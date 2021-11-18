@@ -1,0 +1,30 @@
+[submodule "third/json"]
+	path = third/json
+	url = https://github.com/nlohmann/json.git
+[submodule "third/glm"]
+	path = third/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "third/glfw"]
+	path = third/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "third/imgui"]
+	path = third/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "third/ImGuizmo"]
+	path = third/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "third/spdlog"]
+	path = third/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "third/entt"]
+	path = third/entt
+	url = https://github.com/skypjack/entt.git
+[submodule "third/ImTerm"]
+	path = third/ImTerm
+	url = https://github.com/Organic-Code/ImTerm.git
+[submodule "third/tinygltf"]
+	path = third/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
+[submodule "third/stb"]
+	path = third/stb
+	url = https://github.com/nothings/stb.git

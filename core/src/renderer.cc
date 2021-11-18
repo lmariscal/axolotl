@@ -25,4 +25,8 @@ namespace axl {
     glClear(GL_COLOR_BUFFER_BIT);
   }
 
+  void Renderer::Resize(u32 width, u32 height) {
+    glViewport(0, 0, width, height);
+  }
+
 } // namespace axl

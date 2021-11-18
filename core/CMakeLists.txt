@@ -2,6 +2,10 @@ file(GLOB AXOLOTL_SOURCES
   src/axolotl.cc
   src/window.cc
   src/renderer.cc
+  src/shader.cc
+  src/mesh.cc
+  src/texture.cc
+  src/framebuffer.cc
   src/gui.cc
 )
 

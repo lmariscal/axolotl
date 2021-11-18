@@ -9,7 +9,7 @@ using namespace axl;
 
 i32 main() {
   Axolotl::Init();
-  Window window(1280, 720, "Hi");
+  Window window(1280, 720, "Axolotl Editor");
   Renderer *renderer = window.GetRenderer();
 
   ImGuiIO &io = ImGui::GetIO();
@@ -18,6 +18,9 @@ i32 main() {
 
   while (window.Update()) {
     renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+
+    // log::debug("Delta: {}ms", window.GetDeltaTime());
+
     ImGui::ShowDemoWindow();
     window.Draw();
   }

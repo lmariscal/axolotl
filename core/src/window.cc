@@ -7,7 +7,7 @@
 
 namespace axl {
 
-  Window::Window(f32 width, f32 height, const std::string &title):
+  Window::Window(u32 width, u32 height, const std::string &title):
     _window_height(height),
     _window_width(width),
     _window_title(title),
@@ -41,6 +41,11 @@ namespace axl {
 
   bool Window::Update() {
     glfwPollEvents();
+
+    f64 time_now = glfwGetTime();
+    _delta_time = time_now - _time_last;
+    _time_last = time_now;
+
     _gui->Update();
     return !glfwWindowShouldClose(_window);
   }
@@ -56,6 +61,22 @@ namespace axl {
 
   GLFWwindow * Window::GetGLFWWindow() const {
     return _window;
+  }
+
+  void Window::SetTitle(const std::string &title) {
+    _window_title = title;
+    glfwSetWindowTitle(_window, _window_title.c_str());
+  }
+
+  void Window::SetSize(u32 width, u32 height) {
+    glfwSetWindowSize(_window, width, height);
+    _window_width = width;
+    _window_height = height;
+    _renderer->Resize(width, height);
+  }
+
+  f64 Window::GetDeltaTime() const {
+    return _delta_time * 1000;
   }
 
 } // namespace axolotl

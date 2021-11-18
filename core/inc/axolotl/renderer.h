@@ -13,6 +13,7 @@ namespace axl {
     ~Renderer();
 
     void ClearScreen(const v3 &color);
+    void Resize(u32 width, u32 height);
 
    protected:
     friend class GUI;

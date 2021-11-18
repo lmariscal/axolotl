@@ -1,8 +1,10 @@
 #pragma once
 
+#include <axolotl/types.h>
+
 namespace axl {
 
-  class FrameBuffer {
+  struct FrameBuffer {
    public:
     FrameBuffer();
   };

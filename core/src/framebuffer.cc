@@ -2,4 +2,8 @@
 
 namespace axl {
 
+  FrameBuffer::FrameBuffer() {
+
+  }
+
 } // namespace axl

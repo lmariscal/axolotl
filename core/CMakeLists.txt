@@ -7,6 +7,7 @@ file(GLOB AXOLOTL_SOURCES
   src/texture.cc
   src/framebuffer.cc
   src/gui.cc
+  src/scene.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -27,8 +28,12 @@ set_target_properties(axolotl PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY
 set_target_properties(axolotl PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/dist/lib)
 set_target_properties(axolotl PROPERTIES OUTPUT_NAME axolotl)
 
+target_compile_definitions(axolotl PUBLIC ENTT_ID_TYPE=std::uint64_t)
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   target_compile_definitions(axolotl PUBLIC AXOLOTL_DEBUG=1)
+else()
+  target_compile_definitions(axolotl PUBLIC ENTT_DISABLE_ASSERT=1)
 endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -40,12 +45,12 @@ endif()
 target_link_libraries(axolotl PUBLIC glm)
 target_link_libraries(axolotl PUBLIC spdlog)
 target_link_libraries(axolotl PUBLIC imgui)
+target_link_libraries(axolotl PUBLIC imguizmo)
+target_link_libraries(axolotl PUBLIC ImTerm)
+target_link_libraries(axolotl PUBLIC EnTT::EnTT)
 
-target_link_libraries(axolotl PRIVATE EnTT::EnTT)
 target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
-target_link_libraries(axolotl PRIVATE imguizmo)
-target_link_libraries(axolotl PRIVATE ImTerm)
 target_link_libraries(axolotl PRIVATE nlohmann_json::nlohmann_json) # json
 target_link_libraries(axolotl PRIVATE tinygltf)
 target_link_libraries(axolotl PRIVATE stb)

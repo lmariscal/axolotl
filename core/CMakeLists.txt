@@ -8,6 +8,7 @@ file(GLOB AXOLOTL_SOURCES
   src/framebuffer.cc
   src/gui.cc
   src/scene.cc
+  src/iomanager.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -48,10 +49,11 @@ target_link_libraries(axolotl PUBLIC imgui)
 target_link_libraries(axolotl PUBLIC imguizmo)
 target_link_libraries(axolotl PUBLIC ImTerm)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
+target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json) # json
 
+target_link_libraries(axolotl PRIVATE efsw)
 target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
-target_link_libraries(axolotl PRIVATE nlohmann_json::nlohmann_json) # json
 target_link_libraries(axolotl PRIVATE tinygltf)
 target_link_libraries(axolotl PRIVATE stb)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)

@@ -3,8 +3,44 @@
 #include <fstream>
 #include <sstream>
 #include <glad.h>
+#include <efsw/efsw.hpp>
+#include <iostream>
 
 namespace axl {
+
+  std::vector<Shader *> Shader::_shaders_programs({ });
+
+  class ShaderWatcher : public efsw::FileWatchListener {
+   public:
+    ShaderWatcher(Shader* shader): _shader(shader) { }
+    virtual ~ShaderWatcher() { }
+
+    virtual void handleFileAction(efsw::WatchID watchid, const std::string &dir, const std::string &filename,
+                                  efsw::Action action, std::string old_name = "") {
+      if (action != efsw::Actions::Modified)
+        return;
+
+      ShaderType type = ShaderType::Last;
+      for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+        if (_shader->_paths[i].empty())
+          continue;
+        if (filename != _shader->_paths[i].filename().string())
+          continue;
+        if (dir != _shader->_paths[i].parent_path().string() + "/")
+          continue;
+        type = (ShaderType)i;
+        break;
+      }
+
+      if (type == ShaderType::Last)
+        return;
+
+      _shader->_need_reload[(i32)type] = true;
+    }
+
+   private:
+    Shader *_shader;
+  };
 
   std::string ShaderTypeToString(ShaderType type) {
     switch (type) {
@@ -42,7 +78,16 @@ namespace axl {
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       _shaders[i] = 0;
       _paths[i] = "";
+      _watch_ids[i] = 0;
+      _need_reload[i] = false;
     }
+
+    _watcher = new efsw::FileWatcher();
+    _shader_watcher = new ShaderWatcher(this);
+
+    _watcher->watch();
+
+    _shaders_programs.push_back(this);
   }
 
   Shader::~Shader() {
@@ -51,20 +96,57 @@ namespace axl {
         continue;
 
       glDeleteShader(_shaders[i]);
+
+      if (_watch_ids[i] == 0 || _paths[i].empty())
+        continue;
+
+      _watcher->removeWatch(_watch_ids[i]);
     }
 
     glDeleteProgram(_program);
+
+    delete _shader_watcher;
+    delete _watcher;
+
+    _shaders_programs.erase(std::find(_shaders_programs.begin(), _shaders_programs.end(), this));
+  }
+
+  bool Shader::Watch() {
+    bool need_recompile = false;
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (!_need_reload[i])
+        continue;
+
+      if (Reload((ShaderType)i))
+        need_recompile = true;
+
+      _need_reload[i] = false;
+    }
+    return need_recompile;
   }
 
   void Shader::Load(ShaderType type, const std::filesystem::path &path) {
+    if (_shaders[(i32)type] != 0) {
+      log::error("Shader already loaded, type {}, path \"{}\"", ShaderTypeToString(type), _paths[(i32)type].string());
+      return;
+    }
+
     log::debug("Loading shader, type {}, path \"{}\"", ShaderTypeToString(type), path.string());
     std::string data = Read(path);
 
     _paths[(i32)type] = path;
     LoadData(type, data);
+
+    efsw::WatchID watch_id = _watcher->addWatch(path.parent_path().string(), _shader_watcher, false);
+    _watch_ids[(i32)type] = watch_id;
   }
 
   void Shader::LoadData(ShaderType type, const std::string &data) {
+    if (_shaders[(i32)type] != 0) {
+      log::error("Shader already loaded, type {}, path \"{}\"", ShaderTypeToString(type), _paths[(i32)type].string());
+      return;
+    }
+
     _shaders[(i32)type] = CompileShader(type, data);
   }
 
@@ -84,6 +166,7 @@ namespace axl {
 
       if (line.find("#include ") == 0) {
         buffer << "// " << line << " START\n";
+        // 9 is the length of "#include ", magic number
         std::string include = line.substr(9);
         if (include.rfind(".vert") != 5 && include.rfind(".frag") != 5 && include.rfind(".glsl") != 5) {
           if (include.rfind('.') != std::string::npos) {
@@ -96,10 +179,7 @@ namespace axl {
         }
 
         std::filesystem::path include_path = path.parent_path() / include;
-
-        // 9 is the length of "#include ", magic number
-        log::debug("Found include directive, path \"{}\", resolved \"{}\"", include, include_path.string());
-
+        // log::debug("Found include directive, path \"{}\", resolved \"{}\"", include, include_path.string());
         std::string include_data = Read(include_path);
         if (include_data.empty()) {
           log::error("Shader include \"{}\" could not be read", include_path.string());
@@ -132,7 +212,6 @@ namespace axl {
         continue;
 
       glAttachShader(_program, _shaders[i]);
-      log::debug("Attached shader {}, to program {}", _shaders[i], _program);
     }
 
     glLinkProgram(_program);
@@ -209,6 +288,10 @@ namespace axl {
 
     glDeleteShader(_shaders[(i32)type]);
     _shaders[(i32)type] = 0;
+    _paths[(i32)type] = "";
+    _watcher->removeWatch(_watch_ids[(i32)type]);
+
+    log::debug("Unloaded shader, type {}", ShaderTypeToString(type));
   }
 
   bool Shader::Reload(ShaderType type) {
@@ -239,7 +322,6 @@ namespace axl {
       glDeleteShader(_shaders[(i32)type]);
     _shaders[(i32)type] = shader_id;
 
-    log::debug("Shader program {}, type {} reloaded successfully", _program, ShaderTypeToString(type));
     return true;
   }
 

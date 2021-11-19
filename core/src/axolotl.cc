@@ -9,6 +9,7 @@
 #endif
 
 #include <algorithm>
+#include <axolotl/shader.h>
 
 namespace axl {
 
@@ -40,6 +41,16 @@ namespace axl {
     resultStr = resultStr.substr(0, pos + 5);
 
     return resultStr;
+  }
+
+  std::vector<Shader *> Axolotl::WatchShaders() {
+    std::vector<Shader *> need_recompile;
+    for (Shader *shader : Shader::_shaders_programs) {
+      if (!shader->Watch())
+        continue;
+      need_recompile.push_back(shader);
+    }
+    return need_recompile;
   }
 
 } // namespace axl

@@ -2,10 +2,11 @@
 
 #include <axolotl/axolotl.h>
 #include <axolotl/window.h>
-#include <axolotl/renderer.h>
-#include <axolotl/mesh.h>
 #include <axolotl/shader.h>
+#include <axolotl/renderer.h>
 #include <imgui.h>
+
+#include "test_scene.h"
 
 using namespace axl;
 
@@ -18,30 +19,20 @@ i32 main() {
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  Mesh mesh({
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
-  });
+  io.ConfigViewportsNoAutoMerge = true;
 
-  Shader shader;
-  shader.Load(ShaderType::Vertex, Axolotl::GetDistDir() + "res/shaders/testy.vert");
-  shader.Load(ShaderType::Fragment, Axolotl::GetDistDir() + "res/shaders/testy.frag");
-  shader.Compile();
+  TestScene scene;
+  scene.Init();
 
   while (window.Update()) {
     renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+    std::vector<Shader *> need_recompile = Axolotl::WatchShaders();
+    for (Shader *shader : need_recompile)
+      shader->Recompile();
 
-    if (ImGui::Button("Reload")) {
-      if (shader.Reload())
-        shader.Recompile();
-    }
+    scene.Update(window.GetDeltaTime());
+    scene.Draw();
 
-    shader.Bind();
-    mesh.Draw();
-    // log::debug("Delta: {}ms", window.GetDeltaTime());
-
-    ImGui::ShowDemoWindow();
     window.Draw();
   }
 }

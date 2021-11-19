@@ -92,7 +92,7 @@ namespace axl {
 
     DarkGreenTheme();
 
-    ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
+    ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), false);
     ImGui_ImplOpenGL3_Init();
 
     io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
@@ -122,5 +122,34 @@ namespace axl {
       glfwMakeContextCurrent(current_window);
     }
   }
+
+  void GUI::WindowFocusCallback(GLFWwindow* window, i32 focused) {
+    ImGui_ImplGlfw_WindowFocusCallback(window, focused);
+  }
+
+  void GUI::CursorEnterCallback(GLFWwindow* window, i32 entered) {
+    ImGui_ImplGlfw_CursorEnterCallback(window, entered);
+  }
+
+  void GUI::MouseButtonCallback(GLFWwindow* window, i32 button, i32 action, i32 mods) {
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+  }
+
+  void GUI::ScrollCallback(GLFWwindow* window, f64 x_offset, f64 y_offset) {
+    ImGui_ImplGlfw_ScrollCallback(window, x_offset, y_offset);
+  }
+
+  void GUI::KeyCallback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+  }
+
+  void GUI::CharCallback(GLFWwindow* window, u32 character) {
+    ImGui_ImplGlfw_CharCallback(window, character);
+  }
+
+  void GUI::MonitorCallback(GLFWmonitor* monitor, i32 event) {
+    ImGui_ImplGlfw_MonitorCallback(monitor, event);
+  }
+
 
 } // namespace axl

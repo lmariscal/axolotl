@@ -28,3 +28,6 @@
 [submodule "third/stb"]
 	path = third/stb
 	url = https://github.com/nothings/stb.git
+[submodule "third/efsw"]
+	path = third/efsw
+	url = https://github.com/SpartanJ/efsw.git

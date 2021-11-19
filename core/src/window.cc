@@ -12,7 +12,8 @@ namespace axl {
     _window_width(width),
     _window_title(title),
     _window(nullptr),
-    _renderer(nullptr)
+    _renderer(nullptr),
+    _io_manager(new IOManager(*this))
   {
     glfwInit();
     // This is a renderer used for in-house testing, so we'll use latest OpenGL
@@ -21,14 +22,21 @@ namespace axl {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    log::debug("widht: {}, height: {}, title: {}", width, height, title);
     _window = glfwCreateWindow(_window_width, _window_height, _window_title.c_str(), nullptr, nullptr);
     glfwMakeContextCurrent(_window);
     glfwSwapInterval(1);
     glfwSetWindowUserPointer(_window, this);
 
+    RegisterEvents();
+
     _renderer = new Renderer(this);
     _gui = new GUI(_renderer, this);
+
+    v2d mouse_pos;
+    glfwGetCursorPos(_window, &mouse_pos.x, &mouse_pos.y);
+    _io_manager->MouseEvent(mouse_pos.x, mouse_pos.y);
+    _io_manager->UpdateRelativePositions();
+
   }
 
   Window::~Window() {
@@ -37,9 +45,18 @@ namespace axl {
 
     delete _gui;
     delete _renderer;
+    delete _io_manager;
+  }
+
+  IOManager * Window::GetIOManager() const {
+    return _io_manager;
   }
 
   bool Window::Update() {
+    _io_manager->UpdatePads(_window);
+    _io_manager->UpdateHolds();
+    _io_manager->UpdateRelativePositions();
+
     glfwPollEvents();
 
     f64 time_now = glfwGetTime();
@@ -77,6 +94,85 @@ namespace axl {
 
   f64 Window::GetDeltaTime() const {
     return _delta_time * 1000;
+  }
+
+  void Window::RegisterEvents() {
+    glfwSetKeyCallback(_window, Window::KeyEvent);
+    glfwSetCharCallback(_window, Window::CharEvent);
+    glfwSetMouseButtonCallback(_window, Window::MouseButtonEvent);
+    glfwSetScrollCallback(_window, Window::ScrollEvent);
+    glfwSetCursorPosCallback(_window, Window::MouseEvent);
+
+    glfwSetWindowFocusCallback(_window, Window::FocusEvent);
+    glfwSetCursorEnterCallback(_window, Window::CursorEnterEvent);
+    glfwSetMonitorCallback(Window::MonitorEvent);
+    glfwSetFramebufferSizeCallback(_window, FrameSizeEvent);
+  }
+
+
+  // Static Input Events
+
+  void Window::KeyEvent(GLFWwindow *glfw_window, i32 key, i32 scancode, i32 action, i32 mods) {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    if (action != GLFW_REPEAT)
+      window->_io_manager->KeyEvent(key, action != GLFW_RELEASE);
+
+    // if (window->lockMouse)
+    //   return;
+
+    window->_gui->KeyCallback(glfw_window, key, scancode, action, mods);
+  }
+
+  void Window::CharEvent(GLFWwindow *glfw_window, u32 c) {
+    // if (window->lockMouse)
+    //   return;
+
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->_gui->CharCallback(glfw_window, c);
+  }
+
+  void Window::MouseButtonEvent(GLFWwindow *glfw_window, i32 button, i32 action, i32 mods) {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->_io_manager->MouseButtonEvent(button, action != GLFW_RELEASE);
+
+    // if (window->lockMouse)
+    //   return;
+
+    window->_gui->MouseButtonCallback(glfw_window, button, action, mods);
+  }
+
+  void Window::ScrollEvent(GLFWwindow *glfw_window, f64 xoffset, f64 yoffset) {
+    // if (window->lockMouse)
+    //   return;
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+
+    window->_gui->ScrollCallback(glfw_window, xoffset, yoffset);
+  }
+
+  void Window::MouseEvent(GLFWwindow *glfw_window, f64 x, f64 y) {
+    if (!glfwGetWindowAttrib(glfw_window, GLFW_HOVERED))
+      return;
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->_io_manager->MouseEvent(x, y);
+  }
+
+  void Window::FrameSizeEvent(GLFWwindow *glfw_window, i32 width, i32 height) {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->SetSize(width, height);
+  }
+
+  void Window::FocusEvent(GLFWwindow *glfw_window, i32 focused) {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->_gui->WindowFocusCallback(glfw_window, focused);
+  }
+
+  void Window::CursorEnterEvent(GLFWwindow *glfw_window, i32 entered) {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+    window->_gui->CursorEnterCallback(glfw_window, entered);
+  }
+
+  void Window::MonitorEvent(GLFWmonitor *monitor, i32 event) {
+    GUI::MonitorCallback(monitor, event);
   }
 
 } // namespace axolotl

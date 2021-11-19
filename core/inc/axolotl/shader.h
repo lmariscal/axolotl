@@ -19,6 +19,8 @@ namespace axl {
     Shader();
     ~Shader();
 
+    void Bind();
+    void Unload(ShaderType type);
     void Load(ShaderType type, const std::filesystem::path &path);
     void LoadData(ShaderType type, const std::string &data);
     bool Reload(ShaderType type = ShaderType::Last);

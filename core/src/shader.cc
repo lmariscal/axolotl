@@ -39,8 +39,6 @@ namespace axl {
   Shader::Shader():
     _program(0)
   {
-    _program = glCreateProgram();
-
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       _shaders[i] = 0;
       _paths[i] = "";
@@ -122,6 +120,13 @@ namespace axl {
   }
 
   bool Shader::Compile() {
+    if (_program) {
+      log::error("Shader program {} already compiled", _program);
+      return false;
+    }
+
+    _program = glCreateProgram();
+
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       if (_shaders[i] == 0)
         continue;
@@ -146,6 +151,13 @@ namespace axl {
     }
 
     log::debug("Shader program {} compiled successfully", _program);
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (_shaders[i] == 0)
+        continue;
+
+      glDetachShader(_program, _shaders[i]);
+    }
 
     return true;
   }
@@ -183,9 +195,20 @@ namespace axl {
   bool Shader::Recompile() {
     if (_program)
       glDeleteProgram(_program);
-
-    _program = glCreateProgram();
+    _program = 0;
     return Compile();
+  }
+
+  void Shader::Bind() {
+    glUseProgram(_program);
+  }
+
+  void Shader::Unload(ShaderType type) {
+    if (_shaders[(i32)type] == 0)
+      return;
+
+    glDeleteShader(_shaders[(i32)type]);
+    _shaders[(i32)type] = 0;
   }
 
   bool Shader::Reload(ShaderType type) {

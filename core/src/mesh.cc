@@ -24,7 +24,10 @@ namespace axl {
   }
 
   Mesh::~Mesh() {
-
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
+    if (_ibo)
+      glDeleteBuffers(1, &_ibo);
   }
 
   void Mesh::Draw() {

@@ -33,9 +33,12 @@ i32 main() {
     renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
 
     if (ImGui::Button("Reload")) {
-      if (shader.Reload(ShaderType::Vertex))
+      if (shader.Reload())
         shader.Recompile();
     }
+
+    shader.Bind();
+    mesh.Draw();
     // log::debug("Delta: {}ms", window.GetDeltaTime());
 
     ImGui::ShowDemoWindow();

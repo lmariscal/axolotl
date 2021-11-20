@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <axolotl/terminal.h>
 
+#include "frame_editor.h"
 #include "test_scene.h"
 
 using namespace axl;
@@ -21,41 +22,42 @@ i32 main() {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   io.ConfigViewportsNoAutoMerge = true;
+
   TerminalData terminal_data;
   ImTerm::terminal<Terminal> terminal(terminal_data);
+  terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
-
-  // auto formatter = std::make_unique<spdlog::pattern_formatter>();
-  // formatter->set_pattern(pattern);
-
-  terminal.get_terminal_helper()->set_terminal_pattern("[%R:%S:%e] [user]: %v", ImTerm::message::type::user_input);
-  terminal.get_terminal_helper()->set_terminal_pattern("[%R:%S:%e] [history]: %v", ImTerm::message::type::cmd_history_completion);
-  terminal.get_terminal_helper()->set_terminal_pattern("[%R:%S:%e] [error]: %v", ImTerm::message::type::error);
-  log::default_logger()->sinks().push_back(terminal.get_terminal_helper());
-  spdlog::set_pattern("[%R:%S:%e] [%^%l%$]: %v");
-
-  terminal.set_autocomplete_pos(ImTerm::position::nowhere);
-  terminal.theme() = ImTerm::themes::cherry;
 
   TestScene scene;
   scene.Init();
 
-  while (window.Update() && !terminal_data.quit_requested) {
-    renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+  FrameEditor frame_editor;
+  frame_editor.SetBoundFrameRatio(false);
 
+  IOManager *io_manager = window.GetIOManager();
+
+  while (window.Update() && !terminal_data.quit_requested) {
     if (terminal_data.watch_shaders) {
       std::vector<Shader *> need_recompile = Axolotl::WatchShaders();
       for (Shader *shader : need_recompile)
         shader->Recompile();
     }
 
+    scene.Update(window.GetDeltaTime());
     ImGui::ShowDemoWindow();
-
     terminal.show();
 
-    scene.Update(window.GetDeltaTime());
+    frame_editor.Bind(window);
     scene.Draw();
+    frame_editor.Unbind(window);
+    frame_editor.Draw(window);
 
+    renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
     window.Draw();
+
+    if (io_manager->KeyDown(Key::LeftControl) || io_manager->KeyDown(Key::RightControl)) {
+      if (io_manager->KeyDown(Key::Q))
+        terminal_data.quit_requested = true;
+    }
   }
 }

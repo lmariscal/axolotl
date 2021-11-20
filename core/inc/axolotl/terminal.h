@@ -28,6 +28,8 @@ namespace axl {
     static void ShaderWatch(argument_type &arg);
 
     Terminal();
+
+    void Init();
   };
 
 } // namespace axl

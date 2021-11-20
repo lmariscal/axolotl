@@ -22,6 +22,7 @@ namespace axl {
     void SetSize(u32 width, u32 height);
     void RegisterEvents();
     v2i GetSize() const;
+    v2i GetFramebufferSize() const;
     // Returns Delta time in milliseconds
     f64 GetDeltaTime() const;
     Renderer * GetRenderer() const;

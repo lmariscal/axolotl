@@ -22,6 +22,17 @@ namespace axl {
       add_command_(cmd);
   }
 
+  void Terminal::Init() {
+    set_terminal_pattern("[%R:%S:%e] [user]: %v", ImTerm::message::type::user_input);
+    set_terminal_pattern("[%R:%S:%e] [history]: %v", ImTerm::message::type::cmd_history_completion);
+    set_terminal_pattern("[%R:%S:%e] [error]: %v", ImTerm::message::type::error);
+
+    terminal_->theme() = ImTerm::themes::cherry;
+    terminal_->set_autocomplete_pos(ImTerm::position::nowhere);
+    log::default_logger()->sinks().push_back(terminal_->get_terminal_helper());
+    log::set_pattern("[%R:%S:%e] [%^%l%$]: %v");
+  }
+
   std::vector<std::string> Terminal::NoCompletition(argument_type &arg) {
     return { };
   }
@@ -200,7 +211,13 @@ namespace axl {
   }
 
   void Terminal::Help(argument_type &arg) {
-    constexpr unsigned long list_element_name_max_size = misc::max_size(command_list.begin(), command_list.end(), [](const command_type& cmd) { return cmd.name.size(); });
+    constexpr u64 list_element_name_max_size =
+      misc::max_size(command_list.begin(), command_list.end(),
+        [](const command_type& cmd) {
+          return cmd.name.size();
+        }
+      );
+
     arg.term.add_text("Available commands:");
     for (const command_type& cmd : command_list) {
       std::stringstream ss;

@@ -11,6 +11,7 @@ file(GLOB AXOLOTL_SOURCES
   src/iomanager.cc
   src/serialization.cc
   src/terminal.cc
+  src/editor.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -51,7 +52,8 @@ target_link_libraries(axolotl PUBLIC imgui)
 target_link_libraries(axolotl PUBLIC imguizmo)
 target_link_libraries(axolotl PUBLIC imterm)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
-target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json) # json
+target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(axolotl PUBLIC Zep)
 
 target_link_libraries(axolotl PRIVATE efsw)
 target_link_libraries(axolotl PRIVATE glad)
@@ -61,4 +63,6 @@ target_link_libraries(axolotl PRIVATE stb)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)
 
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/core/inc)
+target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third/zep/include)
+target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third)
 target_include_directories(axolotl PRIVATE ${OPENGL_INCLUDE_DIR})

@@ -175,4 +175,14 @@ namespace axl {
     GUI::MonitorCallback(monitor, event);
   }
 
+  v2i Window::GetSize() const {
+    return v2i(_window_width, _window_height);
+  }
+
+  v2i Window::GetFramebufferSize() const {
+    v2i result;
+    glfwGetFramebufferSize(_window, &result.x, &result.y);
+    return result;
+  }
+
 } // namespace axolotl

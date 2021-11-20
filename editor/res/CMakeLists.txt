@@ -49,3 +49,20 @@ foreach(TEXTURE_FILE ${AXOLOTL_TEXTURES})
 endforeach()
 
 add_dependencies(axolotl_editor axolotl_textures)
+
+# MISC
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dist)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dist/res)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dist/res/misc)
+
+file (GLOB_RECURSE AXOLOTL_RES LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/editor/res/misc/*")
+add_custom_target(axolotl_res_misc ALL DEPENDS ${AXOLOTL_RES})
+
+foreach(RES_FILE ${AXOLOTL_RES})
+  get_filename_component(FILE_NAME ${RES_FILE} NAME)
+  set(FILE_NAME "${CMAKE_BINARY_DIR}/dist/res/misc/${FILE_NAME}")
+  configure_file(${RES_FILE} ${FILE_NAME} COPYONLY)
+endforeach()
+
+add_dependencies(axolotl_editor axolotl_res_misc)

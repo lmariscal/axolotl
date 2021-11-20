@@ -21,7 +21,7 @@
 	url = https://github.com/skypjack/entt.git
 [submodule "third/ImTerm"]
 	path = third/ImTerm
-	url = https://github.com/Organic-Code/ImTerm.git
+	url = https://github.com/lmariscal/ImTerm.git
 [submodule "third/tinygltf"]
 	path = third/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
@@ -31,3 +31,6 @@
 [submodule "third/efsw"]
 	path = third/efsw
 	url = https://github.com/SpartanJ/efsw.git
+[submodule "third/zep"]
+	path = third/zep
+	url = https://github.com/Rezonality/zep.git

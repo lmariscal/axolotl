@@ -60,7 +60,10 @@ target_include_directories(imguizmo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo)
 
 # ImTerm
 
-add_subdirectory(ImTerm)
+project(imterm)
+add_library(imterm INTERFACE)
+
+target_include_directories(imterm INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ImTerm/include)
 
 # JSON
 

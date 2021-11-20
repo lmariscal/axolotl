@@ -9,6 +9,8 @@ file(GLOB AXOLOTL_SOURCES
   src/gui.cc
   src/scene.cc
   src/iomanager.cc
+  src/serialization.cc
+  src/terminal.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -47,7 +49,7 @@ target_link_libraries(axolotl PUBLIC glm)
 target_link_libraries(axolotl PUBLIC spdlog)
 target_link_libraries(axolotl PUBLIC imgui)
 target_link_libraries(axolotl PUBLIC imguizmo)
-target_link_libraries(axolotl PUBLIC ImTerm)
+target_link_libraries(axolotl PUBLIC imterm)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
 target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json) # json
 

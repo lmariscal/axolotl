@@ -6,6 +6,7 @@ All third party libraries are located under directory 'third/'.
 
 | Library  | License       |
 |----------|---------------|
+| EFSW     | MIT License   |
 | EnTT     | MIT License   |
 | Glad     | Public Domain |
 | GLFW     | Zlib License  |
@@ -17,3 +18,4 @@ All third party libraries are located under directory 'third/'.
 | SPDLog   | MIT License   |
 | STB      | MIT License   |
 | TinyGLTF | MIT License   |
+| ZEP      | MIT License   |

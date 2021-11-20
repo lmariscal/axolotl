@@ -17,6 +17,7 @@ namespace axl {
 
   class ShaderWatcher;
   class Axolotl;
+  class Terminal;
 
   enum class ShaderType {
     Vertex,
@@ -40,9 +41,13 @@ namespace axl {
     bool Compile();
     bool Recompile();
 
+    static std::string ShaderTypeToString(ShaderType type);
+    static ShaderType StringToShaderType(const std::string &str);
+
    protected:
     friend class ShaderWatcher;
     friend class Axolotl;
+    friend class Terminal;
 
     // static std::unordered_map<std::filesystem::path, ShaderShader using shared_ptr to manage state of shaders
     static std::vector<Shader *> _shaders_programs;

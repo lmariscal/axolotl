@@ -42,7 +42,7 @@ namespace axl {
     Shader *_shader;
   };
 
-  std::string ShaderTypeToString(ShaderType type) {
+  std::string Shader::ShaderTypeToString(ShaderType type) {
     switch (type) {
       case ShaderType::Vertex:
         return "Vertex";
@@ -55,6 +55,18 @@ namespace axl {
       default:
         return "Unknown";
     }
+  }
+
+  ShaderType Shader::StringToShaderType(const std::string &str) {
+    if (str == "Vertex")
+      return ShaderType::Vertex;
+    if (str == "Fragment")
+      return ShaderType::Fragment;
+    if (str == "Geometry")
+      return ShaderType::Geometry;
+    if (str == "Compute")
+      return ShaderType::Compute;
+    return ShaderType::Last;
   }
 
   u32 ShaderTypeToGL(ShaderType type) {
@@ -261,7 +273,17 @@ namespace axl {
       glGetShaderInfoLog(shader_id, length, &length, &log[0]);
 
       log::error("Shader {} compilation failed, type: {}, path \"{}\"\n{}", shader_id, ShaderTypeToString(type), _paths[(i32)type].string(), log);
-      log::error("Shader data\n{}", data);
+
+      std::istringstream stream(data);
+      std::string line;
+      std::stringstream buffer;
+      i32 line_number = 1;
+      while (std::getline(stream, line)) {
+        buffer << std::setw(4) << std::setfill(' ') << line_number << ": " << line << '\n';
+        ++line_number;
+      }
+
+      log::error("Shader data\n{}", buffer.str());
 
       glDeleteShader(shader_id);
       return 0;

@@ -27,7 +27,6 @@ namespace axl {
 
   void TestScene::Update(f32 delta) {
     // Execute scene scripting, per entity or an overall script
-    ImGui::ShowDemoWindow();
   }
 
 } // namespace axl

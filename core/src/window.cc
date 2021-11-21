@@ -76,6 +76,10 @@ namespace axl {
     return _renderer;
   }
 
+  GUI * Window::GetGUI() const {
+    return _gui;
+  }
+
   GLFWwindow * Window::GetGLFWWindow() const {
     return _window;
   }

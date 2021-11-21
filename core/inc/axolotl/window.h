@@ -27,6 +27,7 @@ namespace axl {
     f64 GetDeltaTime() const;
     Renderer * GetRenderer() const;
     IOManager * GetIOManager() const;
+    GUI * GetGUI() const;
     GLFWwindow * GetGLFWWindow() const;
 
    protected:

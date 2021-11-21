@@ -31,9 +31,6 @@
 [submodule "third/efsw"]
 	path = third/efsw
 	url = https://github.com/SpartanJ/efsw.git
-[submodule "third/zep"]
-	path = third/zep
-	url = https://github.com/Rezonality/zep.git
 [submodule "third/stduuid"]
 	path = third/stduuid
 	url = https://github.com/mariusbancila/stduuid.git

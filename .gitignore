@@ -3,6 +3,7 @@
 .vscode/
 debug/
 compile_commands.json
+Font Awesome*
 
 # */**/renderer.cc
 # */**/renderer.h

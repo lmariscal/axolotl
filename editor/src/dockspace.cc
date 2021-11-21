@@ -18,8 +18,9 @@ namespace axl {
                                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
                                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
                                 ImGuiWindowFlags_NoBackground;
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(0.0f, 3.0f));
     ImGui::Begin("MainDockSpaceWindow", nullptr, main_dock_space_window_flags);
-    ImGui::PopStyleVar(3);
+    ImGui::PopStyleVar(4);
 
     ImGuiDockNodeFlags dock_flags = ImGuiDockNodeFlags_None;
     dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
@@ -45,6 +46,8 @@ namespace axl {
       _first_iteration = false;
     }
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(0.0f, 3.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 3.0f));
     if (ImGui::BeginMenuBar()) {
 
       if (ImGui::BeginMenu("File")) {
@@ -54,15 +57,9 @@ namespace axl {
         ImGui::EndMenu();
       }
 
-      if (ImGui::BeginMenu("Draw")) {
-        if (ImGui::MenuItem("Respect Ratio", "", *data.resize_world_editor)) {
-          *data.resize_world_editor = !*data.resize_world_editor;
-        }
-        ImGui::EndMenu();
-      }
-
       ImGui::EndMenuBar();
     }
+    ImGui::PopStyleVar(2);
 
     ImGui::End();
   }

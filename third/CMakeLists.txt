@@ -26,6 +26,10 @@ set(BUILD_STATIC_LIBS OFF CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
 add_subdirectory(glm)
 
+# IconFontCppHeaders
+
+add_subdirectory(IconFontCppHeaders)
+
 # ImGUI
 
 project(imgui)
@@ -89,9 +93,3 @@ add_subdirectory(stduuid)
 
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 add_subdirectory(tinygltf)
-
-# Zep
-
-set(BUILD_DEMOS OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(zep)

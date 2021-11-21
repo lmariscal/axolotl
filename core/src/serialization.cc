@@ -1,6 +1,7 @@
 #include <axolotl/serialization.h>
 
 #include <axolotl/scene.h>
+#include <json.hpp>
 
 namespace axl {
 
@@ -17,5 +18,15 @@ namespace axl {
   // behaviour. Maybe we can manage parent and children relationship for transformation in the
   // transform component, and then we can manage prefabs as a special kind of entity, which is a
   // scene that is attachable to other scenes.
+
+  class Serializable {
+   public:
+    virtual nlohmann::json Serialize() const = 0;
+    virtual void Deserialize(const nlohmann::json& json) = 0;
+
+   protected:
+    u32 _version_major = 0;
+    u32 _version_minor = 1;
+  };
 
 } // namespace axl

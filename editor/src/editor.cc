@@ -4,8 +4,8 @@
 #include <axolotl/window.h>
 #include <axolotl/shader.h>
 #include <axolotl/renderer.h>
+#include <axolotl/gui.h>
 #include <imgui.h>
-#include <axolotl/terminal.h>
 
 #include "frame_editor.h"
 #include "dockspace.h"
@@ -41,7 +41,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     dock_space.Draw(window, dock_space_data);
 
     scene.Update(window.GetDeltaTime());
-    ImGui::ShowDemoWindow();
     terminal.show();
 
     frame_editor.Bind(window);

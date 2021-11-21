@@ -4,6 +4,8 @@
 #include <axolotl/window.h>
 #include <axolotl/iomanager.h>
 
+#include <IconsFontAwesome5Pro.h>
+
 namespace axl {
 
   FrameEditor::FrameEditor():
@@ -47,23 +49,32 @@ namespace axl {
     }
     v2 current_region_available = v2(buffer_size);
 
-    buffer_size.y -= 28;
+    buffer_size.y -= 30;
     v2 texture_pos = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
-    texture_pos.y += 28;
+    texture_pos.y += 30;
     ImGui::SetCursorPos(texture_pos);
     ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
 
     ImGui::SetCursorPosX(5);
     ImGui::SetCursorPosY(25);
-    ImGui::Button("M", v2(21, 21));
+    ImGui::Button(ICON_FA_EXPAND_ARROWS, v2(24, 24));
     ImGui::SameLine(0.0f, 5.0f);
-    ImGui::Button("R", v2(21, 21));
+    ImGui::Button(ICON_FA_UNDO, v2(24, 24));
     ImGui::SameLine(0.0f, 5.0f);
-    ImGui::Button("Z", v2(21, 21));
-    ImGui::SameLine(0.0f, 5.0f);
+    ImGui::Button(ICON_FA_EXPAND_ALT, v2(24, 24));
+    ImGui::SameLine();
 
-    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 21) / 2.0f);
-    ImGui::Button("P", v2(21, 21));
+    ImGui::Checkbox(" Frame Ratio", &bound_frame_ratio);
+    ImGui::SameLine();
+
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 71) / 2.0f);
+    ImGui::Button(ICON_FA_PLAY, v2(33, 24));
+    ImGui::SameLine(0.0f, 5.0f);
+    ImGui::Button(ICON_FA_PAUSE, v2(33, 24));
+    ImGui::SameLine();
+
+    // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
+    // ImGui::Text("Hi there");
 
     ImGui::End();
     ImGui::PopStyleVar();

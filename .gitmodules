@@ -34,3 +34,6 @@
 [submodule "third/zep"]
 	path = third/zep
 	url = https://github.com/Rezonality/zep.git
+[submodule "third/stduuid"]
+	path = third/stduuid
+	url = https://github.com/mariusbancila/stduuid.git

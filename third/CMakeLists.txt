@@ -81,6 +81,10 @@ add_library(stb INTERFACE)
 
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 
+# stduuid
+set(UUID_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(stduuid)
+
 # TinyGLTF
 
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)

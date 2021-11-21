@@ -15,10 +15,11 @@ namespace axl {
     void Draw(Window &window);
     void SetBoundFrameRatio(bool state);
 
+    bool bound_frame_ratio;
+
    protected:
     FrameBuffer _frame;
     v2 _region_available;
-    bool _bound_frame_ratio;
   };
 
 } // namespace axl

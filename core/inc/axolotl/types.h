@@ -55,3 +55,10 @@ namespace axl {
   }
 
 }
+
+#define IM_VEC2_CLASS_EXTRA                                                 \
+        ImVec2(const axl::v2& f) { x = f.x; y = f.y; }                       \
+        operator axl::v2() const { return axl::v2(x,y); }
+#define IM_VEC4_CLASS_EXTRA                                                 \
+        ImVec4(const axl::v4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
+        operator axl::v4() const { return axl::v4(x,y,z,w); }

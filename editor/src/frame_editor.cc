@@ -7,13 +7,12 @@
 namespace axl {
 
   FrameEditor::FrameEditor():
-    _frame(1280, 720)
-  {
+    bound_frame_ratio(false),
+    _frame(1280, 720),
+    _region_available({ 0, 0 })
+  { }
 
-  }
-
-  FrameEditor::~FrameEditor() {
-  }
+  FrameEditor::~FrameEditor() { }
 
   void FrameEditor::Bind(Window &window) {
     _frame.Bind();
@@ -27,17 +26,17 @@ namespace axl {
   }
 
   void FrameEditor::Draw(Window &window) {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("World Editor");
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
     window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
+    ImGui::Begin("World Editor", nullptr, window_flags);
 
-    ImVec2 uv0 = ImVec2(0.0f, 1.0f);
-    ImVec2 uv1 = ImVec2(1.0f, 0.0f);
-    ImVec2 cra = ImGui::GetContentRegionAvail();
-    ImVec2 buffer_size = cra;
-    if (_bound_frame_ratio) {
+    v2 uv0(0.0f, 1.0f);
+    v2 uv1(1.0f, 0.0f);
+    v2 cra = ImGui::GetContentRegionAvail();
+    v2 buffer_size = cra;
+    if (bound_frame_ratio) {
       if (cra.x * 9.0f / 16.0f > cra.y) {
         buffer_size.x = cra.y * 16.0f / 9.0f;
         buffer_size.y = cra.y;
@@ -46,15 +45,31 @@ namespace axl {
         buffer_size.x = cra.x;
       }
     }
-    v2 current_region_available = v2(buffer_size.x, buffer_size.y);
+    v2 current_region_available = v2(buffer_size);
 
+    buffer_size.y -= 28;
+    v2 texture_pos = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
+    texture_pos.y += 28;
+    ImGui::SetCursorPos(texture_pos);
     ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
+
+    ImGui::SetCursorPosX(5);
+    ImGui::SetCursorPosY(25);
+    ImGui::Button("M", v2(21, 21));
+    ImGui::SameLine(0.0f, 5.0f);
+    ImGui::Button("R", v2(21, 21));
+    ImGui::SameLine(0.0f, 5.0f);
+    ImGui::Button("Z", v2(21, 21));
+    ImGui::SameLine(0.0f, 5.0f);
+
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 21) / 2.0f);
+    ImGui::Button("P", v2(21, 21));
 
     ImGui::End();
     ImGui::PopStyleVar();
 
     IOManager *io_manager = window.GetIOManager();
-    if (_region_available != current_region_available && !io_manager->ButtonDown(MouseButton::Left)) {
+    if (!io_manager->ButtonDown(MouseButton::Left) && _region_available != current_region_available) {
       _region_available = current_region_available;
       _frame.SetSize(_region_available.x, _region_available.y);
       _frame.RebuildFrameBuffer();
@@ -62,7 +77,7 @@ namespace axl {
   }
 
   void FrameEditor::SetBoundFrameRatio(bool state) {
-    _bound_frame_ratio = state;
+    bound_frame_ratio = state;
   }
 
 } // namespace

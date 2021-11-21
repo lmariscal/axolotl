@@ -60,6 +60,7 @@ target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
 target_link_libraries(axolotl PRIVATE tinygltf)
 target_link_libraries(axolotl PRIVATE stb)
+target_link_libraries(axolotl PRIVATE stduuid)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)
 
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/core/inc)

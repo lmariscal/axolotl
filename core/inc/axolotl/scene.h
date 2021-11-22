@@ -50,6 +50,12 @@ namespace axl {
         return _registry.template get<ComponentType...>(entity);
     }
 
+    template<typename... Component>
+    [[nodiscard]] auto TryGetComponent([[maybe_unused]] const entt::entity entity) {
+        ENTT_ASSERT(_registry.valid(entity), "Invalid entity");
+        return _registry.try_get<Component...>(entity);
+    }
+
    protected:
     entt::registry _registry;
   };

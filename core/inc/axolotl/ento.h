@@ -5,6 +5,7 @@
 #include <uuid.h>
 #include <array>
 #include <random>
+#include <vector>
 
 #include <axolotl/component.h>
 
@@ -17,9 +18,15 @@ namespace axl {
     uuids::uuid id;
     std::string name;
 
+    void AddChild(Ento *ento);
+    void RemoveChild(Ento *ento);
+
     Ento *parent;
+    entt::entity entity;
     std::vector<Ento *> children;
     std::vector<Component *> components;
+
+    json Serialize() const;
 
    protected:
     static std::mt19937 _random_generator;

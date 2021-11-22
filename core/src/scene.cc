@@ -19,6 +19,7 @@ namespace axl {
   entt::entity Scene::CreateEntity() {
     entt::entity e = _registry.create();
     Ento &ento = _registry.emplace<Ento>(e);
+    ento.entity = e;
     log::debug("Created entity with id {}", uuids::to_string(ento.id));
     return e;
   }

@@ -13,13 +13,22 @@ namespace axl {
     // Load serialized scene
 
     entt::entity camera = CreateEntity();
-    _registry.get<Ento>(camera).name = "Camera";
+    Ento &ento = GetComponent<Ento>(camera);
+    ento.name = "Camera";
+
+    entt::entity container = CreateEntity();
+    Ento &container_ento = GetComponent<Ento>(container);
+    container_ento.name = "Container";
+    AddComponent<Transform>(container);
 
     Camera &camera_component = AddComponent<Camera>(camera);
     camera_component.SetAsActive();
 
     _triangle = CreateEntity();
-    _registry.get<Ento>(_triangle).name = "Triangle";
+    Ento &triangle_ento = GetComponent<Ento>(_triangle);
+    triangle_ento.name = "Triangle";
+
+    container_ento.AddChild(&triangle_ento);
 
     std::vector<f32> triangle_mesh = {
       -1.0f, -1.0f, 0.0f,
@@ -28,14 +37,15 @@ namespace axl {
     };
     Mesh &mesh = AddComponent<Mesh>(_triangle, triangle_mesh);
     Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f, 0.0f, -5.0f));
-    auto j = transform.Serialize();
-    log::debug("j {}", j.dump(2));
     Shader &shader = AddComponent<Shader>(
         _triangle,
         Axolotl::GetDistDir() + "res/shaders/testy.vert",
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       );
     shader.Compile();
+
+    json j = ento.Serialize();
+    log::debug("Serialized: {}", j.dump(2));
   }
 
   void TestScene::Update(Window &window) {

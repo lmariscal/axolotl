@@ -6,6 +6,7 @@
 #include <axolotl/window.h>
 #include <axolotl/camera.h>
 #include <axolotl/transform.h>
+#include <axolotl/ento.h>
 
 #include <glad.h>
 
@@ -39,10 +40,12 @@ namespace axl {
     m4 view = camera->GetViewMatrix();
     m4 projection = camera->GetProjectionMatrix(*_window);
 
-    auto entities = registry.view<Mesh, Shader>();
+    auto entities = registry.view<Mesh, Shader, Ento>();
     for (auto entity : entities) {
       Mesh &mesh = entities.get<Mesh>(entity);
       Shader &shader = entities.get<Shader>(entity);
+      Ento &ento = entities.get<Ento>(entity);
+      // log::debug("Rendering {}", uuids::to_string(ento.id));
 
       m4 model(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);

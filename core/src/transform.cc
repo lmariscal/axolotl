@@ -1,4 +1,6 @@
 #include <axolotl/transform.h>
+#include <axolotl/ento.h>
+#include <axolotl/scene.h>
 #include <imgui.h>
 
 namespace axl {
@@ -97,7 +99,16 @@ namespace axl {
     model = translate(model, _position);
     model = scale(model, _scale);
     model *= toMat4(_rotation);
-    return model;
+
+    Ento &ento = _scene->GetComponent<Ento>(_parent);
+    if (!ento.parent)
+      return model;
+
+    Transform *grandpa = _scene->TryGetComponent<Transform>(ento.parent->entity);
+    if (!grandpa)
+      return model;
+
+    return grandpa->GetModelMatrix() * model;
   }
 
 } // namespace axl

@@ -37,9 +37,10 @@ namespace axl {
 
   namespace serializable {
 
-    void ShowDataToUI(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
-    void ShowDataToUI(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
-    void ShowDataToUI(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
+    bool ShowDataToUI(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
+    bool ShowDataToUI(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
+    bool ShowDataToUI(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
+    bool ShowDataToUI(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
 
   } // namespace axl::serializable
 

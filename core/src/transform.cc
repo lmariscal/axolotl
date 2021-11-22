@@ -93,9 +93,11 @@ namespace axl {
   }
 
   void Transform::ShowDataToUI() {
+    ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Transform")) {
       serializable::ShowDataToUI("Position", _position);
       serializable::ShowDataToUI("Scale", _scale, v3(1.0f));
+      serializable::ShowDataToUI("Rotation", _rotation);
     }
   }
 

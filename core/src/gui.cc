@@ -13,23 +13,41 @@
 
 namespace axl {
 
-  void ImGuiFonts() {
-    ImGuiIO &io = ImGui::GetIO();
-    io.Fonts->Clear();
-    std::string path = Axolotl::GetDistDir() + "res/misc/JetBrainsMono-Regular.ttf";
-    log::debug("Font path {}", path);
-    ImFont *font = io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f);
-    if (!font) {
-      io.Fonts->AddFontDefault();
-      log::error("Failed to load GUI font\n...");
-    }
-
-    std::string font_awesome_path = Axolotl::GetDistDir() + "res/misc/Font Awesome 6 Pro-Solid-900.otf";
+  void FontAddFontAwesomeChars(const std::string &font_awesome_path, ImGuiIO &io) {
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
-    io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), 15.0f, &icons_config, icons_ranges);
+    ImFont *font = io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), 15.0f, &icons_config, icons_ranges);
+    if (!font) {
+      log::error("Failed to load font \"{}\"", font_awesome_path);
+    }
+  }
+
+  void ImGuiFonts() {
+    ImGuiIO &io = ImGui::GetIO();
+    io.Fonts->Clear();
+    std::string path = Axolotl::GetDistDir() + "res/misc/JetBrainsMono-Regular.ttf";
+    ImFont *font = io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f);
+    if (!font) {
+      io.Fonts->AddFontDefault();
+      log::error("Failed to load GUI font\n...");
+      return;
+    }
+
+    std::string font_awesome_path = Axolotl::GetDistDir() + "res/misc/Font Awesome 6 Pro-Solid-900.otf";
+    FontAddFontAwesomeChars(font_awesome_path, io);
+
+    io.Fonts->Build();
+
+    std::string bold_path = Axolotl::GetDistDir() + "res/misc/JetBrainsMono-Bold.ttf";
+    ImFont *bold_font = io.Fonts->AddFontFromFileTTF(bold_path.c_str(), 16.0f);
+    if (!bold_font) {
+      log::error("Failed to load Bold GUI font\n...");
+      return;
+    }
+
+    FontAddFontAwesomeChars(font_awesome_path, io);
 
     io.Fonts->Build();
   }

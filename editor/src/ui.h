@@ -4,6 +4,8 @@
 #include <axolotl/renderer.h>
 #include <entt/entt.hpp>
 
+#include "inspector.h"
+
 namespace axl {
 
   class Scene;
@@ -24,9 +26,9 @@ namespace axl {
 
    protected:
     FrameBuffer _frame;
-    v2 _region_available;
+    Inspector _inspector;
 
-    entt::entity _selected_entity = entt::null;
+    v2 _region_available;
   };
 
 } // namespace axl

@@ -1,8 +1,9 @@
 file(GLOB AXOLOTL_EDITOR_SOURCES
   editor.cc
   test_scene.cc
-  frame_editor.cc
+  ui.cc
   dockspace.cc
+  inspector.cc
 )
 
 add_executable(axolotl_editor ${AXOLOTL_EDITOR_SOURCES})

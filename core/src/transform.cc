@@ -1,4 +1,5 @@
 #include <axolotl/transform.h>
+#include <imgui.h>
 
 namespace axl {
 
@@ -88,6 +89,13 @@ namespace axl {
     }
     if (json.find("rotation") != json.end()) {
       _rotation = json["rotation"];
+    }
+  }
+
+  void Transform::ShowDataToUI() {
+    if (ImGui::CollapsingHeader("Transform")) {
+      serializable::ShowDataToUI("Position", _position);
+      serializable::ShowDataToUI("Scale", _scale, v3(1.0f));
     }
   }
 

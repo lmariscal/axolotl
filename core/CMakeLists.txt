@@ -9,11 +9,11 @@ file(GLOB AXOLOTL_SOURCES
   src/gui.cc
   src/scene.cc
   src/iomanager.cc
-  src/serialization.cc
   src/terminal.cc
   src/camera.cc
   src/transform.cc
   src/ento.cc
+  src/serialization.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)

@@ -8,7 +8,7 @@
 #include <axolotl/transform.h>
 #include <imgui.h>
 
-#include "frame_editor.h"
+#include "ui.h"
 #include "dockspace.h"
 #include "test_scene.h"
 
@@ -28,19 +28,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   IOManager *io_manager = window.GetIOManager();
   DockSpace dock_space;
-
-  Transform transform;
-  transform.SetPosition({ 0.0f, 0.0f, -5.0f });
-  transform.SetRotation({ 0.0f, 0.0f, 0.0f, 0.0f });
-  transform.SetScale({ 1.0f, 1.0f, 1.0f });
-  nlohmann::json json;
-  json["transform"] = transform.Serialize();
-  log::debug("{}", json.dump(2));
-
-  std::vector<u8> cbor = nlohmann::json::to_cbor(json);
-  for (auto &byte : cbor)
-    std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";
-  std::cout << '\n';
 
   while (window.Update() && !terminal_data.quit_requested) {
     if (terminal_data.watch_shaders) {

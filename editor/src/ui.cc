@@ -1,4 +1,4 @@
-#include "frame_editor.h"
+#include "ui.h"
 
 #include <imgui.h>
 #include <axolotl/window.h>
@@ -104,33 +104,14 @@ namespace axl {
       std::string label = ICON_FA_SMALL_CIRCLE;
       label += " ";
       label += ento.name.empty() ? uuids::to_string(ento.id) : ento.name;
-      if (ImGui::Selectable(label.c_str(), _selected_entity == entity))
-        _selected_entity = entity;
+      if (ImGui::Selectable(label.c_str(), _inspector._selected_entity == entity))
+        _inspector._selected_entity = entity;
     }
     ImGui::End();
   }
 
   void FrameEditor::DrawInspector(Scene &scene) {
-    ImGui::Begin("Inspector");
-    entt::registry *registry = scene.GetRegistry();
-
-    if (_selected_entity == entt::null) {
-      ImGui::Text("No entity selected");
-      ImGui::End();
-      return;
-    }
-
-    Ento &ento = registry->get<Ento>(_selected_entity);
-    ImGui::Text("ID %s", uuids::to_string(ento.id).c_str());
-    ImGui::Text("Name ");
-    ImGui::SameLine();
-    ImGui::InputText("##entity_name", ento.name.data(), ento.name.capacity());
-
-    for (Serializable *s : ento.components) {
-      ImGui::Text("%s", s->Serialize().dump(2).c_str());
-    }
-
-    ImGui::End();
+    _inspector.Draw(scene);
   }
 
 } // namespace

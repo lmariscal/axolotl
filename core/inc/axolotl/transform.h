@@ -14,6 +14,7 @@ namespace axl {
 
     virtual nlohmann::json Serialize() const;
     virtual void Deserialize(const nlohmann::json &json);
+    virtual void ShowDataToUI();
 
     const v3& GetPosition() const;
     const v3& GetScale() const;

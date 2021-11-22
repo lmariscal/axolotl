@@ -28,10 +28,20 @@ namespace axl {
     virtual nlohmann::json Serialize() const = 0;
     virtual void Deserialize(const nlohmann::json &json) = 0;
 
+    virtual void ShowDataToUI() = 0;
+
    protected:
     u32 _version_major = 0;
     u32 _version_minor = 1;
   };
+
+  namespace serializable {
+
+    void ShowDataToUI(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
+    void ShowDataToUI(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
+    void ShowDataToUI(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
+
+  } // namespace axl::serializable
 
 } // namespace axl
 

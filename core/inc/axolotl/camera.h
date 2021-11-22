@@ -7,12 +7,22 @@ namespace axl {
 
   class Window;
 
+  enum class CameraDirection {
+    Up,
+    Down,
+    Front,
+    Back,
+    Left,
+    Right
+  };
+
   struct Camera {
    public:
     Camera();
     ~Camera();
 
-    void Update(Window &window);
+    void MoveCamera(CameraDirection direction, Window &window);
+    void RotateCameraMouse(const vec3 &rotation, Window &window); // euler angles
     void SetAsActive();
     void SetOrthographic();
     void SetPerspective();

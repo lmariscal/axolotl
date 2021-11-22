@@ -384,23 +384,6 @@ namespace axl {
     return location;
   }
 
-  // void SetUniformV2(const std::string &name, const v2 &value);
-  // void SetUniformV3(const std::string &name, const v3 &value);
-  // void SetUniformV4(const std::string &name, const v4 &value);
-  // void SetUniformM3(const std::string &name, const m3 &value);
-  // void SetUniformM4(const std::string &name, const m4 &value);
-  // void SetUniformF32(const std::string &name, const f32 &value);
-  // void SetUniformI32(const std::string &name, const i32 &value);
-  // void SetUniformU32(const std::string &name, const u32 &value);
-  // void SetUniformF32V(const std::string &name, const f32 *value, u32 count);
-  // void SetUniformI32V(const std::string &name, const i32 *value, u32 count);
-  // void SetUniformU32V(const std::string &name, const u32 *value, u32 count);
-  // void SetUniformV2V(const std::string &name, const v2 *value, u32 count);
-  // void SetUniformV3V(const std::string &name, const v3 *value, u32 count);
-  // void SetUniformV4V(const std::string &name, const v4 *value, u32 count);
-  // void SetUniformM3V(const std::string &name, const m4 *value, u32 count);
-  // void SetUniformM4V(const std::string &name, const m4 *value, u32 count);
-
   void Shader::SetUniformV2(const std::string &name, const v2 &value) {
     i32 location = GetUniformLocation(name);
     if (location == -1)

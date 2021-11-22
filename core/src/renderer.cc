@@ -61,4 +61,12 @@ namespace axl {
     }
   }
 
+  void Renderer::SetMeshWireframe(bool state) {
+    if (state) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+  }
+
 } // namespace axl

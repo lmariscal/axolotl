@@ -1,6 +1,6 @@
 #pragma once
 
-#include <axolotl/scene.h>
+#include <axolotl/types.h>
 #include <nlohmann/json.hpp>
 
 namespace axl {

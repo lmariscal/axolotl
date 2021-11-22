@@ -13,6 +13,7 @@ file(GLOB AXOLOTL_SOURCES
   src/terminal.cc
   src/camera.cc
   src/transform.cc
+  src/ento.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -55,15 +56,16 @@ target_link_libraries(axolotl PUBLIC imterm)
 target_link_libraries(axolotl PUBLIC IconFontCppHeaders)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
 target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(axolotl PUBLIC stduuid)
 
 target_link_libraries(axolotl PRIVATE efsw)
 target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
 target_link_libraries(axolotl PRIVATE tinygltf)
 target_link_libraries(axolotl PRIVATE stb)
-target_link_libraries(axolotl PRIVATE stduuid)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)
 
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/core/inc)
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third)
+# target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third/stduuid/include)
 target_include_directories(axolotl PRIVATE ${OPENGL_INCLUDE_DIR})

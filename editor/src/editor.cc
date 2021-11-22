@@ -63,6 +63,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     frame_editor.Unbind(window);
     frame_editor.Draw(window);
 
+    frame_editor.DrawEntityList(scene);
+    frame_editor.DrawInspector(scene);
+
     renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
 
     window.Draw();

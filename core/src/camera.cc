@@ -22,28 +22,42 @@ namespace axl {
   Camera::~Camera() {
   }
 
-  void Camera::Update(Window &window) {
+  void Camera::MoveCamera(CameraDirection direction, Window &window) {
     if (_active_camera != this)
       return;
 
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime() / 1000.0f;
-    if (io_manager->KeyDown(Key::W))
-      _transform.SetPosition(_transform.GetPosition() + _front * _movement_speed * delta);
-    if (io_manager->KeyDown(Key::S))
-      _transform.SetPosition(_transform.GetPosition() - _front * _movement_speed * delta);
-    if (io_manager->KeyDown(Key::A))
-      _transform.SetPosition(_transform.GetPosition() - _right * _movement_speed * delta);
-    if (io_manager->KeyDown(Key::D))
-      _transform.SetPosition(_transform.GetPosition() + _right * _movement_speed * delta);
-    if (io_manager->KeyDown(Key::Q))
-      _transform.SetPosition(_transform.GetPosition() - _up * _movement_speed * delta);
-    if (io_manager->KeyDown(Key::E))
-      _transform.SetPosition(_transform.GetPosition() + _up * _movement_speed * delta);
+    switch (direction) {
+      case CameraDirection::Up:
+        _transform.SetPosition(_transform.GetPosition() + _up * _movement_speed * delta);
+        break;
+      case CameraDirection::Down:
+        _transform.SetPosition(_transform.GetPosition() - _up * _movement_speed * delta);
+        break;
+      case CameraDirection::Front:
+        _transform.SetPosition(_transform.GetPosition() + _front * _movement_speed * delta);
+        break;
+      case CameraDirection::Back:
+        _transform.SetPosition(_transform.GetPosition() - _front * _movement_speed * delta);
+        break;
+      case CameraDirection::Left:
+        _transform.SetPosition(_transform.GetPosition() - _right * _movement_speed * delta);
+        break;
+      case CameraDirection::Right:
+        _transform.SetPosition(_transform.GetPosition() + _right * _movement_speed * delta);
+        break;
+    }
+  }
 
-    v2 mouse_offset = io_manager->GetRelativePosition() * 0.333f;
-    _yaw += mouse_offset.x;
-    _pitch -= mouse_offset.y;
+  void Camera::RotateCameraMouse(const vec3 &rotation, Window &window) {
+    if (_active_camera != this)
+      return;
+
+    IOManager *io_manager = window.GetIOManager();
+    f32 delta = window.GetDeltaTime() / 1000.0f;
+    _yaw += rotation.x * delta;
+    _pitch -= rotation.y * delta;
 
     _pitch = std::min(_pitch, 90.0f);
     _pitch = std::max(_pitch, -90.0f);

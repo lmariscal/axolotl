@@ -39,8 +39,8 @@ namespace axl {
       auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.33f, nullptr, &dock_id);
 
       ImGui::DockBuilderDockWindow("World Editor", dock_id);
-      ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
-      ImGui::DockBuilderDockWindow("Dear ImGui Metrics/Debugger", dock_id_right);
+      ImGui::DockBuilderDockWindow("Entities", dock_id_left);
+      ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
       ImGui::DockBuilderDockWindow("Terminal", dock_id_bottom);
 
       _first_iteration = false;

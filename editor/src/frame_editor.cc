@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <axolotl/window.h>
 #include <axolotl/iomanager.h>
+#include <axolotl/ento.h>
+#include <axolotl/scene.h>
 
 #include <IconsFontAwesome5Pro.h>
 
@@ -89,6 +91,46 @@ namespace axl {
 
   void FrameEditor::SetBoundFrameRatio(bool state) {
     bound_frame_ratio = state;
+  }
+
+  void FrameEditor::DrawEntityList(Scene &scene) {
+    ImGui::Begin("Entities");
+    entt::registry *registry = scene.GetRegistry();
+    auto view = registry->view<Ento>();
+    for (auto entity : view) {
+      Ento &ento = registry->get<Ento>(entity);
+
+      // ImGui::Selectable("%s", );
+      std::string label = ICON_FA_SMALL_CIRCLE;
+      label += " ";
+      label += ento.name.empty() ? uuids::to_string(ento.id) : ento.name;
+      if (ImGui::Selectable(label.c_str(), _selected_entity == entity))
+        _selected_entity = entity;
+    }
+    ImGui::End();
+  }
+
+  void FrameEditor::DrawInspector(Scene &scene) {
+    ImGui::Begin("Inspector");
+    entt::registry *registry = scene.GetRegistry();
+
+    if (_selected_entity == entt::null) {
+      ImGui::Text("No entity selected");
+      ImGui::End();
+      return;
+    }
+
+    Ento &ento = registry->get<Ento>(_selected_entity);
+    ImGui::Text("ID %s", uuids::to_string(ento.id).c_str());
+    ImGui::Text("Name ");
+    ImGui::SameLine();
+    ImGui::InputText("##entity_name", ento.name.data(), ento.name.capacity());
+
+    for (Serializable *s : ento.components) {
+      ImGui::Text("%s", s->Serialize().dump(2).c_str());
+    }
+
+    ImGui::End();
   }
 
 } // namespace

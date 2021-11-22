@@ -17,6 +17,7 @@ namespace axl {
     void Resize(u32 width, u32 height);
 
     void Render(entt::registry &registry);
+    void SetMeshWireframe(bool state);
 
    protected:
     friend class GUI;

@@ -8,7 +8,7 @@ namespace axl {
   struct Transform : public Serializable {
    public:
     Transform();
-    Transform(const v3& position, const v3& scale, const quat& rotation);
+    Transform(const v3& position, const v3& scale = v3(1.0f), const quat& rotation = quat());
     Transform(const Transform& other);
     ~Transform();
 

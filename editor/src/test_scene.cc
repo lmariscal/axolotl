@@ -25,8 +25,7 @@ namespace axl {
        0.0f,  1.0f, 0.0f
     };
     Mesh &mesh = _registry.emplace<Mesh>(triangle, triangle_mesh);
-    Transform &transform = _registry.emplace<Transform>(triangle);
-    transform.SetPosition({ 0.0f, 0.0f, -5.0f });
+    Transform &transform = _registry.emplace<Transform>(triangle, v3(0.0f, 0.0f, -5.0f));
     Shader &shader = _registry.emplace<Shader>(
         triangle,
         Axolotl::GetDistDir() + "res/shaders/testy.vert",

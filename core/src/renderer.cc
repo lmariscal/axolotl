@@ -48,7 +48,7 @@ namespace axl {
       m4 model(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
       if (transform) {
-        // model *= transform->GetRotation();
+        model *= toMat4(transform->GetRotation());
         model = scale(model, transform->GetScale());
         model = translate(model, transform->GetPosition());
       }

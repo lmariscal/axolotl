@@ -31,8 +31,10 @@ namespace axl {
     v3 _front;
     v3 _right;
     v3 _world_up;
+
     f32 _yaw;
     f32 _pitch;
+
     f32 _movement_speed;
 
     bool _is_orthographic;

@@ -5,10 +5,12 @@
 
 namespace axl {
 
+  class Camera;
+
   class TestScene : public Scene {
    public:
     void Init() override;
-    void Update(f32 delta) override;
+    void Update(Window &window) override;
   };
 
 } // namespace axl

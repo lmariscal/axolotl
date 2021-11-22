@@ -5,16 +5,20 @@
 
 namespace axl {
 
+  class Renderer;
+  class Window;
+
   class Scene {
    public:
      Scene();
      ~Scene();
 
      virtual void Init() = 0;
-     virtual void Update(f32 delta) = 0;
+     virtual void Update(Window &window) = 0;
 
      entt::registry * GetRegistry();
-     void Draw();
+     entt::entity CreateEntity();
+     void Draw(Renderer &renderer);
 
    protected:
     entt::registry _registry;

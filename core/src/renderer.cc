@@ -1,6 +1,11 @@
 #include <axolotl/renderer.h>
 
 #include <axolotl/window.h>
+#include <axolotl/mesh.h>
+#include <axolotl/shader.h>
+#include <axolotl/window.h>
+#include <axolotl/camera.h>
+#include <axolotl/transform.h>
 
 #include <glad.h>
 
@@ -27,6 +32,33 @@ namespace axl {
 
   void Renderer::Resize(u32 width, u32 height) {
     glViewport(0, 0, width, height);
+  }
+
+  void Renderer::Render(entt::registry &registry) {
+    Camera *camera = Camera::GetActiveCamera();
+    camera->SetPerspective();
+    m4 view = camera->GetViewMatrix();
+    m4 projection = camera->GetProjectionMatrix(*_window);
+
+    auto entities = registry.view<Mesh, Shader>();
+    for (auto entity : entities) {
+      Mesh &mesh = entities.get<Mesh>(entity);
+      Shader &shader = entities.get<Shader>(entity);
+
+      m4 model(1.0f);
+      Transform *transform = registry.try_get<Transform>(entity);
+      if (transform) {
+        // model *= transform->GetRotation();
+        model = scale(model, transform->GetScale());
+        model = translate(model, transform->GetPosition());
+      }
+
+      shader.Bind();
+      shader.SetUniformM4("uModel", model);
+      shader.SetUniformM4("uView", view);
+      shader.SetUniformM4("uProjection", projection);
+      mesh.Draw();
+    }
   }
 
 } // namespace axl

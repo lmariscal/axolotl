@@ -11,6 +11,8 @@ file(GLOB AXOLOTL_SOURCES
   src/iomanager.cc
   src/serialization.cc
   src/terminal.cc
+  src/camera.cc
+  src/transform.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)

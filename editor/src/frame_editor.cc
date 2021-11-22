@@ -9,7 +9,7 @@
 namespace axl {
 
   FrameEditor::FrameEditor():
-    bound_frame_ratio(false),
+    bound_frame_ratio(true),
     _frame(1280, 720),
     _region_available({ 0, 0 })
   { }

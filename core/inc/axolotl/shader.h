@@ -30,6 +30,7 @@ namespace axl {
   struct Shader {
    public:
     Shader();
+    Shader(const std::filesystem::path &vertex, const std::filesystem::path &fragment, const std::filesystem::path &geometry = "", const std::filesystem::path &compute = "");
     ~Shader();
 
     void Bind();
@@ -40,6 +41,23 @@ namespace axl {
     bool Reload(ShaderType type = ShaderType::Last);
     bool Compile();
     bool Recompile();
+    i32 GetUniformLocation(const std::string &name);
+    void SetUniformV2(const std::string &name, const v2 &value);
+    void SetUniformV3(const std::string &name, const v3 &value);
+    void SetUniformV4(const std::string &name, const v4 &value);
+    void SetUniformM3(const std::string &name, const m3 &value);
+    void SetUniformM4(const std::string &name, const m4 &value);
+    void SetUniformF32(const std::string &name, const f32 &value);
+    void SetUniformI32(const std::string &name, const i32 &value);
+    void SetUniformU32(const std::string &name, const u32 &value);
+    void SetUniformF32V(const std::string &name, const f32 *value, u32 count);
+    void SetUniformI32V(const std::string &name, const i32 *value, u32 count);
+    void SetUniformU32V(const std::string &name, const u32 *value, u32 count);
+    void SetUniformV2V(const std::string &name, const v2 *value, u32 count);
+    void SetUniformV3V(const std::string &name, const v3 *value, u32 count);
+    void SetUniformV4V(const std::string &name, const v4 *value, u32 count);
+    void SetUniformM3V(const std::string &name, const m3 *value, u32 count);
+    void SetUniformM4V(const std::string &name, const m4 *value, u32 count);
 
     static std::string ShaderTypeToString(ShaderType type);
     static ShaderType StringToShaderType(const std::string &str);
@@ -52,6 +70,9 @@ namespace axl {
     // static std::unordered_map<std::filesystem::path, ShaderShader using shared_ptr to manage state of shaders
     static std::vector<Shader *> _shaders_programs;
 
+    std::unordered_map<std::string, i32> _uniform_locations;
+
+    void Init();
     std::string Read(const std::filesystem::path &path);
     u32 CompileShader(ShaderType type, const std::string &data);
 

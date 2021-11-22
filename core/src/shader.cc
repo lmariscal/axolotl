@@ -84,9 +84,7 @@ namespace axl {
     }
   }
 
-  Shader::Shader():
-    _program(0)
-  {
+  void Shader::Init() {
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       _shaders[i] = 0;
       _paths[i] = "";
@@ -100,6 +98,27 @@ namespace axl {
     _watcher->watch();
 
     _shaders_programs.push_back(this);
+  }
+
+  Shader::Shader(const std::filesystem::path &vertex, const std::filesystem::path &fragment,
+                 const std::filesystem::path &geometry, const std::filesystem::path &compute):
+    _program(0)
+  {
+    Init();
+    if (!vertex.empty())
+      Load(ShaderType::Vertex, vertex);
+    if (!fragment.empty())
+      Load(ShaderType::Fragment, fragment);
+    if (!geometry.empty())
+      Load(ShaderType::Geometry, geometry);
+    if (!compute.empty())
+      Load(ShaderType::Compute, compute);
+  }
+
+  Shader::Shader():
+    _program(0)
+  {
+    Init();
   }
 
   Shader::~Shader() {
@@ -250,6 +269,8 @@ namespace axl {
       glDetachShader(_program, _shaders[i]);
     }
 
+    _uniform_locations.clear();
+
     return true;
   }
 
@@ -345,6 +366,151 @@ namespace axl {
     _shaders[(i32)type] = shader_id;
 
     return true;
+  }
+
+  i32 Shader::GetUniformLocation(const std::string &name) {
+    if (_program == 0) {
+      log::error("Shader program {} not compiled", _program);
+      return -1;
+    }
+
+    if (_uniform_locations.count(name))
+      return _uniform_locations[name];
+
+    i32 location = glGetUniformLocation(_program, name.c_str());
+    if (location == -1)
+      log::error("Shader uniform \"{}\" not found", name);
+    _uniform_locations[name] = location;
+    return location;
+  }
+
+  // void SetUniformV2(const std::string &name, const v2 &value);
+  // void SetUniformV3(const std::string &name, const v3 &value);
+  // void SetUniformV4(const std::string &name, const v4 &value);
+  // void SetUniformM3(const std::string &name, const m3 &value);
+  // void SetUniformM4(const std::string &name, const m4 &value);
+  // void SetUniformF32(const std::string &name, const f32 &value);
+  // void SetUniformI32(const std::string &name, const i32 &value);
+  // void SetUniformU32(const std::string &name, const u32 &value);
+  // void SetUniformF32V(const std::string &name, const f32 *value, u32 count);
+  // void SetUniformI32V(const std::string &name, const i32 *value, u32 count);
+  // void SetUniformU32V(const std::string &name, const u32 *value, u32 count);
+  // void SetUniformV2V(const std::string &name, const v2 *value, u32 count);
+  // void SetUniformV3V(const std::string &name, const v3 *value, u32 count);
+  // void SetUniformV4V(const std::string &name, const v4 *value, u32 count);
+  // void SetUniformM3V(const std::string &name, const m4 *value, u32 count);
+  // void SetUniformM4V(const std::string &name, const m4 *value, u32 count);
+
+  void Shader::SetUniformV2(const std::string &name, const v2 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform2fv(location, 1, value_ptr(value));
+  }
+
+  void Shader::SetUniformV3(const std::string &name, const v3 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform3fv(location, 1, value_ptr(value));
+  }
+
+  void Shader::SetUniformV4(const std::string &name, const v4 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform4fv(location, 1, value_ptr(value));
+  }
+
+  void Shader::SetUniformM3(const std::string &name, const m3 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(value));
+  }
+
+  void Shader::SetUniformM4(const std::string &name, const m4 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
+  }
+
+  void Shader::SetUniformF32(const std::string &name, const f32 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1f(location, value);
+  }
+
+  void Shader::SetUniformI32(const std::string &name, const i32 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1i(location, value);
+  }
+
+  void Shader::SetUniformU32(const std::string &name, const u32 &value) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1ui(location, value);
+  }
+
+  void Shader::SetUniformF32V(const std::string &name, const f32 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1fv(location, count, value);
+  }
+
+  void Shader::SetUniformI32V(const std::string &name, const i32 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1iv(location, count, value);
+  }
+
+  void Shader::SetUniformU32V(const std::string &name, const u32 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform1uiv(location, count, value);
+  }
+
+  void Shader::SetUniformV2V(const std::string &name, const v2 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform2fv(location, count, value_ptr(value[0]));
+  }
+
+  void Shader::SetUniformV3V(const std::string &name, const v3 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform3fv(location, count, value_ptr(value[0]));
+  }
+
+  void Shader::SetUniformV4V(const std::string &name, const v4 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniform4fv(location, count, value_ptr(value[0]));
+  }
+
+  void Shader::SetUniformM3V(const std::string &name, const m3 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniformMatrix3fv(location, count, GL_FALSE, value_ptr(value[0]));
+  }
+
+  void Shader::SetUniformM4V(const std::string &name, const m4 *value, u32 count) {
+    i32 location = GetUniformLocation(name);
+    if (location == -1)
+      return;
+    glUniformMatrix4fv(location, count, GL_FALSE, value_ptr(value[0]));
   }
 
 } // namespace axl

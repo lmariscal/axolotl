@@ -1,6 +1,7 @@
 #include <axolotl/scene.h>
 
 #include <axolotl/shader.h>
+#include <axolotl/renderer.h>
 #include <axolotl/mesh.h>
 
 namespace axl {
@@ -15,14 +16,12 @@ namespace axl {
     return &_registry;
   }
 
-  void Scene::Draw() {
-    auto view = _registry.view<Mesh, Shader>();
-    for (auto entity : view) {
-      Mesh &mesh = view.get<Mesh>(entity);
-      Shader &shader = view.get<Shader>(entity);
-      shader.Bind();
-      mesh.Draw();
-    }
+  entt::entity Scene::CreateEntity() {
+    return _registry.create();
+  }
+
+  void Scene::Draw(Renderer &renderer) {
+    renderer.Render(_registry);
   }
 
 }

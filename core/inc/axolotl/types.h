@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 #include <cstdint>
 
 namespace axl {
@@ -46,6 +47,8 @@ namespace axl {
   using m2 = mat2;
   using m3 = mat3;
   using m4 = mat4;
+
+  using json = nlohmann::json;
 
 #ifndef M_PI
   constexpr f32 M_PI = 3.14159265358979323846;

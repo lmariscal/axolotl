@@ -1,7 +1,10 @@
 #pragma once
 
 #include <axolotl/types.h>
-#include <nlohmann/json.hpp>
+#include <vector>
+#include <entt/entt.hpp>
+#include <imgui.h>
+#include <limits>
 
 namespace axl {
 
@@ -22,27 +25,38 @@ namespace axl {
   // I am aware that I can use to_json and from_json to serialize and deserialize. The issue is
   // that these functions are not fully under my control and prefer to have a dedicated Serialize
   // and Deserialize function.
+  class Scene;
 
-  class Serializable {
+  class Component {
    public:
-    virtual nlohmann::json Serialize() const = 0;
-    virtual void Deserialize(const nlohmann::json &json) = 0;
+    virtual json Serialize() const = 0;
+    virtual void Deserialize(const json &json) = 0;
 
-    virtual void ShowDataToUI() = 0;
+    virtual bool ShowData() = 0;
+
+    virtual void Init() = 0;
+
+    json GetRootNode(const std::string data_type) const;
+    bool VerifyRootNode(const json &j, const std::string &data_type) const;
 
    protected:
+    friend class Scene;
+
     u32 _version_major = 0;
     u32 _version_minor = 1;
+
+    entt::entity _parent;
+    Scene *_scene = nullptr;
   };
 
-  namespace serializable {
-
-    bool ShowDataToUI(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
-    bool ShowDataToUI(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
-    bool ShowDataToUI(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
-    bool ShowDataToUI(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
-
-  } // namespace axl::serializable
+  bool ShowData(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
+  bool ShowData(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
+  bool ShowData(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
+  bool ShowData(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
+  bool ShowData(const std::string &label, f32 &v,
+                const f32 &reset_value = 0.0f, f32 min = std::numeric_limits<f32>::min(),
+                f32 max = std::numeric_limits<f32>::max());
+  bool ShowData(const std::string &label, bool &v);
 
 } // namespace axl
 

@@ -176,7 +176,8 @@ namespace axl {
   }
 
   GUI::GUI(Renderer *renderer, Window *window):
-    _renderer(renderer)
+    _renderer(renderer),
+    _lock_mouse(false)
   {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -249,5 +250,31 @@ namespace axl {
     ImGui_ImplGlfw_MonitorCallback(monitor, event);
   }
 
+  void GUI::LockMouse(bool state) {
+    _lock_mouse = state;
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    if (state) {
+      io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+      io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+      io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+      io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    } else {
+      io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+      io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
+      io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+      io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+    }
+    // Remove if statement via binary operations and state
+
+    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouse) | (state ? ImGuiConfigFlags_NoMouse : 0);
+    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouseCursorChange) | (state ? ImGuiConfigFlags_NoMouseCursorChange : 0);
+    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableKeyboard) | (state ? ImGuiConfigFlags_NavEnableKeyboard : 0);
+    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableGamepad) | (state ? ImGuiConfigFlags_NavEnableGamepad : 0);
+
+    io.WantCaptureKeyboard = state;
+    io.WantCaptureMouse = state;
+  }
 
 } // namespace axl

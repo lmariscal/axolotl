@@ -34,8 +34,8 @@ namespace axl {
       ImGui::DockBuilderAddNode(dock_id, main_dock_space_window_flags | ImGuiDockNodeFlags_DockSpace);
       ImGui::DockBuilderSetNodeSize(dock_id, v2(window_size.x, window_size.y));
 
-      auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.17f, nullptr, &dock_id);
-      auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Right, 0.20f, nullptr, &dock_id);
+      auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.15f, nullptr, &dock_id);
+      auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Right, 0.24f, nullptr, &dock_id);
       auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.33f, nullptr, &dock_id);
 
       ImGui::DockBuilderDockWindow("World Editor", dock_id);

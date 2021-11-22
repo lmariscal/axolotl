@@ -36,7 +36,6 @@ namespace axl {
 
   void Renderer::Render(entt::registry &registry) {
     Camera *camera = Camera::GetActiveCamera();
-    camera->SetPerspective();
     m4 view = camera->GetViewMatrix();
     m4 projection = camera->GetProjectionMatrix(*_window);
 
@@ -48,9 +47,7 @@ namespace axl {
       m4 model(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
       if (transform) {
-        model *= toMat4(transform->GetRotation());
-        model = scale(model, transform->GetScale());
-        model = translate(model, transform->GetPosition());
+        model = transform->GetModelMatrix();
       }
 
       shader.Bind();

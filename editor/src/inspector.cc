@@ -21,8 +21,8 @@ namespace axl {
     ImGui::SameLine();
     ImGui::InputText("##entity_name", ento.name.data(), ento.name.capacity());
 
-    for (Serializable *s : ento.components) {
-      s->ShowDataToUI();
+    for (Component *s : ento.components) {
+      s->ShowData();
     }
 
     ImGui::End();

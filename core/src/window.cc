@@ -13,7 +13,8 @@ namespace axl {
     _window_title(title),
     _window(nullptr),
     _renderer(nullptr),
-    _io_manager(new IOManager(*this))
+    _io_manager(new IOManager(*this)),
+    _lock_mouse(false)
   {
     glfwInit();
     // This is a renderer used for in-house testing, so we'll use latest OpenGL
@@ -97,7 +98,7 @@ namespace axl {
   }
 
   f64 Window::GetDeltaTime() const {
-    return _delta_time * 1000;
+    return _delta_time;
   }
 
   void Window::RegisterEvents() {
@@ -187,6 +188,17 @@ namespace axl {
     v2i result;
     glfwGetFramebufferSize(_window, &result.x, &result.y);
     return result;
+  }
+
+  void Window::LockMouse(bool state) {
+    _lock_mouse = state;
+
+    glfwSetInputMode(_window, GLFW_CURSOR, state ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    _gui->LockMouse(state);
+  }
+
+  bool Window::GetLockMouse() const {
+    return _lock_mouse;
   }
 
 } // namespace axolotl

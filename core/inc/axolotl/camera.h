@@ -2,6 +2,7 @@
 
 #include <axolotl/types.h>
 #include <axolotl/transform.h>
+#include <axolotl/component.h>
 
 namespace axl {
 
@@ -16,16 +17,23 @@ namespace axl {
     Right
   };
 
-  struct Camera {
+  struct Camera : public Component {
    public:
     Camera();
     ~Camera();
 
+    virtual json Serialize() const;
+    virtual void Deserialize(const json &json);
+    virtual bool ShowData();
+    virtual void Init();
+
     void MoveCamera(CameraDirection direction, Window &window);
-    void RotateCameraMouse(const vec3 &rotation, Window &window); // euler angles
+    void RotateCamera(const v2 &mouse_delta, Window &window); // euler angles
     void SetAsActive();
     void SetOrthographic();
     void SetPerspective();
+    void SetMovementSpeed(f32 speed);
+    void SetMouseSensitivity(f32 sensitivity);
     m4 GetViewMatrix();
     m4 GetProjectionMatrix(Window &window);
 
@@ -36,16 +44,16 @@ namespace axl {
 
     static Camera * _active_camera;
 
-    Transform _transform;
+    v3 _last_position;
+    v3 _last_rotation;
+
     v3 _up;
     v3 _front;
     v3 _right;
     v3 _world_up;
 
-    f32 _yaw;
-    f32 _pitch;
-
     f32 _movement_speed;
+    f32 _mouse_sensitivity;
 
     bool _is_orthographic;
   };

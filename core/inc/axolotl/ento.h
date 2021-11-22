@@ -6,7 +6,7 @@
 #include <array>
 #include <random>
 
-#include <axolotl/serialization.h>
+#include <axolotl/component.h>
 
 namespace axl {
 
@@ -19,7 +19,7 @@ namespace axl {
 
     Ento *parent;
     std::vector<Ento *> children;
-    std::vector<Serializable *> components;
+    std::vector<Component *> components;
 
    protected:
     static std::mt19937 _random_generator;

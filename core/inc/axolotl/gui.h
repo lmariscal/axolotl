@@ -17,6 +17,7 @@ namespace axl {
 
     void Update();
     void Draw();
+    void LockMouse(bool state);
 
    protected:
     friend class Renderer;
@@ -32,6 +33,7 @@ namespace axl {
     static void MonitorCallback(GLFWmonitor* monitor, i32 event);
 
     Renderer *_renderer;
+    bool _lock_mouse;
   };
 
 } // namespace axl

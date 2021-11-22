@@ -2,6 +2,7 @@
 
 #include <axolotl/window.h>
 #include <axolotl/iomanager.h>
+#include <axolotl/scene.h>
 #include <algorithm>
 
 namespace axl {
@@ -11,61 +12,66 @@ namespace axl {
   Camera::Camera():
     _is_orthographic(true),
     _world_up({ 0.0f, 1.0f, 0.0f }),
-    _yaw(-90.0f),
-    _pitch(0.0f),
-    _movement_speed(6.0f)
+    _movement_speed(6.0f),
+    _mouse_sensitivity(2.0f)
   {
-    _transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-    UpdateVectors();
   }
 
   Camera::~Camera() {
+  }
+
+  void Camera::Init() {
+    Transform &transform = _scene->TryAddComponent<Transform>(_parent);
+    transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+    transform.SetRotation(v3(-90.0f, 0.0f, 0.0f));
+    UpdateVectors();
   }
 
   void Camera::MoveCamera(CameraDirection direction, Window &window) {
     if (_active_camera != this)
       return;
 
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
     IOManager *io_manager = window.GetIOManager();
-    f32 delta = window.GetDeltaTime() / 1000.0f;
+    f32 delta = window.GetDeltaTime();
     switch (direction) {
-      case CameraDirection::Up:
-        _transform.SetPosition(_transform.GetPosition() + _up * _movement_speed * delta);
-        break;
       case CameraDirection::Down:
-        _transform.SetPosition(_transform.GetPosition() - _up * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _up * _movement_speed * delta);
+        break;
+      case CameraDirection::Up:
+        transform.SetPosition(transform.GetPosition() - _up * _movement_speed * delta);
         break;
       case CameraDirection::Front:
-        _transform.SetPosition(_transform.GetPosition() + _front * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _front * _movement_speed * delta);
         break;
       case CameraDirection::Back:
-        _transform.SetPosition(_transform.GetPosition() - _front * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _front * _movement_speed * delta);
         break;
       case CameraDirection::Left:
-        _transform.SetPosition(_transform.GetPosition() - _right * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _right * _movement_speed * delta);
         break;
       case CameraDirection::Right:
-        _transform.SetPosition(_transform.GetPosition() + _right * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _right * _movement_speed * delta);
         break;
     }
   }
 
-  void Camera::RotateCameraMouse(const vec3 &rotation, Window &window) {
+  void Camera::RotateCamera(const v2 &mouse_delta, Window &window) {
     if (_active_camera != this)
       return;
 
     IOManager *io_manager = window.GetIOManager();
-    f32 delta = window.GetDeltaTime() / 1000.0f;
-    _yaw += rotation.x * delta;
-    _pitch -= rotation.y * delta;
+    f32 delta = window.GetDeltaTime();
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
 
-    _pitch = std::min(_pitch, 90.0f);
-    _pitch = std::max(_pitch, -90.0f);
+    v3 euler = transform.GetRotation();
+    f32 &yaw = euler.x;
+    f32 &pitch = euler.y;
 
-    if (_yaw > 360.0f)
-      _yaw -= 360.0f;
-    else if (_yaw < 0.0f)
-      _yaw += 360.0f;
+    yaw += mouse_delta.x * delta * _mouse_sensitivity * 10.0f;
+    pitch -= mouse_delta.y * delta * _mouse_sensitivity * 10.0f;
+
+    transform.SetRotation(euler);
 
     UpdateVectors();
   }
@@ -80,17 +86,23 @@ namespace axl {
   }
 
   void Camera::UpdateVectors() {
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    v3 euler = transform.GetRotation();
+    f32 &yaw = euler.x;
+    f32 &pitch = euler.y;
+
     v3 front;
-    front.x = cos(radians(_yaw)) * cos(radians(_pitch));
-    front.y = sin(radians(_pitch));
-    front.z = sin(radians(_yaw)) * cos(radians(_pitch));
+    front.x = cos(radians(yaw)) * cos(radians(pitch));
+    front.y = sin(radians(pitch));
+    front.z = sin(radians(yaw)) * cos(radians(pitch));
     _front = normalize(front);
     _right = normalize(cross(_front, _world_up));
     _up = normalize(cross(_right, _front));
   }
 
   m4 Camera::GetViewMatrix() {
-    return lookAt(_transform.GetPosition(), _transform.GetPosition() + _front, _up);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
   }
 
   void Camera::SetAsActive() {
@@ -107,6 +119,55 @@ namespace axl {
 
   void Camera::SetOrthographic() {
     _is_orthographic = true;
+  }
+
+  json Camera::Serialize() const {
+    json j = GetRootNode("camera");
+    j["is_orthographic"] = _is_orthographic;
+    j["movement_speed"] = _movement_speed;
+    j["mouse_sensitivity"] = _mouse_sensitivity;
+    return j;
+  }
+
+  void Camera::Deserialize(const json &j) {
+    if (!VerifyRootNode(j, "transform"))
+      return;
+
+    if (j.find("is_orthographic") != j.end())
+      _is_orthographic = j["is_orthographic"];
+    if (j.find("movement_speed") != j.end())
+      _movement_speed = j["movement_speed"];
+    if (j.find("mouse_sensitivity") != j.end())
+      _mouse_sensitivity = j["mouse_sensitivity"];
+  }
+
+  bool Camera::ShowData() {
+    bool modified = false;
+
+    ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Camera")) {
+      if (axl::ShowData("Orthographic", _is_orthographic))
+        modified = true;
+      if (axl::ShowData("Movement Speed", _movement_speed))
+        modified = true;
+      if (axl::ShowData("Mouse Sensitivity", _mouse_sensitivity))
+        modified = true;
+    }
+
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    if (_last_position != transform.GetPosition()) {
+      _last_position = transform.GetPosition();
+      modified = true;
+    }
+    if (_last_rotation != transform.GetRotation()) {
+      _last_rotation = transform.GetRotation();
+      modified = true;
+    }
+
+    if (modified)
+      UpdateVectors();
+
+    return modified;
   }
 
 } // namespace axl

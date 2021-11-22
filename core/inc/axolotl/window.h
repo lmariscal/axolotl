@@ -16,11 +16,13 @@ namespace axl {
     Window(u32 width, u32 height, const std::string &title);
     ~Window();
 
+    bool GetLockMouse() const;
     bool Update();
     void Draw();
     void SetTitle(const std::string &title);
     void SetSize(u32 width, u32 height);
     void RegisterEvents();
+    void LockMouse(bool state);
     v2i GetSize() const;
     v2i GetFramebufferSize() const;
     // Returns Delta time in milliseconds
@@ -52,6 +54,7 @@ namespace axl {
     Renderer *_renderer;
     IOManager *_io_manager;
     GLFWwindow *_window;
+    bool _lock_mouse;
   };
 
 } // namespace axolotl

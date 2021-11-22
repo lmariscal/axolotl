@@ -7,38 +7,41 @@ namespace axl {
     _position({ 0.0f, 0.0f, 0.0f }),
     _scale({ 1.0f, 1.0f, 1.0f }),
     _rotation()
-  {
+  { }
 
-  }
-
-  Transform::~Transform() {
-
-  }
+  Transform::~Transform() { }
 
   Transform::Transform(const v3& position, const v3& scale, const quat& rotation):
     _position(position),
     _scale(scale),
     _rotation(rotation)
-  {
-  }
-
+  { }
   Transform::Transform(const Transform& other):
     _position(other._position),
     _scale(other._scale),
     _rotation(other._rotation)
-  {
-  }
+  { }
 
-  const v3& Transform::GetPosition() const {
+  void Transform::Init() { }
+
+  const v3 & Transform::GetPosition() const {
     return _position;
   }
 
-  const v3& Transform::GetScale() const {
+  const v3 & Transform::GetScale() const {
     return _scale;
   }
 
-  const quat& Transform::GetRotation() const {
+  const quat & Transform::GetRotationQuat() const {
     return _rotation;
+  }
+
+  const v3 Transform::GetRotation() const {
+    return degrees(eulerAngles(_rotation));
+  }
+
+  void Transform::SetRotation(const v3 &rotation) {
+    _rotation = quat(radians(rotation));
   }
 
   void Transform::SetPosition(const v3& position) {
@@ -53,52 +56,48 @@ namespace axl {
     _rotation = rotation;
   }
 
-  nlohmann::json Transform::Serialize() const {
-    nlohmann::json j;
-    j["version"] = {
-      { "major", _version_major },
-      { "minor", _version_minor }
-    };
-    j["type"] = "transform";
+  json Transform::Serialize() const {
+    json j = GetRootNode("transform");
     j["position"] = _position;
     j["scale"] = _scale;
     j["rotation"] = _rotation;
     return j;
   }
 
-  void Transform::Deserialize(const nlohmann::json &json) {
-    if (json.find("version") != json.end()) {
-      if (json["version"]["major"] != _version_major) {
-        log::error("Transform::Deserialize: incompatible version");
-        return;
-      }
-    }
+  void Transform::Deserialize(const json &j) {
+    if (!VerifyRootNode(j, "transform"))
+      return;
 
-    if (json.find("type") != json.end()) {
-      if (json["type"] != "transform") {
-        log::error("Transform::Deserialize: invalid type");
-        return;
-      }
-    }
-
-    if (json.find("position") != json.end()) {
-      _position = json["position"];
-    }
-    if (json.find("scale") != json.end()) {
-      _scale = json["scale"];
-    }
-    if (json.find("rotation") != json.end()) {
-      _rotation = json["rotation"];
-    }
+    if (j.find("position") != j.end())
+      _position = j["position"];
+    if (j.find("scale") != j.end())
+      _scale = j["scale"];
+    if (j.find("rotation") != j.end())
+      _rotation = j["rotation"];
   }
 
-  void Transform::ShowDataToUI() {
+  bool Transform::ShowData() {
+    bool modified = false;
+
     ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Transform")) {
-      serializable::ShowDataToUI("Position", _position);
-      serializable::ShowDataToUI("Scale", _scale, v3(1.0f));
-      serializable::ShowDataToUI("Rotation", _rotation);
+      if (axl::ShowData("Position", _position))
+        modified = true;
+      if (axl::ShowData("Scale", _scale, v3(1.0f)))
+        modified = true;
+      if (axl::ShowData("Rotation", _rotation))
+        modified = true;
     }
+
+    return modified;
+  }
+
+  m4 Transform::GetModelMatrix() const {
+    m4 model(1.0f);
+    model = translate(model, _position);
+    model = scale(model, _scale);
+    model *= toMat4(_rotation);
+    return model;
   }
 
 } // namespace axl

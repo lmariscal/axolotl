@@ -13,7 +13,7 @@ file(GLOB AXOLOTL_SOURCES
   src/camera.cc
   src/transform.cc
   src/ento.cc
-  src/serialization.cc
+  src/component.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)

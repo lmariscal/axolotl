@@ -11,6 +11,9 @@ namespace axl {
    public:
     void Init() override;
     void Update(Window &window) override;
+
+   protected:
+    entt::entity _triangle;
   };
 
 } // namespace axl

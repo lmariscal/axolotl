@@ -1,6 +1,7 @@
 #pragma once
 
 #include <axolotl/types.h>
+#include <axolotl/component.h>
 
 #include <filesystem>
 #include <unordered_map>
@@ -19,6 +20,30 @@ namespace axl {
   class Axolotl;
   class Terminal;
 
+  enum class UniformType {
+    Model,
+    View,
+    Projection,
+    Time,
+    Resolution,
+    Mouse,
+    MouseDelta,
+    Other,
+    Last
+  };
+
+  enum class UniformDataType {
+    Float,
+    Int,
+    Vec2,
+    Vec3,
+    Vec4,
+    Mat4,
+    Sampler2D,
+    Color,
+    Last
+  };
+
   enum class ShaderType {
     Vertex,
     Fragment,
@@ -27,7 +52,17 @@ namespace axl {
     Last
   };
 
-  struct Shader {
+  struct Uniform {
+    UniformType type;
+    UniformDataType data_type;
+    ShaderType shader_type;
+    std::string name;
+    json value;
+
+    Uniform(UniformType type, UniformDataType data_type, std::string name, ShaderType shader_type, json value);
+  };
+
+  struct Shader : public Component {
    public:
     Shader();
     Shader(const std::filesystem::path &vertex, const std::filesystem::path &fragment, const std::filesystem::path &geometry = "", const std::filesystem::path &compute = "");
@@ -59,8 +94,24 @@ namespace axl {
     void SetUniformM3V(const std::string &name, const m3 *value, u32 count);
     void SetUniformM4V(const std::string &name, const m4 *value, u32 count);
 
+    void SetUniformModel(const m4 &model);
+    void SetUniformView(const m4 &view);
+    void SetUniformProjection(const m4 &projection);
+    void SetUniformTime(const f32 &time);
+    void SetUniformResolution(const v2 &resolution);
+    void SetUniformMouse(const v2 &mouse);
+    void SetUniformMouseDelta(const v2 &mouse_delta);
+    void SetOthers();
+
     static std::string ShaderTypeToString(ShaderType type);
     static ShaderType StringToShaderType(const std::string &str);
+
+    virtual json Serialize() const;
+    virtual void Deserialize(const json &json);
+
+    virtual bool ShowData();
+
+    virtual void Init();
 
    protected:
     friend class ShaderWatcher;
@@ -72,13 +123,16 @@ namespace axl {
 
     std::unordered_map<std::string, i32> _uniform_locations;
 
-    void Init();
-    std::string Read(const std::filesystem::path &path);
+    void ShowData(Uniform &u);
+
+    void ParseUniform(std::string line, ShaderType shader_type);
+    std::string Read(const std::filesystem::path &path, ShaderType shade_type);
     u32 CompileShader(ShaderType type, const std::string &data);
 
     u32 _program;
     u32 _shaders[(i32)ShaderType::Last];
     std::filesystem::path _paths[(i32)ShaderType::Last];
+    std::vector<Uniform> _uniforms[(i32)UniformType::Last];
 
     bool _need_reload[(i32)ShaderType::Last];
     efsw::FileWatcher *_watcher;

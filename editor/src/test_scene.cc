@@ -43,9 +43,6 @@ namespace axl {
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       );
     shader.Compile();
-
-    json j = ento.Serialize();
-    log::debug("Serialized: {}", j.dump(2));
   }
 
   void TestScene::Update(Window &window) {

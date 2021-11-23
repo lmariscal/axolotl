@@ -318,6 +318,25 @@ namespace axl {
     return modified;
   }
 
+  bool ShowData(const std::string &label, i32 &v, const i32 &reset_value, i32 min, i32 max) {
+    bool modified = false;
+
+    ImGui::PushID(label.c_str());
+
+    ImGui::Columns(2);
+    f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
+    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    ImGui::Text("%s", label.c_str());
+    ImGui::NextColumn();
+
+    if (ImGui::DragInt("##v", &v, 0.1f, 0.0f, 0.0f))
+      modified = true;
+
+    ImGui::Columns(1);
+    ImGui::PopID();
+    return modified;
+  }
+
   json Component::GetRootNode(const std::string data_type) const {
     json j;
     j["type"] = data_type;
@@ -346,6 +365,39 @@ namespace axl {
     }
 
     return true;
+  }
+
+  bool ShowDataColor(const std::string &label, v4 &v) {
+    i32 column_width = 100;
+    bool modified = false;
+
+    ImGuiIO& io = ImGui::GetIO();
+    auto bold_font = io.Fonts->Fonts[1];
+
+    ImGui::PushID(label.c_str());
+
+    ImGui::Columns(2);
+    f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
+    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    ImGui::Text("%s", label.c_str());
+    ImGui::NextColumn();
+
+    ImGui::PushItemWidth(ImGui::CalcItemWidth());
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
+
+    ImGui::PushFont(bold_font);
+    if (ImGui::ColorEdit4("##color", value_ptr(v)))
+      modified = true;
+    ImGui::PopFont();
+
+    ImGui::PopItemWidth();
+    ImGui::PopStyleVar();
+
+    ImGui::Columns(1);
+
+    ImGui::PopID();
+
+    return modified;
   }
 
 } // namespace axl

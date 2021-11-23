@@ -2,13 +2,11 @@
 
 in vec3 position;
 
-// out Vertex {
-//   vec2 texCoord;
-//   vec4 color;
-// } OUT;
-
+#uniform model mat4 uModel
 uniform mat4 uModel;
+#uniform view mat4 uView
 uniform mat4 uView;
+#uniform projection mat4 uProjection
 uniform mat4 uProjection;
 
 void main() {

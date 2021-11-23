@@ -52,12 +52,15 @@ namespace axl {
   bool ShowData(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
   bool ShowData(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
   bool ShowData(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
+  bool ShowDataColor(const std::string &label, v4 &v);
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
   bool ShowData(const std::string &label, f32 &v,
                 const f32 &reset_value = 0.0f, f32 min = std::numeric_limits<f32>::min(),
                 f32 max = std::numeric_limits<f32>::max());
   bool ShowData(const std::string &label, bool &v);
-
+  bool ShowData(const std::string &label, i32 &v,
+                const i32 &reset_value = 0, i32 min = std::numeric_limits<i32>::min(),
+                i32 max = std::numeric_limits<i32>::max());
 } // namespace axl
 
 namespace nlohmann {

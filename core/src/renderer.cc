@@ -54,9 +54,10 @@ namespace axl {
       }
 
       shader.Bind();
-      shader.SetUniformM4("uModel", model);
-      shader.SetUniformM4("uView", view);
-      shader.SetUniformM4("uProjection", projection);
+      shader.SetUniformModel(model);
+      shader.SetUniformView(view);
+      shader.SetUniformProjection(projection);
+      shader.SetOthers();
       mesh.Draw();
     }
   }

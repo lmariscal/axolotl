@@ -2,7 +2,7 @@
 
 #include <axolotl/types.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace axl {
 

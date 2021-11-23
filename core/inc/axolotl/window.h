@@ -3,8 +3,8 @@
 #include <axolotl/types.h>
 #include <axolotl/iomanager.h>
 
-class GLFWwindow;
-class GLFWmonitor;
+struct GLFWwindow;
+struct GLFWmonitor;
 
 namespace axl {
 

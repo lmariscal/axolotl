@@ -2,8 +2,6 @@
 
 namespace axl {
 
-  bool Ento::_first_gen = true;
-  std::mt19937 Ento::_random_generator;
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
 
   Ento::Ento():
@@ -15,8 +13,8 @@ namespace axl {
       std::generate(std::begin(_seed_data), std::end(_seed_data), std::ref(rd));
       std::seed_seq seq(std::begin(_seed_data), std::end(_seed_data));
 
-      _random_generator = std::mt19937(seq);
-      _uuid_generator = uuids::uuid_random_generator(_random_generator);
+      static std::mt19937 random_generator = std::mt19937(seq);
+      _uuid_generator = uuids::uuid_random_generator(random_generator);
       _first_gen = false;
     }
 

@@ -29,9 +29,8 @@ namespace axl {
     json Serialize() const;
 
    protected:
-    static std::mt19937 _random_generator;
     static uuids::uuid_random_generator _uuid_generator;
-    static bool _first_gen;
+    inline static bool _first_gen = true;
   };
 
 } // namespace axl

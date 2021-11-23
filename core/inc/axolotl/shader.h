@@ -68,7 +68,7 @@ namespace axl {
     friend class Terminal;
 
     // static std::unordered_map<std::filesystem::path, ShaderShader using shared_ptr to manage state of shaders
-    static std::vector<Shader *> _shaders_programs;
+    inline static std::vector<Shader *> _shaders_programs;
 
     std::unordered_map<std::string, i32> _uniform_locations;
 

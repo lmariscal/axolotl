@@ -26,7 +26,7 @@ namespace axl {
     std::fill(result, result + 512, '\0');
 
 #if defined(WIN32) || defined(_WIN32)
-    GetModuleFileName(nullptr, resultChar, MAX_PATH);
+    GetModuleFileName(nullptr, result, MAX_PATH);
 #elif defined(__linux__)
     ssize_t count = readlink("/proc/self/exe", result, 512);
 #else

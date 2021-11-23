@@ -42,7 +42,7 @@ namespace axl {
    protected:
     void UpdateVectors();
 
-    static Camera * _active_camera;
+    inline static Camera * _active_camera;
 
     v3 _last_position;
     v3 _last_rotation;

@@ -8,8 +8,6 @@
 
 namespace axl {
 
-  std::vector<Shader *> Shader::_shaders_programs({ });
-
   class ShaderWatcher : public efsw::FileWatchListener {
    public:
     ShaderWatcher(Shader* shader): _shader(shader) { }

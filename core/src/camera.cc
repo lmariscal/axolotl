@@ -7,8 +7,6 @@
 
 namespace axl {
 
-  Camera *Camera::_active_camera = nullptr;
-
   Camera::Camera():
     _is_orthographic(false),
     _world_up({ 0.0f, 1.0f, 0.0f }),

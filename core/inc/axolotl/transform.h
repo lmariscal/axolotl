@@ -6,7 +6,6 @@
 namespace axl {
 
   struct Transform : public Component {
-   public:
     Transform();
     Transform(const v3& position, const v3& scale = v3(1.0f), const quat& rotation = quat());
     Transform(const Transform& other);

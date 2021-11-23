@@ -5,6 +5,7 @@
 #include <axolotl/axolotl.h>
 #include <axolotl/camera.h>
 #include <axolotl/window.h>
+#include <axolotl/texture.h>
 #include <imgui.h>
 
 namespace axl {
@@ -42,6 +43,8 @@ namespace axl {
         Axolotl::GetDistDir() + "res/shaders/testy.vert",
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       );
+
+    Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
     shader.Compile();
   }
 

@@ -1,4 +1,10 @@
-#EFSW
+# # ASSIMP
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(assimp)
+
+# EFSW
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 add_subdirectory(efsw)
@@ -88,8 +94,3 @@ target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 # stduuid
 set(UUID_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(stduuid)
-
-# TinyGLTF
-
-set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
-add_subdirectory(tinygltf)

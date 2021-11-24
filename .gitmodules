@@ -22,9 +22,6 @@
 [submodule "third/ImTerm"]
 	path = third/ImTerm
 	url = https://github.com/lmariscal/ImTerm.git
-[submodule "third/tinygltf"]
-	path = third/tinygltf
-	url = https://github.com/syoyo/tinygltf.git
 [submodule "third/stb"]
 	path = third/stb
 	url = https://github.com/nothings/stb.git
@@ -34,3 +31,6 @@
 [submodule "third/stduuid"]
 	path = third/stduuid
 	url = https://github.com/mariusbancila/stduuid.git
+[submodule "third/assimp"]
+	path = third/assimp
+	url = https://github.com/assimp/assimp.git

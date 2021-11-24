@@ -61,7 +61,7 @@ target_link_libraries(axolotl PUBLIC stduuid)
 target_link_libraries(axolotl PRIVATE efsw)
 target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
-target_link_libraries(axolotl PRIVATE tinygltf)
+target_link_libraries(axolotl PRIVATE assimp)
 target_link_libraries(axolotl PRIVATE stb)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)
 

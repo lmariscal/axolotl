@@ -33,7 +33,9 @@ namespace axl {
 
     container_ento.AddChild(&triangle_ento);
 
+    // Mesh &mesh = AddComponent<Mesh>(_triangle, Axolotl::GetDistDir() + "res/misc/Triangle.gltf");
     Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
+
     Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
     Shader &shader = AddComponent<Shader>(
         _triangle,

@@ -97,8 +97,8 @@ namespace axl {
   m4 Transform::GetModelMatrix() const {
     m4 model(1.0f);
     model = translate(model, _position);
-    model = scale(model, _scale);
     model *= toMat4(_rotation);
+    model = scale(model, _scale);
 
     Ento &ento = _scene->GetComponent<Ento>(_parent);
     if (!ento.parent)

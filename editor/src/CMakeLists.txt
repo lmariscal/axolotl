@@ -15,7 +15,7 @@ set_target_properties(axolotl_editor PROPERTIES
 )
 
 set_target_properties(axolotl_editor PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/dist/bin)
-set_target_properties(axolotl_editor PROPERTIES OUTPUT_NAME axolotl)
+set_target_properties(axolotl_editor PROPERTIES OUTPUT_NAME salamander)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   target_compile_definitions(axolotl_editor PUBLIC AXOLOTL_DEBUG=1)

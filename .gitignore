@@ -4,6 +4,12 @@
 debug/
 compile_commands.json
 Font Awesome*
+*.gltf
+*.glb
+*.png
+*.jpg
+*.jpeg
+*.bin
 
 # */**/renderer.cc
 # */**/renderer.h

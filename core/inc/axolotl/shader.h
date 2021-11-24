@@ -28,6 +28,7 @@ namespace axl {
     Resolution,
     Mouse,
     MouseDelta,
+    Texture,
     Other,
     Last
   };
@@ -59,13 +60,22 @@ namespace axl {
     std::string name;
     json value;
 
+    Uniform();
     Uniform(UniformType type, UniformDataType data_type, std::string name, ShaderType shader_type, json value);
   };
 
-  struct Shader : public Component {
+  struct ShaderPaths {
+    std::filesystem::path vertex   = "";
+    std::filesystem::path fragment = "";
+    std::filesystem::path geometry = "";
+    std::filesystem::path compute  = "";
+  };
+
+  struct Shader {
    public:
     Shader();
-    Shader(const std::filesystem::path &vertex, const std::filesystem::path &fragment, const std::filesystem::path &geometry = "", const std::filesystem::path &compute = "");
+    Shader(const ShaderPaths &paths);
+    Shader(Shader &other) = delete;
     ~Shader();
 
     void Bind();
@@ -101,24 +111,22 @@ namespace axl {
     void SetUniformResolution(const v2 &resolution);
     void SetUniformMouse(const v2 &mouse);
     void SetUniformMouseDelta(const v2 &mouse_delta);
+    void SetUniformTexture(u32 unit, u32 opengl_id);
     void SetOthers();
 
     static std::string ShaderTypeToString(ShaderType type);
     static ShaderType StringToShaderType(const std::string &str);
 
-    virtual json Serialize() const;
-    virtual void Deserialize(const json &json);
-
-    virtual bool ShowData();
-
-    virtual void Init();
+    void Init();
+    bool ShowData();
 
    protected:
+    constexpr static u32 MaxTextures = 32;
+
     friend class ShaderWatcher;
     friend class Axolotl;
     friend class Terminal;
 
-    // static std::unordered_map<std::filesystem::path, ShaderShader using shared_ptr to manage state of shaders
     inline static std::vector<Shader *> _shaders_programs;
 
     std::unordered_map<std::string, i32> _uniform_locations;
@@ -133,6 +141,7 @@ namespace axl {
     u32 _shaders[(i32)ShaderType::Last];
     std::filesystem::path _paths[(i32)ShaderType::Last];
     std::vector<Uniform> _uniforms[(i32)UniformType::Last];
+    u32 _uniform_texture_cache[32];
 
     bool _need_reload[(i32)ShaderType::Last];
     efsw::FileWatcher *_watcher;

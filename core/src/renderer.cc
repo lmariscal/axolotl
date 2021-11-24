@@ -1,8 +1,8 @@
 #include <axolotl/renderer.h>
 
 #include <axolotl/window.h>
-#include <axolotl/mesh.h>
-#include <axolotl/shader.h>
+#include <axolotl/model.h>
+#include <axolotl/material.h>
 #include <axolotl/window.h>
 #include <axolotl/camera.h>
 #include <axolotl/transform.h>
@@ -41,31 +41,30 @@ namespace axl {
     m4 view = camera->GetViewMatrix();
     m4 projection = camera->GetProjectionMatrix(*_window);
 
-    auto entities = registry.view<Mesh, Shader, Ento>();
+    auto entities = registry.view<Ento, Model, Material>();
     for (auto entity : entities) {
-      Mesh &mesh = entities.get<Mesh>(entity);
-      Shader &shader = entities.get<Shader>(entity);
+      Model &model = entities.get<Model>(entity);
+      Material &material = entities.get<Material>(entity);
       Ento &ento = entities.get<Ento>(entity);
 
-      m4 model(1.0f);
+      m4 model_mat(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
       if (transform) {
-        model = transform->GetModelMatrix();
+        model_mat = transform->GetModelMatrix();
       }
 
-      Texture *texture = registry.try_get<Texture>(entity);
-      if (texture) {
-        texture->Bind();
-      }
 
       glEnable(GL_DEPTH_TEST);
 
-      shader.Bind();
-      shader.SetUniformModel(model);
-      shader.SetUniformView(view);
-      shader.SetUniformProjection(projection);
-      shader.SetOthers();
-      mesh.Draw();
+      material.Bind();
+      Texture *texture = registry.try_get<Texture>(entity);
+      if (texture)
+        material._shader->SetUniformTexture(0, TextureStore::GetRendererTextureID(texture->texture_id));
+      material._shader->SetUniformModel(model_mat);
+      material._shader->SetUniformView(view);
+      material._shader->SetUniformProjection(projection);
+      material._shader->SetOthers();
+      model.Draw();
     }
   }
 

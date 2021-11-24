@@ -1,19 +1,14 @@
 #pragma once
 
 #include <axolotl/types.h>
-#include <axolotl/component.h>
 #include <map>
 
 namespace axl {
 
-  struct Texture : public Component {
+  struct Texture {
     Texture(const std::filesystem::path &path = "");
 
-    virtual json Serialize() const;
-    virtual void Deserialize(const json &json);
-    virtual bool ShowData();
-    virtual void Init();
-
+    void Init();
     void Bind();
 
     u32 texture_id;

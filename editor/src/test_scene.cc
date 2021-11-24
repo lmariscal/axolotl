@@ -1,7 +1,7 @@
 #include "test_scene.h"
 
-#include <axolotl/shader.h>
-#include <axolotl/mesh.h>
+#include <axolotl/material.h>
+#include <axolotl/model.h>
 #include <axolotl/axolotl.h>
 #include <axolotl/camera.h>
 #include <axolotl/window.h>
@@ -33,17 +33,17 @@ namespace axl {
 
     container_ento.AddChild(&triangle_ento);
 
-    // Mesh &mesh = AddComponent<Mesh>(_triangle, Axolotl::GetDistDir() + "res/misc/Triangle.gltf");
-    Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
+    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj");
+    // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
 
     Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
-    Shader &shader = AddComponent<Shader>(
-        _triangle,
-        Axolotl::GetDistDir() + "res/shaders/testy.vert",
-        Axolotl::GetDistDir() + "res/shaders/testy.frag"
-      );
+    ShaderPaths shader_paths = {
+      Axolotl::GetDistDir() + "res/shaders/testy.vert",
+      Axolotl::GetDistDir() + "res/shaders/testy.frag"
+    };
+    Material &material = AddComponent<Material>(_triangle, shader_paths);;
     Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
-    shader.Compile();
+    texture.Init();
   }
 
   void TestScene::Update(Window &window) {

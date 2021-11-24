@@ -13,15 +13,6 @@ namespace axl {
     i32 target;
   };
 
-  struct MeshData {
-    MeshData();
-
-    u32 vao;
-    u32 num_vertices;
-    u32 num_indices;
-    std::vector<BufferData> buffers;
-  };
-
   struct Mesh {
    public:
     Mesh(const std::vector<f32> &vertices, const std::vector<u32> &indices = { });
@@ -34,7 +25,10 @@ namespace axl {
     static Mesh CreateCube();
 
    protected:
-    std::shared_ptr<MeshData> _data;
+    u32 _vao;
+    u32 _num_vertices;
+    u32 _num_indices;
+    std::vector<BufferData> _buffers;
 
     void LoadBuffers(const std::vector<f32> &vertices, const std::vector<u32> &indices);
   };

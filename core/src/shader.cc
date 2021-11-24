@@ -16,6 +16,14 @@ namespace axl {
     value(json)
   { }
 
+  Uniform::Uniform():
+    type(UniformType::Last),
+    data_type(UniformDataType::Last),
+    name(""),
+    shader_type(ShaderType::Last),
+    value(json::object())
+  { }
+
   class ShaderWatcher : public efsw::FileWatchListener {
    public:
     ShaderWatcher(Shader* shader): _shader(shader) { }
@@ -107,6 +115,8 @@ namespace axl {
       return UniformType::MouseDelta;
     if (str == "other")
       return UniformType::Other;
+    if (str.find("texture") == 0)
+      return UniformType::Texture;
     return UniformType::Last;
   }
 
@@ -137,6 +147,13 @@ namespace axl {
       _watch_ids[i] = 0;
       _need_reload[i] = false;
     }
+    _uniforms[(i32)UniformType::Texture].resize(MaxTextures);
+    for (i32 i = 0; i < MaxTextures; ++i) {
+      _uniforms[(i32)UniformType::Texture][i].type = UniformType::Texture;
+      _uniforms[(i32)UniformType::Texture][i].data_type = UniformDataType::Sampler2D;
+      _uniforms[(i32)UniformType::Texture][i].name = "";
+      _uniform_texture_cache[i] = 0;
+    }
 
     _watcher = new efsw::FileWatcher();
     _shader_watcher = new ShaderWatcher(this);
@@ -152,18 +169,17 @@ namespace axl {
     }
   }
 
-  Shader::Shader(const std::filesystem::path &vertex, const std::filesystem::path &fragment,
-                 const std::filesystem::path &geometry, const std::filesystem::path &compute):
+  Shader::Shader(const ShaderPaths &paths):
     _program(0)
   {
-    if (!vertex.empty())
-      _paths[(i32)ShaderType::Vertex] = vertex;
-    if (!fragment.empty())
-      _paths[(i32)ShaderType::Fragment] = fragment;
-    if (!geometry.empty())
-      _paths[(i32)ShaderType::Geometry] = geometry;
-    if (!compute.empty())
-      _paths[(i32)ShaderType::Compute] = compute;
+    if (!paths.vertex.empty())
+      _paths[(i32)ShaderType::Vertex] = paths.vertex;
+    if (!paths.fragment.empty())
+      _paths[(i32)ShaderType::Fragment] = paths.fragment;
+    if (!paths.geometry.empty())
+      _paths[(i32)ShaderType::Geometry] = paths.geometry;
+    if (!paths.compute.empty())
+      _paths[(i32)ShaderType::Compute] = paths.compute;
   }
 
   Shader::Shader():
@@ -289,7 +305,20 @@ namespace axl {
       }
     };
 
-    _uniforms[(i32)type].push_back(Uniform(type, data_type, name, shader_type, j));
+    if (type != UniformType::Texture) {
+      _uniforms[(i32)type].push_back(Uniform(type, data_type, name, shader_type, j));
+      return;
+    }
+    if (line_type.length() != std::string("texturen").length()) {
+      log::error("Unknown uniform type \"{}\"", line);
+      return;
+    }
+    i32 texture_index = line_type.substr(line_type.length() - 1, 1).at(0) - '0';
+    if (texture_index < 0 || texture_index > MaxTextures) {
+      log::error("Unknown uniform type \"{}\"", line);
+      return;
+    }
+    _uniforms[(i32)type][texture_index] = Uniform(type, data_type, name, shader_type, j);
   }
 
   std::string Shader::Read(const std::filesystem::path &path, ShaderType shader_type) {
@@ -380,6 +409,23 @@ namespace axl {
       SetUniformV2(u.name, mouse_delta);
   }
 
+  void Shader::SetUniformTexture(u32 unit, u32 id) {
+    if (unit >= MaxTextures) {
+      log::error("Texture unit {} is out of range", unit);
+      return;
+    }
+
+    const Uniform &uniform = _uniforms[(i32)UniformType::Texture][unit];
+    if (uniform.name.empty()) {
+      log::error("No uniform set for texture unit {}", unit);
+      return;
+    }
+
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, id);
+    _uniform_texture_cache[unit] = id;
+  }
+
   void Shader::SetOthers() {
     for (Uniform &u : _uniforms[(i32)UniformType::Other]) {
       switch (u.data_type) {
@@ -430,7 +476,6 @@ namespace axl {
   }
 
   bool Shader::Compile() {
-    log::debug("Compiling shader");
     if (_program) {
       log::error("Shader program {} already compiled", _program);
       return false;
@@ -557,6 +602,17 @@ namespace axl {
     std::copy(_uniforms[(i32)type].begin(), _uniforms[(i32)type].end(), std::back_inserter(uniforms_copy[(i32)type]));
 
     for (i32 i = 0; i < (i32)UniformType::Last; ++i) {
+      if ((UniformType)i == UniformType::Texture) {
+        for (i32 j = 0; j < MaxTextures; ++j) {
+          if (_uniforms[i][j].shader_type != type)
+            continue;
+          _uniforms[i][j].name = "";
+          _uniforms[i][j].value = json::object();
+          _uniforms[i][j].shader_type = ShaderType::Last;
+        }
+        continue;
+      }
+
       _uniforms[i].erase(std::remove_if(_uniforms[i].begin(), _uniforms[i].end(), [type](const Uniform &u) {
         return u.shader_type == type;
       }), _uniforms[i].end());
@@ -707,14 +763,6 @@ namespace axl {
     glUniformMatrix4fv(location, count, GL_FALSE, value_ptr(value[0]));
   }
 
-  json Shader::Serialize() const {
-    json j = GetRootNode("shader");
-    return j;
-  }
-
-  void Shader::Deserialize(const json &j) {
-  }
-
   void Shader::ShowData(Uniform &u) {
     switch (u.data_type) {
       case UniformDataType::Float: {
@@ -794,6 +842,15 @@ namespace axl {
     if (ImGui::CollapsingHeader("Shader")) {
       for (Uniform &u : _uniforms[(i32)UniformType::Other]) {
         ShowData(u);
+      }
+      for (i32 i = 0; i < MaxTextures; ++i) {
+        if (_uniform_texture_cache[i] == 0)
+          continue;
+        std::string texture_unit_name = "Texture" + std::to_string(i);
+        const u32 &id = _uniform_texture_cache[i];
+        ImGui::Text("%s : %s", _uniforms[(i32)UniformType::Texture][i].name.c_str(), texture_unit_name.c_str());
+        f32 size = ImGui::CalcItemWidth();
+        ImGui::Image((void *)(intptr_t)id, v2(size));
       }
     }
     return false;

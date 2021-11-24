@@ -14,6 +14,8 @@ file(GLOB AXOLOTL_SOURCES
   src/transform.cc
   src/ento.cc
   src/component.cc
+  src/model.cc
+  src/material.cc
 )
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)

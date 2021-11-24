@@ -13,22 +13,6 @@ namespace axl {
     TextureStore::ProcessQueue();
   }
 
-  json Texture::Serialize() const {
-    json j = GetRootNode("texture");
-    j["path"] = TextureStore::GetPath(texture_id);
-    return j;
-  }
-
-  void Texture::Deserialize(const json &j) {
-    if (!VerifyRootNode(j, "texture"))
-      return;
-  }
-
-  bool Texture::ShowData() {
-    bool modified = false;
-    return modified;
-  }
-
   void Texture::Bind() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererTextureID(texture_id));

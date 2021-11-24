@@ -24,6 +24,8 @@ namespace axl {
 
     Camera &camera_component = AddComponent<Camera>(camera);
     camera_component.SetAsActive();
+    Transform &camera_transform = GetComponent<Transform>(camera);
+    camera_transform.SetPosition({ 0.0f, 0.0f, -5.0f });
 
     _triangle = CreateEntity();
     Ento &triangle_ento = GetComponent<Ento>(_triangle);
@@ -31,19 +33,13 @@ namespace axl {
 
     container_ento.AddChild(&triangle_ento);
 
-    std::vector<f32> triangle_mesh = {
-      -1.0f, -1.0f, 0.0f,
-       1.0f, -1.0f, 0.0f,
-       0.0f,  1.0f, 0.0f
-    };
-    Mesh &mesh = AddComponent<Mesh>(_triangle, triangle_mesh);
-    Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f, 0.0f, -5.0f));
+    Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
+    Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
     Shader &shader = AddComponent<Shader>(
         _triangle,
         Axolotl::GetDistDir() + "res/shaders/testy.vert",
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       );
-
     Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
     shader.Compile();
   }
@@ -81,6 +77,10 @@ namespace axl {
       Transform &t = GetComponent<Transform>(_triangle);
       t.SetRotation(t.GetRotation() + v3(0.0f, 0.0f, 30.0f * window.GetDeltaTime()));
     }
+  }
+
+  void TestScene::Focused(Window &window, bool state) {
+    window.LockMouse(state);
   }
 
 } // namespace axl

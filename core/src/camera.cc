@@ -21,7 +21,7 @@ namespace axl {
   void Camera::Init() {
     Transform &transform = _scene->TryAddComponent<Transform>(_parent);
     transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-    transform.SetRotation(v3(-90.0f, 0.0f, 0.0f));
+    transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
     UpdateVectors();
   }
 
@@ -75,7 +75,7 @@ namespace axl {
   }
 
   m4 Camera::GetProjectionMatrix(Window &window) {
-    v2 window_size = window.GetFramebufferSize();
+    v2 window_size = window.GetFrameBufferSize();
     f32 aspect_ratio = window_size.x / window_size.y;
     if (_is_orthographic)
       return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);

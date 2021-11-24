@@ -1,6 +1,7 @@
 #include <axolotl/texture.h>
 
 #include <stb_image.h>
+#include <glad.h>
 
 namespace axl {
 
@@ -26,6 +27,11 @@ namespace axl {
   bool Texture::ShowData() {
     bool modified = false;
     return modified;
+  }
+
+  void Texture::Bind() {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererTextureID(texture_id));
   }
 
   u32 TextureStore::GetTextureID(const std::filesystem::path &path) {
@@ -56,17 +62,6 @@ namespace axl {
     return;
   }
 
-  void TextureStore::DeregisterTexture(u32 id) {
-    if (!_textures.count(id))
-      return;
-
-    _instances[id]--;
-    if (_instances[id] > 0)
-      return;
-
-    // TODO remove texture from opengl
-  }
-
   std::filesystem::path TextureStore::GetPath(u32 id) {
     for (auto it = _path_to_id.cbegin(); it != _path_to_id.cend(); ++it) {
       if (it->second == id)
@@ -86,6 +81,44 @@ namespace axl {
 
   void TextureStore::LoadTexture(const Texture &texture, const std::filesystem::path &path) {
     log::debug("Loading Texture \"{}\"", path.string());
+
+    // Load opengl Texture with stb_image
+    i32 width, height, channels;
+    u8 *data = stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    if (!data) {
+      log::error("Failed to load texture \"{}\"", path.string());
+      return;
+    }
+
+    u32 tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    _textures[texture.texture_id] = tex;
+
+    stbi_image_free(data);
+  }
+
+  void TextureStore::DeregisterTexture(u32 id) {
+    if (!_textures.count(id))
+      return;
+
+    _instances[id]--;
+    if (_instances[id] > 0)
+      return;
+
+    glDeleteTextures(1, &_textures[id]);
+
+    _textures.erase(id);
+    _instances.erase(id);
+    _path_to_id.erase(GetPath(id));
   }
 
 } // namespace axl

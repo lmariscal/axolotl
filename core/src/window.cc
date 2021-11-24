@@ -28,6 +28,8 @@ namespace axl {
     glfwSwapInterval(1);
     glfwSetWindowUserPointer(_window, this);
 
+    _frame_buffer_size = GetWindowFrameBufferSize();
+
     RegisterEvents();
 
     _renderer = new Renderer(this);
@@ -95,6 +97,7 @@ namespace axl {
     _window_width = width;
     _window_height = height;
     _renderer->Resize(width, height);
+    _frame_buffer_size = GetWindowFrameBufferSize();
   }
 
   f64 Window::GetDeltaTime() const {
@@ -184,10 +187,18 @@ namespace axl {
     return v2i(_window_width, _window_height);
   }
 
-  v2i Window::GetFramebufferSize() const {
+  v2i Window::GetWindowFrameBufferSize() const {
     v2i result;
     glfwGetFramebufferSize(_window, &result.x, &result.y);
     return result;
+  }
+
+  const v2i & Window::GetFrameBufferSize() const {
+    return _frame_buffer_size;
+  }
+
+  void Window::SetFrameBufferSize(const v2i &size) {
+    _frame_buffer_size = size;
   }
 
   void Window::LockMouse(bool state) {

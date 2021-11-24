@@ -10,6 +10,8 @@ namespace axl {
   struct TerminalData {
     bool quit_requested = false;
     bool watch_shaders = true;
+    bool scene_playing = false;
+    bool scene_paused = false;
   };
 
   class Terminal : public ImTerm::basic_spdlog_terminal_helper<Terminal, TerminalData, std::mutex> {

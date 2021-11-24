@@ -6,6 +6,7 @@
 #include <axolotl/window.h>
 #include <axolotl/camera.h>
 #include <axolotl/transform.h>
+#include <axolotl/texture.h>
 #include <axolotl/ento.h>
 
 #include <glad.h>
@@ -28,7 +29,7 @@ namespace axl {
 
   void Renderer::ClearScreen(const v3 &color) {
     glClearColor(color.x, color.y, color.z, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   void Renderer::Resize(u32 width, u32 height) {
@@ -45,13 +46,19 @@ namespace axl {
       Mesh &mesh = entities.get<Mesh>(entity);
       Shader &shader = entities.get<Shader>(entity);
       Ento &ento = entities.get<Ento>(entity);
-      // log::debug("Rendering {}", uuids::to_string(ento.id));
 
       m4 model(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
       if (transform) {
         model = transform->GetModelMatrix();
       }
+
+      Texture *texture = registry.try_get<Texture>(entity);
+      if (texture) {
+        texture->Bind();
+      }
+
+      glEnable(GL_DEPTH_TEST);
 
       shader.Bind();
       shader.SetUniformModel(model);

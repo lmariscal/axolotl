@@ -36,27 +36,54 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
-    DockSpaceData dock_space_data;
-    dock_space_data.terminal_data = &terminal_data;
-    dock_space_data.resize_world_editor = &frame_editor.bound_frame_ratio;
-    dock_space.Draw(window, dock_space_data);
+    bool no_frame = terminal_data.scene_playing && frame_editor.frame_focused && frame_editor.fullscreen_play;
+    if (frame_editor.frame_focused && io_manager->KeyTriggered(Key::Escape))
+      frame_editor.frame_focused = false;
 
-    scene.Update(window);
-    terminal.show();
+    if (!no_frame) {
+      DockSpaceData dock_space_data;
+      dock_space_data.terminal_data = &terminal_data;
+      dock_space_data.resize_world_editor = &frame_editor.bound_frame_ratio;
+      dock_space.Draw(window, dock_space_data);
+    }
 
-    frame_editor.Bind(window);
+    if (terminal_data.scene_playing && !terminal_data.scene_paused)
+      scene.Update(window);
+
+    if (no_frame) {
+      v2i region_available = window.GetWindowFrameBufferSize();
+      renderer->Resize(region_available.x, region_available.y);
+      window.SetFrameBufferSize(region_available);
+    } else {
+      v2i region_available = frame_editor.GetRegionAvailable();
+      if (region_available.x > 0 && region_available.y > 0)
+        window.SetFrameBufferSize(region_available);
+
+      terminal.show();
+      frame_editor.Bind(window);
+      renderer->Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
+    }
+
     renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
     scene.Draw(*renderer);
-    frame_editor.Unbind(window);
-    frame_editor.Draw(window);
 
-    frame_editor.DrawEntityList(scene);
-    frame_editor.DrawInspector(scene);
+    if (!no_frame) {
+      frame_editor.Unbind(window);
+      frame_editor.Draw(window, terminal_data);
+      frame_editor.DrawEntityList(scene);
+      frame_editor.DrawInspector(scene);
+    }
 
-    renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+    scene.Focused(window, frame_editor.frame_focused);
+
+    if (!no_frame) {
+      renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+    }
 
     window.Draw();
 
+    if (terminal_data.scene_playing && io_manager->KeyTriggered(Key::GraveAccent))
+      terminal_data.scene_paused = !terminal_data.scene_paused;
     if (io_manager->KeyDown(Key::LeftControl) || io_manager->KeyDown(Key::RightControl)) {
       if (io_manager->KeyDown(Key::Q))
         terminal_data.quit_requested = true;

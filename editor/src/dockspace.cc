@@ -25,7 +25,7 @@ namespace axl {
     ImGuiDockNodeFlags dock_flags = ImGuiDockNodeFlags_None;
     dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
     // dock_flags |= ImGuiDockNodeFlags_AutoHideTabBar;
-    v2i window_size = window.GetFramebufferSize();
+    v2i window_size = window.GetWindowFrameBufferSize();
     ImGuiID dock_id = ImGui::GetID("MainDockSpace");
     ImGui::DockSpace(dock_id, v2(0, 0), dock_flags);
 

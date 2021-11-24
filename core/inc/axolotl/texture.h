@@ -14,6 +14,8 @@ namespace axl {
     virtual bool ShowData();
     virtual void Init();
 
+    void Bind();
+
     u32 texture_id;
   };
 

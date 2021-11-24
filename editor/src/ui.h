@@ -9,6 +9,7 @@
 namespace axl {
 
   class Scene;
+  struct TerminalData;
 
   class FrameEditor {
    public:
@@ -17,12 +18,15 @@ namespace axl {
 
     void Bind(Window &window);
     void Unbind(Window &window);
-    void Draw(Window &window);
+    void Draw(Window &window, TerminalData &data);
     void SetBoundFrameRatio(bool state);
     void DrawEntityList(Scene &scene);
     void DrawInspector(Scene &scene);
+    const v2 & GetRegionAvailable() const;
 
     bool bound_frame_ratio;
+    bool frame_focused;
+    bool fullscreen_play;
 
    protected:
     FrameBuffer _frame;

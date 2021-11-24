@@ -5,13 +5,16 @@
 #include <axolotl/iomanager.h>
 #include <axolotl/ento.h>
 #include <axolotl/scene.h>
+#include <axolotl/terminal.h>
 
 #include <IconsFontAwesome5Pro.h>
 
 namespace axl {
 
   FrameEditor::FrameEditor():
-    bound_frame_ratio(true),
+    bound_frame_ratio(false),
+    frame_focused(false),
+    fullscreen_play(false),
     _frame(1280, 720),
     _region_available({ 0, 0 })
   { }
@@ -20,16 +23,15 @@ namespace axl {
 
   void FrameEditor::Bind(Window &window) {
     _frame.Bind();
-    window.GetRenderer()->Resize(_region_available.x, _region_available.y);
   }
 
   void FrameEditor::Unbind(Window &window) {
     _frame.Unbind();
-    v2i size = window.GetFramebufferSize();
+    v2i size = window.GetWindowFrameBufferSize();
     window.GetRenderer()->Resize(size.x, size.y);
   }
 
-  void FrameEditor::Draw(Window &window) {
+  void FrameEditor::Draw(Window &window, TerminalData &data) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -51,10 +53,17 @@ namespace axl {
     }
     v2 current_region_available = v2(buffer_size);
 
+    IOManager *io_manager = window.GetIOManager();
+
     buffer_size.y -= 30;
     v2 texture_pos = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
     texture_pos.y += 30;
     ImGui::SetCursorPos(texture_pos);
+
+    v2 cursor_pos = ImGui::GetCursorPos();
+    if (data.scene_playing && ImGui::InvisibleButton("##click_frame", buffer_size))
+      frame_focused = true;
+    ImGui::SetCursorPos(cursor_pos);
     ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
 
     ImGui::SetCursorPosX(5);
@@ -68,11 +77,33 @@ namespace axl {
 
     ImGui::Checkbox(" Frame Ratio", &bound_frame_ratio);
     ImGui::SameLine();
+    ImGui::Checkbox(" Fullscreen", &fullscreen_play);
+    ImGui::SameLine();
 
+    ImVec4 *colors = ImGui::GetStyle().Colors;
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 71) / 2.0f);
-    ImGui::Button(ICON_FA_PLAY, v2(33, 24));
+
+    bool playing = data.scene_playing;
+    if (playing)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    if (ImGui::Button(data.scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
+      data.scene_playing = !data.scene_playing;
+      if (data.scene_playing)
+        frame_focused = true;
+      if (!data.scene_playing && data.scene_paused)
+        data.scene_paused = false;
+    }
+    if (playing)
+      ImGui::PopStyleColor();
+
     ImGui::SameLine(0.0f, 5.0f);
-    ImGui::Button(ICON_FA_PAUSE, v2(33, 24));
+    bool paused = data.scene_paused;
+    if (paused)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    if (ImGui::Button(ICON_FA_PAUSE, v2(33, 24)))
+      data.scene_paused = !data.scene_paused;
+    if (paused)
+      ImGui::PopStyleColor();
     ImGui::SameLine();
 
     // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
@@ -81,7 +112,6 @@ namespace axl {
     ImGui::End();
     ImGui::PopStyleVar();
 
-    IOManager *io_manager = window.GetIOManager();
     if (!io_manager->ButtonDown(MouseButton::Left) && _region_available != current_region_available) {
       _region_available = current_region_available;
       _frame.SetSize(_region_available.x, _region_available.y);
@@ -100,7 +130,6 @@ namespace axl {
     for (auto entity : view) {
       Ento &ento = registry->get<Ento>(entity);
 
-      // ImGui::Selectable("%s", );
       std::string label = ICON_FA_SMALL_CIRCLE;
       label += " ";
       label += ento.name.empty() ? uuids::to_string(ento.id) : ento.name;
@@ -112,6 +141,10 @@ namespace axl {
 
   void FrameEditor::DrawInspector(Scene &scene) {
     _inspector.Draw(scene);
+  }
+
+  const v2 & FrameEditor::GetRegionAvailable() const {
+    return _region_available;
   }
 
 } // namespace

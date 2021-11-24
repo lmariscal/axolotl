@@ -16,6 +16,7 @@ namespace axl {
 
     virtual void Init() = 0;
     virtual void Update(Window &window) = 0;
+    virtual void Focused(Window &window, bool stat) = 0;
 
     entt::registry * GetRegistry();
     entt::entity CreateEntity();

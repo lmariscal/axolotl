@@ -23,8 +23,10 @@ namespace axl {
     void SetSize(u32 width, u32 height);
     void RegisterEvents();
     void LockMouse(bool state);
+    void SetFrameBufferSize(const v2i &size);
     v2i GetSize() const;
-    v2i GetFramebufferSize() const;
+    v2i GetWindowFrameBufferSize() const;
+    const v2i & GetFrameBufferSize() const;
     // Returns Delta time in milliseconds
     f64 GetDeltaTime() const;
     Renderer * GetRenderer() const;
@@ -49,6 +51,7 @@ namespace axl {
     f64 _delta_time;
     u32 _window_height;
     u32 _window_width;
+    v2i _frame_buffer_size;
     std::string _window_title;
     GUI *_gui;
     Renderer *_renderer;

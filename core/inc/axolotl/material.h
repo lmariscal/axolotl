@@ -18,16 +18,14 @@ namespace axl {
 
     void Bind();
     void Build();
-    void SetShader(const std::filesystem::path &path);
-    void AddTexture(const std::filesystem::path &path);
-    void AddTexture(u32 id);
+    void AddTexture(const std::filesystem::path &path, TextureType type = TextureType::Last);
+    void AddTexture(u32 id, TextureType type = TextureType::Last);
+    Shader * GetShader();
 
-    // protected:
+    protected:
      Shader *_shader;
-     std::vector<Texture> _textures;
-
-     std::filesystem::path _vertex_shader_path;
-     std::filesystem::path _fragment_shader_path;
+     std::vector<Texture *> _textures;
+     std::set<std::filesystem::path> _textures_path;
   };
 
 } // namespace axl

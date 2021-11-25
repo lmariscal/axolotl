@@ -100,7 +100,7 @@ namespace axl {
     model *= toMat4(_rotation);
     model = scale(model, _scale);
 
-    Ento &ento = _scene->GetComponent<Ento>(_parent);
+    Ento &ento = _scene->GetComponent<Ento>(*_parent);
     if (!ento.parent)
       return model;
 

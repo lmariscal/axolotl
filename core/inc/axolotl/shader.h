@@ -16,6 +16,8 @@ namespace efsw {
 
 namespace axl {
 
+  constexpr static u32 MaxTextures = 32;
+
   class ShaderWatcher;
   class Axolotl;
   class Terminal;
@@ -62,6 +64,8 @@ namespace axl {
 
     Uniform();
     Uniform(UniformType type, UniformDataType data_type, std::string name, ShaderType shader_type, json value);
+
+    std::string UniformTypeToString(UniformType type);
   };
 
   struct ShaderPaths {
@@ -121,7 +125,7 @@ namespace axl {
     bool ShowData();
 
    protected:
-    constexpr static u32 MaxTextures = 32;
+    friend class Material;
 
     friend class ShaderWatcher;
     friend class Axolotl;

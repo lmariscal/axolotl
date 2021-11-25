@@ -16,10 +16,15 @@ namespace axl {
     }
 
     Ento &ento = registry->get<Ento>(_selected_entity);
+
+    std::string name = ento.name.empty() ? "Unnamed" : ento.name;
+    name.resize(64);
     ImGui::Text("ID %s", uuids::to_string(ento.id).c_str());
     ImGui::Text("Name ");
     ImGui::SameLine();
-    ImGui::InputText("##entity_name", ento.name.data(), ento.name.capacity());
+    if (ImGui::InputText("##entity_name", name.data(), ento.name.capacity())) {
+      ento.name = name;
+    }
 
     for (Component *s : ento.components) {
       s->ShowData();

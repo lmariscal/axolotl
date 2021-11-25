@@ -130,10 +130,11 @@ namespace axl {
     for (auto entity : view) {
       Ento &ento = registry->get<Ento>(entity);
 
-      std::string label = ICON_FA_SMALL_CIRCLE;
-      label += " ";
-      label += ento.name.empty() ? uuids::to_string(ento.id) : ento.name;
-      if (ImGui::Selectable(label.c_str(), _inspector._selected_entity == entity))
+      std::stringstream label;
+      label << ICON_FA_SMALL_CIRCLE << " ";
+      label << (ento.name.empty() ? uuids::to_string(ento.id) : ento.name);
+      label << "##" << std::to_string((i32)ento.name[0]);
+      if (ImGui::Selectable(label.str().c_str(), _inspector._selected_entity == entity))
         _inspector._selected_entity = entity;
     }
     ImGui::End();

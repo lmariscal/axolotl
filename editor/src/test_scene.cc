@@ -17,11 +17,6 @@ namespace axl {
     Ento &ento = GetComponent<Ento>(camera);
     ento.name = "Camera";
 
-    entt::entity container = CreateEntity();
-    Ento &container_ento = GetComponent<Ento>(container);
-    container_ento.name = "Container";
-    AddComponent<Transform>(container);
-
     Camera &camera_component = AddComponent<Camera>(camera);
     camera_component.SetAsActive();
     Transform &camera_transform = GetComponent<Transform>(camera);
@@ -31,17 +26,14 @@ namespace axl {
     Ento &triangle_ento = GetComponent<Ento>(_triangle);
     triangle_ento.name = "Triangle";
 
-    container_ento.AddChild(&triangle_ento);
-
-    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj");
-    // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
-
-    Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
     ShaderPaths shader_paths = {
       Axolotl::GetDistDir() + "res/shaders/testy.vert",
       Axolotl::GetDistDir() + "res/shaders/testy.frag"
     };
-    Material &material = AddComponent<Material>(_triangle, shader_paths);;
+    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
+    // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
+
+    Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
     Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
     texture.Init();
   }

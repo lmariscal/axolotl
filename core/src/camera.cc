@@ -19,7 +19,7 @@ namespace axl {
   }
 
   void Camera::Init() {
-    Transform &transform = _scene->TryAddComponent<Transform>(_parent);
+    Transform &transform = _scene->TryAddComponent<Transform>(*_parent);
     transform.SetPosition({ 0.0f, 0.0f, 0.0f });
     transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
     UpdateVectors();
@@ -29,7 +29,7 @@ namespace axl {
     if (_active_camera != this)
       return;
 
-    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    Transform &transform = _scene->GetComponent<Transform>(*_parent);
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
     switch (direction) {
@@ -60,7 +60,7 @@ namespace axl {
 
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
-    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    Transform &transform = _scene->GetComponent<Transform>(*_parent);
 
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
@@ -84,7 +84,7 @@ namespace axl {
   }
 
   void Camera::UpdateVectors() {
-    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    Transform &transform = _scene->GetComponent<Transform>(*_parent);
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -99,7 +99,7 @@ namespace axl {
   }
 
   m4 Camera::GetViewMatrix() {
-    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    Transform &transform = _scene->GetComponent<Transform>(*_parent);
     return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
   }
 
@@ -152,7 +152,7 @@ namespace axl {
         modified = true;
     }
 
-    Transform &transform = _scene->GetComponent<Transform>(_parent);
+    Transform &transform = _scene->GetComponent<Transform>(*_parent);
     if (_last_position != transform.GetPosition()) {
       _last_position = transform.GetPosition();
       modified = true;

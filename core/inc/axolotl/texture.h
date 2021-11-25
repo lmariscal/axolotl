@@ -5,13 +5,26 @@
 
 namespace axl {
 
+  enum class TextureType {
+    Diffuse,
+    Specular,
+    Normal,
+    Ambient,
+    Normals,
+    Height,
+    Last
+  };
+
   struct Texture {
-    Texture(const std::filesystem::path &path = "");
+    Texture(const std::filesystem::path &path = "", TextureType type = TextureType::Last);
 
     void Init();
-    void Bind();
+    void Bind(u32 unit = 0);
 
     u32 texture_id;
+    TextureType type;
+
+    static std::string TextureTypeToString(TextureType type);
   };
 
   class TextureStore {

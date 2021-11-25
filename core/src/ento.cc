@@ -18,13 +18,17 @@ namespace axl {
       _first_gen = false;
     }
 
-    name.resize(64);
+    name.reserve(64);
     id = _uuid_generator();
+
+    _ento_map.insert(std::make_pair(id, this));
   }
 
   Ento::~Ento() {
     if (parent)
       parent->RemoveChild(this);
+
+    _ento_map.erase(id);
   }
 
   void Ento::AddChild(Ento *ento) {

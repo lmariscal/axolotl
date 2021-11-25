@@ -26,6 +26,7 @@ namespace axl {
   // that these functions are not fully under my control and prefer to have a dedicated Serialize
   // and Deserialize function.
   class Scene;
+  class Ento;
 
   class Component {
    public:
@@ -45,7 +46,7 @@ namespace axl {
     u32 _version_major = 0;
     u32 _version_minor = 1;
 
-    entt::entity _parent;
+    Ento *_parent;
     Scene *_scene = nullptr;
   };
 

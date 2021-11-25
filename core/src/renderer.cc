@@ -49,21 +49,16 @@ namespace axl {
 
       m4 model_mat(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
-      if (transform) {
+      if (transform)
         model_mat = transform->GetModelMatrix();
-      }
-
 
       glEnable(GL_DEPTH_TEST);
 
       material.Bind();
-      Texture *texture = registry.try_get<Texture>(entity);
-      if (texture)
-        material._shader->SetUniformTexture(0, TextureStore::GetRendererTextureID(texture->texture_id));
-      material._shader->SetUniformModel(model_mat);
-      material._shader->SetUniformView(view);
-      material._shader->SetUniformProjection(projection);
-      material._shader->SetOthers();
+      material.GetShader()->SetUniformModel(model_mat);
+      material.GetShader()->SetUniformView(view);
+      material.GetShader()->SetUniformProjection(projection);
+      material.GetShader()->SetOthers();
       model.Draw();
     }
   }

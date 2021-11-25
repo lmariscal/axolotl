@@ -28,9 +28,12 @@ namespace axl {
 
     json Serialize() const;
 
+    operator entt::entity() const { return entity; }
+
    protected:
     static uuids::uuid_random_generator _uuid_generator;
     inline static bool _first_gen = true;
+    inline static std::map<uuids::uuid, Ento *> _ento_map;
   };
 
 } // namespace axl

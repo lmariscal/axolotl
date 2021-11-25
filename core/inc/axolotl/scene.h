@@ -27,8 +27,9 @@ namespace axl {
       ENTT_ASSERT(_registry.valid(entity), "Invalid entity");
       auto &c = _registry.emplace<ComponentType>(entity, std::forward<Args>(args)...);
       if constexpr (std::is_base_of_v<Component, ComponentType>) {
-        _registry.get<Ento>(entity).components.push_back(&c);
-        c._parent = entity;
+        Ento *ento = &_registry.get<Ento>(entity);
+        ento->components.push_back(&c);
+        c._parent = ento;
         c._scene = this;
         c.Init();
       }
@@ -38,7 +39,7 @@ namespace axl {
     template<typename ComponentType, typename... Args>
     decltype(auto) TryAddComponent(const entt::entity entity, Args &&...args) {
       ENTT_ASSERT(_registry.valid(entity), "Invalid entity");
-      auto *e = _registry.try_get<ComponentType>(entity, std::forward<Args>(args)...);
+      auto *e = _registry.try_get<ComponentType>(entity);
       if (e)
         return _registry.get<ComponentType>(entity);
 

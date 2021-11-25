@@ -59,11 +59,11 @@ target_link_libraries(axolotl PUBLIC IconFontCppHeaders)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
 target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(axolotl PUBLIC stduuid)
+target_link_libraries(axolotl PUBLIC assimp)
 
 target_link_libraries(axolotl PRIVATE efsw)
 target_link_libraries(axolotl PRIVATE glad)
 target_link_libraries(axolotl PRIVATE glfw)
-target_link_libraries(axolotl PRIVATE assimp)
 target_link_libraries(axolotl PRIVATE stb)
 target_link_libraries(axolotl PRIVATE OpenGL::GL)
 

@@ -5,16 +5,38 @@
 
 namespace axl {
 
-  Texture::Texture(const std::filesystem::path &path) {
+  Texture::Texture(const std::filesystem::path &path, TextureType type):
+    type(type)
+  {
     TextureStore::RegisterTexture(*this, path);
+  }
+
+
+  std::string Texture::TextureTypeToString(TextureType type) {
+    switch (type) {
+      case TextureType::Diffuse:
+        return "diffuse";
+      case TextureType::Specular:
+        return "specular";
+      case TextureType::Normal:
+        return "normal";
+      case TextureType::Ambient:
+        return "ambient";
+      case TextureType::Normals:
+        return "normals";
+      case TextureType::Height:
+        return "height";
+      default:
+        return "";
+    }
   }
 
   void Texture::Init() {
     TextureStore::ProcessQueue();
   }
 
-  void Texture::Bind() {
-    glActiveTexture(GL_TEXTURE0);
+  void Texture::Bind(u32 unit) {
+    glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererTextureID(texture_id));
   }
 
@@ -64,10 +86,11 @@ namespace axl {
   }
 
   void TextureStore::LoadTexture(const Texture &texture, const std::filesystem::path &path) {
-    log::debug("Loading Texture \"{}\"", path.string());
+    log::debug("Loading Texture \"{}\", type {}", path.string(), Texture::TextureTypeToString(texture.type));
 
     // Load opengl Texture with stb_image
     i32 width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
     u8 *data = stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
     if (!data) {
       log::error("Failed to load texture \"{}\"", path.string());
@@ -97,6 +120,8 @@ namespace axl {
     _instances[id]--;
     if (_instances[id] > 0)
       return;
+
+    log::debug("Deleting Texture \"{}\"", GetPath(id).string());
 
     glDeleteTextures(1, &_textures[id]);
 

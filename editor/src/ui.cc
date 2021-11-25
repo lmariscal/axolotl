@@ -84,8 +84,11 @@ namespace axl {
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 71) / 2.0f);
 
     bool playing = data.scene_playing;
-    if (playing)
+    if (playing) {
       ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    } else {
+      ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, v2(0.36, 0.50));
+    }
     if (ImGui::Button(data.scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
       data.scene_playing = !data.scene_playing;
       if (data.scene_playing)
@@ -93,8 +96,11 @@ namespace axl {
       if (!data.scene_playing && data.scene_paused)
         data.scene_paused = false;
     }
-    if (playing)
+    if (playing) {
       ImGui::PopStyleColor();
+    } else {
+      ImGui::PopStyleVar();
+    }
 
     ImGui::SameLine(0.0f, 5.0f);
     bool paused = data.scene_paused;
@@ -123,21 +129,49 @@ namespace axl {
     bound_frame_ratio = state;
   }
 
+  void FrameEditor::ShowTreeEnto(Ento *ento, u32 depth) {
+    ImGui::PushID(uuids::to_string(ento->id).c_str());
+    std::stringstream label;
+    label << ICON_FA_BOX << " ";
+    label << (ento->name.empty() ? uuids::to_string(ento->id) : ento->name);
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+    if (ento->children.empty()) {
+      flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
+    bool clicked = ImGui::TreeNodeEx(label.str().c_str(), flags);
+    if (ImGui::IsItemClicked())
+      _inspector._selected_entity = *ento;
+    ImGui::PopStyleVar();
+
+    ImGui::PopID();
+
+    if (!clicked || ento->children.empty())
+      return;
+
+    for (Ento *c : ento->children)
+      ShowTreeEnto(c, depth + 1);
+    ImGui::TreePop();
+    return;
+  }
+
   void FrameEditor::DrawEntityList(Scene &scene) {
+    ImGui::ShowDemoWindow();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 12.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 6.0f));
     ImGui::Begin("Entities");
     entt::registry *registry = scene.GetRegistry();
     auto view = registry->view<Ento>();
     for (auto entity : view) {
       Ento &ento = registry->get<Ento>(entity);
-
-      std::stringstream label;
-      label << ICON_FA_SMALL_CIRCLE << " ";
-      label << (ento.name.empty() ? uuids::to_string(ento.id) : ento.name);
-      label << "##" << std::to_string((i32)ento.name[0]);
-      if (ImGui::Selectable(label.str().c_str(), _inspector._selected_entity == entity))
-        _inspector._selected_entity = entity;
+      if (ento.parent)
+        continue;
+      ShowTreeEnto(&ento, 0);
     }
     ImGui::End();
+    ImGui::PopStyleVar(2);
   }
 
   void FrameEditor::DrawInspector(Scene &scene) {

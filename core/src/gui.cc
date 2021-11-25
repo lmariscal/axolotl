@@ -53,7 +53,11 @@ namespace axl {
   }
 
   void YADarkTheme() {
-    ImVec4* colors = ImGui::GetStyle().Colors;
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    style.ColorButtonPosition = ImGuiDir_Left;
+
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
     colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);

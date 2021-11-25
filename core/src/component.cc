@@ -386,6 +386,7 @@ namespace axl {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
 
     ImGui::PushFont(bold_font);
+    // imgui button position on the left
     if (ImGui::ColorEdit4("##color", value_ptr(v)))
       modified = true;
     ImGui::PopFont();

@@ -99,7 +99,7 @@ i32 main() {
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  io.ConfigViewportsNoAutoMerge = true;
+  // io.ConfigViewportsNoAutoMerge = true;
 
   TerminalData terminal_data;
 

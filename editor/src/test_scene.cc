@@ -30,10 +30,12 @@ namespace axl {
       Axolotl::GetDistDir() + "res/shaders/testy.vert",
       Axolotl::GetDistDir() + "res/shaders/testy.frag"
     };
-    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
+    // Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
+    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
     // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
 
     Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
+    transform.SetRotation(v3(-90.0f, 0.0f, 0.0f));
     Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
     texture.Init();
   }

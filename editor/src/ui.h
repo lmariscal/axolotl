@@ -10,6 +10,7 @@ namespace axl {
 
   class Scene;
   struct TerminalData;
+  struct Ento;
 
   class FrameEditor {
    public:
@@ -29,6 +30,8 @@ namespace axl {
     bool fullscreen_play;
 
    protected:
+    void ShowTreeEnto(Ento *ento, u32 depth);
+
     FrameBuffer _frame;
     Inspector _inspector;
 

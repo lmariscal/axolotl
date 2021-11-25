@@ -81,7 +81,7 @@ namespace axl {
   bool Transform::ShowData() {
     bool modified = false;
 
-    ImGui::SetNextTreeNodeOpen(true);
+    ImGui::SetNextItemOpen(true);
     if (ImGui::CollapsingHeader("Transform")) {
       if (axl::ShowData("Position", _position))
         modified = true;

@@ -69,6 +69,14 @@ namespace axl {
     yaw += mouse_delta.x * delta * _mouse_sensitivity * 10.0f;
     pitch -= mouse_delta.y * delta * _mouse_sensitivity * 10.0f;
 
+    if (pitch > 89.0f)
+      pitch = 89.0f;
+    if (pitch < -89.0f)
+      pitch = -89.0f;
+
+    std::min(yaw, 360.0f);
+    std::max(yaw, 0.0f);
+
     transform.SetRotation(euler);
 
     UpdateVectors();
@@ -142,8 +150,8 @@ namespace axl {
   bool Camera::ShowData() {
     bool modified = false;
 
-    ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("Camera")) {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+    if (ImGui::CollapsingHeader("Camera", flags)) {
       if (axl::ShowData("Orthographic", _is_orthographic))
         modified = true;
       if (axl::ShowData("Movement Speed", _movement_speed))

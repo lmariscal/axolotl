@@ -34,13 +34,13 @@ namespace axl {
     void SetPerspective();
     void SetMovementSpeed(f32 speed);
     void SetMouseSensitivity(f32 sensitivity);
+    void UpdateVectors();
     m4 GetViewMatrix();
     m4 GetProjectionMatrix(Window &window);
 
     static Camera * GetActiveCamera();
 
    protected:
-    void UpdateVectors();
 
     inline static Camera * _active_camera;
 

@@ -838,8 +838,8 @@ namespace axl {
   }
 
   bool Shader::ShowData() {
-    ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("Shader")) {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+    if (ImGui::CollapsingHeader("Shader", flags)) {
       for (Uniform &u : _uniforms[(i32)UniformType::Other]) {
         ShowData(u);
       }

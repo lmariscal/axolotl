@@ -122,12 +122,24 @@ namespace axl {
 
     log::debug("Loading model from {}", _path.string());
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(_path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+    u32 flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs;
+    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb")
+      flags &= ~aiProcess_FlipUVs;
+    const aiScene *scene = importer.ReadFile(_path.string(), flags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
       log::error("Assimp error: {}", importer.GetErrorString());
       return;
     }
+
+    aiVector3D scale, position;
+    aiQuaternion rotation;
+    scene->mRootNode->mTransformation.Decompose(scale, rotation, position);
+    Transform &transform = _scene->TryAddComponent<Transform>(*_parent);
+    transform.SetPosition(v3(position.x, position.y, position.z));
+    transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
+    transform.SetScale(v3(scale.x, scale.y, scale.z));
 
     ProcessNode(scene->mRootNode, scene, this);
   }

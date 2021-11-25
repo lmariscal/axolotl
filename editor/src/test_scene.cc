@@ -20,7 +20,9 @@ namespace axl {
     Camera &camera_component = AddComponent<Camera>(camera);
     camera_component.SetAsActive();
     Transform &camera_transform = GetComponent<Transform>(camera);
-    camera_transform.SetPosition({ 0.0f, 0.0f, -5.0f });
+    camera_transform.SetPosition({ -14.0f, 6.5f, 2.5f });
+    camera_transform.SetRotation({ 35.0f, -16.5f, 0.0f });
+    camera_component.UpdateVectors();
 
     _triangle = CreateEntity();
     Ento &triangle_ento = GetComponent<Ento>(_triangle);
@@ -33,9 +35,6 @@ namespace axl {
     // Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
     Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
     // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
-
-    Transform &transform = AddComponent<Transform>(_triangle, v3(0.0f));
-    transform.SetRotation(v3(-90.0f, 0.0f, 0.0f));
     Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
     texture.Init();
   }

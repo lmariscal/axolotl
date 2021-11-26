@@ -7,7 +7,8 @@ namespace axl {
   Mesh::Mesh(const std::vector<f32> &vertices, const std::vector<u32> &indices):
     _vao(0),
     _num_vertices(0),
-    _num_indices(0)
+    _num_indices(0),
+    _single_mesh(true)
   {
     _num_vertices = vertices.size() / 8;
     _num_indices = indices.size();
@@ -45,6 +46,8 @@ namespace axl {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(f32), (void*)(6 * sizeof(f32)));
 
     glBindVertexArray(0);
+
+    log::debug("Mesh created {}", _vao);
   }
 
   Mesh::~Mesh() {
@@ -54,6 +57,14 @@ namespace axl {
     for (auto &buffer : _buffers)
       glDeleteBuffers(1, &buffer.vbo);
     glDeleteVertexArrays(1, &_vao);
+  }
+
+  void Mesh::SetMaterialID(u32 id) {
+    _material_id = id;
+  }
+
+  u32 Mesh::GetMaterialID() const {
+    return _material_id;
   }
 
   void Mesh::Draw() {

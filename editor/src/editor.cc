@@ -52,6 +52,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     if (no_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
+      renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
       renderer->Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
     } else {
@@ -61,24 +62,21 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
       terminal.show();
       frame_editor.Bind(window);
+      renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
       renderer->Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
     scene.Draw(*renderer);
 
     if (!no_frame) {
       frame_editor.Unbind(window);
+      renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
       frame_editor.Draw(window, terminal_data);
       frame_editor.DrawEntityList(scene);
       frame_editor.DrawInspector(scene);
     }
 
     scene.Focused(window, frame_editor.frame_focused);
-
-    if (!no_frame) {
-      renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
-    }
 
     window.Draw();
 

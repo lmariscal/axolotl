@@ -54,6 +54,7 @@ namespace axl {
 
     f32 _movement_speed;
     f32 _mouse_sensitivity;
+    f32 _fov;
 
     bool _is_orthographic;
   };

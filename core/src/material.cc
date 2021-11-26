@@ -9,13 +9,17 @@ namespace axl {
   Material::Material(const ShaderPaths &paths):
     _shader(nullptr)
   {
+    for (i32 i = 0; i < (i32)TextureType::Last; ++i)
+      _textures[i] = { };
+
     _shader = new Shader(paths);
   }
 
   Material::~Material() {
     delete _shader;
-    for (Texture *texture : _textures)
-      delete texture;
+    for (i32 i = 0; i < (i32)TextureType::Last; ++i)
+      for (Texture *texture : _textures[i])
+        delete texture;
   }
 
   void Material::Init() {
@@ -23,23 +27,32 @@ namespace axl {
     _shader->Compile();
   }
 
-  void Material::Bind() {
+  void Material::BindAll() {
     _shader->Bind();
 
     u32 counter[(i32)TextureType::Last];
     std::fill(counter, counter + (i32)TextureType::Last, 0);
-    i32 i = 0;
-    for (Texture *texture : _textures) {
-      if (texture->type == TextureType::Last)
-        continue;
 
-      u32 index = ++counter[(i32)texture->type];
-      std::string name = Texture::TextureTypeToString(texture->type) + std::to_string(counter[(i32)texture->type]);
-      // _shader->SetUniformTexture(i, TextureStore::GetRendererTextureID(texture->texture_id));
-      _shader->SetUniformI32(name, i);
-      texture->Bind(i);
-      i++;
+    u32 unit_count = 0;
+    for (i32 i = 0; i < (i32)TextureType::Last; ++i) {
+      for (i32 j = 0; j < _textures[i].size(); ++j) {
+        u32 count = counter[i]++;
+        if (Bind(j, unit_count, count, (TextureType)i))
+          unit_count++;
+      }
     }
+  }
+
+  bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
+    if (type == TextureType::Last || _textures[(i32)type].empty() || id >= _textures[(i32)type].size())
+      return false;
+
+    auto &t = _textures[(i32)type];
+    Texture *texture = t[id];
+    std::string name = Texture::TextureTypeToString(type) + std::to_string(count + 1);
+    _shader->SetUniformI32(name, unit);
+    _shader->SetUniformTexture(unit, TextureStore::GetRendererTextureID(texture->texture_id));
+    return true;
   }
 
   void Material::AddTexture(const std::filesystem::path &path, TextureType type) {
@@ -47,9 +60,9 @@ namespace axl {
       return;
 
     Texture *texture = new Texture(path, type);
-    _textures.push_back(texture);
+    _textures[(i32)type].push_back(texture);
     _textures_path.insert(path);
-    log::debug("Added texture {}", path.string());
+    log::debug("Added texture {} of type {}", path.string(), Texture::TextureTypeToString(type));
   }
 
   void Material::AddTexture(u32 id, TextureType type) {

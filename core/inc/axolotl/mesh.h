@@ -19,15 +19,21 @@ namespace axl {
     ~Mesh();
 
     void Draw();
+    void SetMaterialID(u32 id);
+    u32 GetMaterialID() const;
 
     static Mesh CreateQuad();
     static Mesh CreateTriangle();
     static Mesh CreateCube();
 
    protected:
+    friend class Model;
+
     u32 _vao;
     u32 _num_vertices;
     u32 _num_indices;
+    u32 _material_id;
+    bool _single_mesh;
     std::vector<BufferData> _buffers;
 
     void LoadBuffers(const std::vector<f32> &vertices, const std::vector<u32> &indices);

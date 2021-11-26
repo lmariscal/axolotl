@@ -54,7 +54,7 @@ namespace axl {
 
       glEnable(GL_DEPTH_TEST);
 
-      material.Bind();
+      material.GetShader()->Bind();
       material.GetShader()->SetUniformModel(model_mat);
       material.GetShader()->SetUniformView(view);
       material.GetShader()->SetUniformProjection(projection);

@@ -55,19 +55,18 @@ namespace axl {
 
     IOManager *io_manager = window.GetIOManager();
 
-    buffer_size.y -= 30;
+    v2 cursor_pos = ImGui::GetCursorPos();
+
+    buffer_size.y -= 30 + (cursor_pos.y * 0.1f);
     v2 texture_pos = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
-    texture_pos.y += 30;
+    texture_pos.y += 30 + (cursor_pos.y * 0.1f);
     ImGui::SetCursorPos(texture_pos);
 
-    v2 cursor_pos = ImGui::GetCursorPos();
-    if (data.scene_playing && ImGui::InvisibleButton("##click_frame", buffer_size))
-      frame_focused = true;
-    ImGui::SetCursorPos(cursor_pos);
     ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
+    if (data.scene_playing && ImGui::IsItemClicked())
+      frame_focused = true;
 
-    ImGui::SetCursorPosX(5);
-    ImGui::SetCursorPosY(25);
+    ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
     ImGui::Button(ICON_FA_EXPAND_ARROWS, v2(24, 24));
     ImGui::SameLine(0.0f, 5.0f);
     ImGui::Button(ICON_FA_UNDO, v2(24, 24));
@@ -135,20 +134,22 @@ namespace axl {
     label << ICON_FA_BOX << " ";
     label << (ento->name.empty() ? uuids::to_string(ento->id) : ento->name);
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-    if (ento->children.empty()) {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
+    if (ento->children.empty())
       flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    }
+    if (_inspector._selected_entity == *ento)
+      flags |= ImGuiTreeNodeFlags_Selected;
 
     ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
-    bool clicked = ImGui::TreeNodeEx(label.str().c_str(), flags);
+    bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
     if (ImGui::IsItemClicked())
       _inspector._selected_entity = *ento;
+
     ImGui::PopStyleVar();
 
     ImGui::PopID();
 
-    if (!clicked || ento->children.empty())
+    if (!tree_open || ento->children.empty())
       return;
 
     for (Ento *c : ento->children)
@@ -158,7 +159,6 @@ namespace axl {
   }
 
   void FrameEditor::DrawEntityList(Scene &scene) {
-    ImGui::ShowDemoWindow();
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 12.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 6.0f));
     ImGui::Begin("Entities");

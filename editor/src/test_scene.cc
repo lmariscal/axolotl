@@ -20,23 +20,29 @@ namespace axl {
     Camera &camera_component = AddComponent<Camera>(camera);
     camera_component.SetAsActive();
     Transform &camera_transform = GetComponent<Transform>(camera);
-    camera_transform.SetPosition({ -14.0f, 6.5f, 2.5f });
-    camera_transform.SetRotation({ 35.0f, -16.5f, 0.0f });
+    camera_transform.SetPosition({ -10.4f, 2.15f, -1.0f });
+    camera_transform.SetRotation({ 7.5f, -4.4f, 0.0f });
     camera_component.UpdateVectors();
 
-    _triangle = CreateEntity();
-    Ento &triangle_ento = GetComponent<Ento>(_triangle);
-    triangle_ento.name = "Triangle";
 
     ShaderPaths shader_paths = {
       Axolotl::GetDistDir() + "res/shaders/testy.vert",
       Axolotl::GetDistDir() + "res/shaders/testy.frag"
     };
-    // Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
-    Model &model = AddComponent<Model>(_triangle, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
-    // Mesh &mesh = AddComponent<Mesh>(_triangle, Mesh::CreateCube());
-    Texture &texture = AddComponent<Texture>(_triangle, Axolotl::GetDistDir() + "res/textures/crate0_diffuse.png");
-    texture.Init();
+
+    entt::entity sponza = CreateEntity();
+    GetComponent<Ento>(sponza).name = "Sponza";
+    AddComponent<Model>(sponza, "/home/coffee/dev/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", shader_paths);
+
+    // entt::entity town = CreateEntity();
+    // GetComponent<Ento>(town).name = "Town";
+    // AddComponent<Model>(town, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
+
+    // entt::entity backpack = CreateEntity();
+    // GetComponent<Ento>(backpack).name = "Backpack";
+    // AddComponent<Model>(backpack, "/home/coffee/docs/models/backpack-obj/backpack.obj", shader_paths);
+
+    TextureStore::ProcessQueue();
   }
 
   void TestScene::Update(Window &window) {
@@ -62,15 +68,6 @@ namespace axl {
         if (io_manager->KeyDown(Key::E))
           camera.MoveCamera(CameraDirection::Down, window);
       }
-    }
-
-    if (io_manager->KeyTriggered(Key::L)) {
-      window.LockMouse(!window.GetLockMouse());
-    }
-
-    if (io_manager->KeyDown(Key::R)) {
-      Transform &t = GetComponent<Transform>(_triangle);
-      t.SetRotation(t.GetRotation() + v3(0.0f, 0.0f, 30.0f * window.GetDeltaTime()));
     }
   }
 

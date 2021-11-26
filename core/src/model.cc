@@ -86,32 +86,59 @@ namespace axl {
 
     ProcessMaterialTextures(material, aiTextureType_DIFFUSE, scene, model);
     ProcessMaterialTextures(material, aiTextureType_SPECULAR, scene, model);
-    ProcessMaterialTextures(material, aiTextureType_HEIGHT, scene, model);
     ProcessMaterialTextures(material, aiTextureType_AMBIENT, scene, model);
+    ProcessMaterialTextures(material, aiTextureType_NORMALS, scene, model);
+    ProcessMaterialTextures(material, aiTextureType_HEIGHT, scene, model);
 
     return new Mesh(buffer_data, indices);
   }
 
   void Model::ProcessNode(aiNode *node, const aiScene *scene, Model *model) {
+      log::warn("Node with more than one mesh");
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-      model->_meshes.push_back(ProcessMesh(mesh, scene, model));
+      Mesh *m = ProcessMesh(mesh, scene, model);
+      if (node->mNumMeshes > 1)
+        m->_single_mesh = false;
+      model->_meshes.push_back(m);
+      m->SetMaterialID(mesh->mMaterialIndex);
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
       entt::entity child = model->_scene->CreateEntity();
-      model->_scene->AddComponent<Transform>(child);
+
+      Transform &transform = model->_scene->AddComponent<Transform>(child);
       Model *child_model = &model->_scene->AddComponent<Model>(child, model->_path, model->_shader_paths, false);
       model->_parent->AddChild(child_model->_parent);
       model->_parent->name = node->mName.C_Str();
+
+      // aiVector3D scale, position;
+      // aiQuaternion rotation;
+      // node->mTransformation.Decompose(scale, rotation, position);
+      // transform.SetPosition(v3(position.x, position.y, position.z));
+      // transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
+      // transform.SetScale(v3(scale.x, scale.y, scale.z));
+
       log::debug("Processing node {}", node->mName.C_Str());
       ProcessNode(node->mChildren[i], scene, child_model);
     }
   }
 
   void Model::Draw() {
-    for (Mesh *mesh : _meshes)
+    Material &material = _scene->GetComponent<Material>(*_parent);
+    for (Mesh *mesh : _meshes) {
+      u32 material_id = mesh->GetMaterialID();
+      if (!mesh->_single_mesh) {
+        i32 unit_count = 0;
+        for (i32 i = 0; i < (i32)TextureType::Last; ++i) {
+          if (material.Bind(material_id, unit_count, 0, (TextureType)i))
+            unit_count++;
+        }
+      } else {
+        material.BindAll();
+      }
       mesh->Draw();
+    }
   }
 
   void Model::Init() {

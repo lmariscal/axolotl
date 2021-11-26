@@ -11,7 +11,8 @@ namespace axl {
     _is_orthographic(false),
     _world_up({ 0.0f, 1.0f, 0.0f }),
     _movement_speed(6.0f),
-    _mouse_sensitivity(2.0f)
+    _mouse_sensitivity(2.0f),
+    _fov(60.0f)
   {
   }
 
@@ -34,10 +35,10 @@ namespace axl {
     f32 delta = window.GetDeltaTime();
     switch (direction) {
       case CameraDirection::Down:
-        transform.SetPosition(transform.GetPosition() + _up * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * delta);
         break;
       case CameraDirection::Up:
-        transform.SetPosition(transform.GetPosition() - _up * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _world_up * _movement_speed * delta);
         break;
       case CameraDirection::Front:
         transform.SetPosition(transform.GetPosition() + _front * _movement_speed * delta);
@@ -88,7 +89,7 @@ namespace axl {
     if (_is_orthographic)
       return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
     else
-      return perspective(radians(45.0f), aspect_ratio, 0.1f, 100.0f);
+      return perspective(radians(_fov), aspect_ratio, 0.1f, 100.0f);
   }
 
   void Camera::UpdateVectors() {
@@ -154,9 +155,11 @@ namespace axl {
     if (ImGui::CollapsingHeader("Camera", flags)) {
       if (axl::ShowData("Orthographic", _is_orthographic))
         modified = true;
-      if (axl::ShowData("Movement Speed", _movement_speed))
+      if (axl::ShowData("Speed", _movement_speed))
         modified = true;
-      if (axl::ShowData("Mouse Sensitivity", _mouse_sensitivity))
+      if (axl::ShowData("Sensitivity", _mouse_sensitivity))
+        modified = true;
+      if (axl::ShowData("FOV", _fov))
         modified = true;
     }
 

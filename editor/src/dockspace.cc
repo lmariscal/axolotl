@@ -24,7 +24,7 @@ namespace axl {
 
     ImGuiDockNodeFlags dock_flags = ImGuiDockNodeFlags_None;
     dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
-    // dock_flags |= ImGuiDockNodeFlags_AutoHideTabBar;
+    dock_flags |= ImGuiDockNodeFlags_AutoHideTabBar;
     v2i window_size = window.GetWindowFrameBufferSize();
     ImGuiID dock_id = ImGui::GetID("MainDockSpace");
     ImGui::DockSpace(dock_id, v2(0, 0), dock_flags);
@@ -34,9 +34,9 @@ namespace axl {
       ImGui::DockBuilderAddNode(dock_id, main_dock_space_window_flags | ImGuiDockNodeFlags_DockSpace);
       ImGui::DockBuilderSetNodeSize(dock_id, v2(window_size.x, window_size.y));
 
-      auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.18f, nullptr, &dock_id);
-      auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Right, 0.22f, nullptr, &dock_id);
-      auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.33f, nullptr, &dock_id);
+      auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.15f, nullptr, &dock_id);
+      auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Right, 0.18f, nullptr, &dock_id);
+      auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.27f, nullptr, &dock_id);
 
       ImGui::DockBuilderDockWindow("World Editor", dock_id);
       ImGui::DockBuilderDockWindow("Entities", dock_id_left);

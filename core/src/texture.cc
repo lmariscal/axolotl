@@ -1,14 +1,15 @@
 #include <axolotl/texture.h>
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <glad.h>
 
 namespace axl {
 
-  Texture::Texture(const std::filesystem::path &path, TextureType type):
+  Texture::Texture(const std::filesystem::path &path, TextureType type, const  TextureData &data):
     type(type)
   {
-    TextureStore::RegisterTexture(*this, path);
+    TextureStore::RegisterTexture(*this, path, type, data);
   }
 
 
@@ -47,23 +48,26 @@ namespace axl {
   }
 
   u32 TextureStore::GetRendererTextureID(u32 id) {
-    if (_textures.count(id))
-      return _textures[id];
+    if (_data.count(id))
+      return _data[id].gl_id;
     return 0;
   }
 
-  void TextureStore::RegisterTexture(Texture &texture, const std::filesystem::path &path) {
-    if (_path_to_id.count(path)) {
+  void TextureStore::RegisterTexture(Texture &texture, const std::filesystem::path &path,
+                                     TextureType type, const TextureData &data)
+  {
+    if (!path.empty() && _path_to_id.count(path)) {
       texture.texture_id = _path_to_id[path];
-      _instances[texture.texture_id]++;
+      _data[texture.texture_id].instances++;
       return;
     }
 
     _id_count++;
     texture.texture_id = _id_count;
-    _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
-    _textures.insert(std::pair<u32, u32>(_id_count, 0));
-    _instances.insert(std::pair<u32, u32>(texture.texture_id, 1));
+    texture.type = type;
+    if (!path.empty())
+      _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
+    _data.insert(std::pair<u32, TextureData>(_id_count, data));
     _texture_queue.push_back(texture);
     return;
   }
@@ -80,7 +84,10 @@ namespace axl {
     while (!_texture_queue.empty()) {
       Texture t = *(--_texture_queue.end());
       std::filesystem::path path = GetPath(t.texture_id);
-      LoadTexture(t, path);
+      if (!path.empty())
+        LoadTexture(t, path);
+      else
+        CreateTexture(t);
       _texture_queue.pop_back();
     }
   }
@@ -108,25 +115,34 @@ namespace axl {
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    _textures[texture.texture_id] = tex;
+    _data[texture.texture_id].gl_id = tex;
+    _data[texture.texture_id].size = v2i(width, height);
 
     stbi_image_free(data);
   }
 
+  void TextureStore::CreateTexture(const Texture &texture) {
+    v2i &size = _data[texture.texture_id].size;
+    if (size.x <= 0 || size.y <= 0) {
+      DeregisterTexture(texture.texture_id);
+      return;
+    }
+  }
+
   void TextureStore::DeregisterTexture(u32 id) {
-    if (!_textures.count(id))
+    if (!_data.count(id))
       return;
 
-    _instances[id]--;
-    if (_instances[id] > 0)
+    _data[id].instances--;
+    if (_data[id].instances > 0)
       return;
 
     log::debug("Deleting Texture \"{}\"", GetPath(id).string());
 
-    glDeleteTextures(1, &_textures[id]);
+    if (_data[id].gl_id)
+      glDeleteTextures(1, &_data[id].instances);
 
-    _textures.erase(id);
-    _instances.erase(id);
+    _data.erase(id);
     _path_to_id.erase(GetPath(id));
   }
 

@@ -16,7 +16,8 @@ namespace axl {
     virtual bool ShowData();
     virtual void Init();
 
-    void Bind();
+    bool Bind(u32 id = 0, u32 unit = 0, u32 count = 0, TextureType type = TextureType::Last);
+    void BindAll();
     void Build();
     void AddTexture(const std::filesystem::path &path, TextureType type = TextureType::Last);
     void AddTexture(u32 id, TextureType type = TextureType::Last);
@@ -24,7 +25,7 @@ namespace axl {
 
     protected:
      Shader *_shader;
-     std::vector<Texture *> _textures;
+     std::vector<Texture *> _textures[(i32)TextureType::Last];
      std::set<std::filesystem::path> _textures_path;
   };
 

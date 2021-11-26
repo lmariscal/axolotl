@@ -416,10 +416,8 @@ namespace axl {
     }
 
     const Uniform &uniform = _uniforms[(i32)UniformType::Texture][unit];
-    if (uniform.name.empty()) {
-      log::error("No uniform set for texture unit {}", unit);
+    if (uniform.name.empty())
       return;
-    }
 
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, id);

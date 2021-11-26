@@ -12,9 +12,6 @@ namespace axl {
     void Init() override;
     void Update(Window &window) override;
     void Focused(Window &window, bool state) override;
-
-   protected:
-    entt::entity _triangle;
   };
 
 } // namespace axl

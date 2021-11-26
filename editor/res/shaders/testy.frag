@@ -2,22 +2,18 @@
 
 #include utils
 
+layout (location = UNIFORM_TEXTURES) uniform sampler2D textures[TEXTURE_COUNT];
 #uniform other color color
 uniform vec4 color;
-#uniform texture0 sampler2D diffuse1
-uniform sampler2D diffuse1;
-#uniform texture1 sampler2D specular1
-uniform sampler2D specular1;
-#uniform texture2 sampler2D specular1
-uniform sampler2D height1;
 
-in Vertex {
-  vec3 normals;
-  vec2 texCoord;
+layout (location = 0) in Vertex {
+  vec3 normal;
+  vec2 tex_coord;
 } IN;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 frag_color;
 
 void main () {
-  fragColor = texture(diffuse1, IN.texCoord) * color;
+  vec4 normal = texture(textures[TEXTURE_NORMALS], IN.tex_coord);
+  frag_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord) * color * normal;
 }

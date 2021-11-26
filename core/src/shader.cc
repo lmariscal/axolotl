@@ -375,18 +375,15 @@ namespace axl {
   }
 
   void Shader::SetUniformModel(const m4 &model) {
-    for (Uniform &u : _uniforms[(i32)UniformType::Model])
-      SetUniformM4(u.name, model);
+    glUniformMatrix4fv(0, 1, GL_FALSE, value_ptr(model));
   }
 
   void Shader::SetUniformView(const m4 &view) {
-    for (Uniform &u : _uniforms[(i32)UniformType::View])
-      SetUniformM4(u.name, view);
+    glUniformMatrix4fv(1, 1, GL_FALSE, value_ptr(view));
   }
 
   void Shader::SetUniformProjection(const m4 &projection) {
-    for (Uniform &u : _uniforms[(i32)UniformType::Projection])
-      SetUniformM4(u.name, projection);
+    glUniformMatrix4fv(2, 1, GL_FALSE, value_ptr(projection));
   }
 
   void Shader::SetUniformTime(const f32 &time) {
@@ -415,9 +412,9 @@ namespace axl {
       return;
     }
 
-    const Uniform &uniform = _uniforms[(i32)UniformType::Texture][unit];
-    if (uniform.name.empty())
-      return;
+    // const Uniform &uniform = _uniforms[(i32)UniformType::Texture][unit];
+    // if (uniform.name.empty())
+    //   return;
 
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, id);
@@ -473,6 +470,40 @@ namespace axl {
     }
   }
 
+  void Shader::GetUniformData() {
+    i32 num_active_attribs = 0;
+    i32 num_active_uniforms = 0;
+
+    glGetProgramInterfaceiv(_program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &num_active_attribs);
+    glGetProgramInterfaceiv(_program, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
+
+    log::debug("Active attributes: {}", num_active_attribs);
+    log::debug("Active uniforms: {}", num_active_uniforms);
+
+    std::vector<char> name_buffer(256);
+    std::vector<u32> properties;
+    properties.push_back(GL_NAME_LENGTH);
+    properties.push_back(GL_TYPE);
+    properties.push_back(GL_ARRAY_SIZE);
+    properties.push_back(GL_LOCATION);
+    std::vector<i32> values(properties.size());
+    for (i32 i = 0; i < num_active_attribs; ++i) {
+      glGetProgramResourceiv(_program, GL_PROGRAM_INPUT, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
+      name_buffer.resize(values[0]);
+      glGetProgramResourceName(_program, GL_PROGRAM_INPUT, i, name_buffer.size(), nullptr, name_buffer.data());
+      std::string name(name_buffer.data());
+      log::debug("Attribute {}: {} | location {}", i, name, values[3]);
+    }
+
+    for (i32 i = 0; i < num_active_uniforms; ++i) {
+      glGetProgramResourceiv(_program, GL_UNIFORM, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
+      name_buffer.resize(values[0]);
+      glGetProgramResourceName(_program, GL_UNIFORM, i, name_buffer.size(), nullptr, name_buffer.data());
+      std::string name(name_buffer.data());
+      log::debug("Uniforms {}: {} | location {}", i, name, values[3]);
+    }
+  }
+
   bool Shader::Compile() {
     if (_program) {
       log::error("Shader program {} already compiled", _program);
@@ -513,6 +544,7 @@ namespace axl {
     }
 
     _uniform_locations.clear();
+    GetUniformData();
 
     return true;
   }
@@ -695,6 +727,10 @@ namespace axl {
     i32 location = GetUniformLocation(name);
     if (location == -1)
       return;
+    glUniform1i(location, value);
+  }
+
+  void Shader::SetUniformI32(u32 location, const i32 &value) {
     glUniform1i(location, value);
   }
 

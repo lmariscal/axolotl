@@ -50,7 +50,7 @@ namespace axl {
     auto &t = _textures[(i32)type];
     Texture *texture = t[id];
     std::string name = Texture::TextureTypeToString(type) + std::to_string(count + 1);
-    _shader->SetUniformI32(name, unit);
+    _shader->SetUniformI32(10 + (i32)type, unit);
     _shader->SetUniformTexture(unit, TextureStore::GetRendererTextureID(texture->texture_id));
     return true;
   }

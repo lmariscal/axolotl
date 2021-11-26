@@ -18,6 +18,12 @@ file(GLOB AXOLOTL_SOURCES
   src/material.cc
 )
 
+file(GLOB_RECURSE AXOLOTL_HEADERS
+  inc/**/*.h
+)
+
+list(APPEND AXOLOTL_SOURCES ${AXOLOTL_HEADERS})
+
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
   set(OpenGL_GL_PREFERENCE "GLVND")
 endif()

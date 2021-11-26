@@ -6,6 +6,12 @@ file(GLOB AXOLOTL_EDITOR_SOURCES
   inspector.cc
 )
 
+file(GLOB_RECURSE AXOLOTL_EDITOR_HEADERS
+  *.h
+)
+
+list(APPEND AXOLOTL_EDITOR_SOURCES ${AXOLOTL_EDITOR_HEADERS})
+
 add_executable(axolotl_editor ${AXOLOTL_EDITOR_SOURCES})
 
 set_target_properties(axolotl_editor PROPERTIES

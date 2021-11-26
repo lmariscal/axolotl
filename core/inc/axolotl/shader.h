@@ -98,6 +98,7 @@ namespace axl {
     void SetUniformM4(const std::string &name, const m4 &value);
     void SetUniformF32(const std::string &name, const f32 &value);
     void SetUniformI32(const std::string &name, const i32 &value);
+    void SetUniformI32(u32 location, const i32 &value);
     void SetUniformU32(const std::string &name, const u32 &value);
     void SetUniformF32V(const std::string &name, const f32 *value, u32 count);
     void SetUniformI32V(const std::string &name, const i32 *value, u32 count);
@@ -136,6 +137,7 @@ namespace axl {
     std::unordered_map<std::string, i32> _uniform_locations;
 
     void ShowData(Uniform &u);
+    void GetUniformData();
 
     void ParseUniform(std::string line, ShaderType shader_type);
     std::string Read(const std::filesystem::path &path, ShaderType shade_type);

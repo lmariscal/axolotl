@@ -31,11 +31,11 @@ namespace axl {
       case aiTextureType_SPECULAR:
         type = TextureType::Specular;
         break;
+      case aiTextureType_NORMALS:
+        type = TextureType::Normal;
+        break;
       case aiTextureType_AMBIENT:
         type = TextureType::Ambient;
-        break;
-      case aiTextureType_NORMALS:
-        type = TextureType::Normals;
         break;
       case aiTextureType_HEIGHT:
         type = TextureType::Height;

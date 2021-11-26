@@ -8,22 +8,6 @@
 
 namespace axl {
 
-  Uniform::Uniform(UniformType type, UniformDataType data_type, std::string name, ShaderType shader_type, json json):
-    type(type),
-    data_type(data_type),
-    name(name),
-    shader_type(shader_type),
-    value(json)
-  { }
-
-  Uniform::Uniform():
-    type(UniformType::Last),
-    data_type(UniformDataType::Last),
-    name(""),
-    shader_type(ShaderType::Last),
-    value(json::object())
-  { }
-
   class ShaderWatcher : public efsw::FileWatchListener {
    public:
     ShaderWatcher(Shader* shader): _shader(shader) { }
@@ -98,63 +82,12 @@ namespace axl {
     }
   }
 
-  UniformType StringToUniformType(const std::string &str) {
-    if (str == "model")
-      return UniformType::Model;
-    if (str == "view")
-      return UniformType::View;
-    if (str == "projection")
-      return UniformType::Projection;
-    if (str == "time")
-      return UniformType::Time;
-    if (str == "resolution")
-      return UniformType::Resolution;
-    if (str == "mouse")
-      return UniformType::Mouse;
-    if (str == "mouse_delta")
-      return UniformType::MouseDelta;
-    if (str == "other")
-      return UniformType::Other;
-    if (str.find("texture") == 0)
-      return UniformType::Texture;
-    return UniformType::Last;
-  }
-
-  UniformDataType StringToUniformDataType(const std::string &str) {
-    if (str == "float")
-      return UniformDataType::Float;
-    if (str == "int")
-      return UniformDataType::Int;
-    if (str == "vec2")
-      return UniformDataType::Vec2;
-    if (str == "vec3")
-      return UniformDataType::Vec3;
-    if (str == "vec4")
-      return UniformDataType::Vec4;
-    if (str == "mat4")
-      return UniformDataType::Mat4;
-    if (str == "sampler2D")
-      return UniformDataType::Sampler2D;
-    if (str == "color")
-      return UniformDataType::Color;
-    return UniformDataType::Last;
-  }
-
-
   void Shader::Init() {
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       _shaders[i] = 0;
       _watch_ids[i] = 0;
       _need_reload[i] = false;
     }
-    _uniforms[(i32)UniformType::Texture].resize(MaxTextures);
-    for (i32 i = 0; i < MaxTextures; ++i) {
-      _uniforms[(i32)UniformType::Texture][i].type = UniformType::Texture;
-      _uniforms[(i32)UniformType::Texture][i].data_type = UniformDataType::Sampler2D;
-      _uniforms[(i32)UniformType::Texture][i].name = "";
-      _uniform_texture_cache[i] = 0;
-    }
-
     _watcher = new efsw::FileWatcher();
     _shader_watcher = new ShaderWatcher(this);
 
@@ -247,80 +180,6 @@ namespace axl {
     _shaders[(i32)type] = CompileShader(type, data);
   }
 
-  void Shader::ParseUniform(std::string line, ShaderType shader_type) {
-    std::string line_type;
-    line_type = line.substr(0, line.find(' '));
-    line = line.substr(line_type.length() + 1);
-
-    std::string line_data_type;
-    line_data_type = line.substr(0, line.find(' '));
-    line = line.substr(line_data_type.length() + 1);
-
-    std::string name = line;
-
-    UniformType type = StringToUniformType(line_type);
-    UniformDataType data_type = StringToUniformDataType(line_data_type);
-
-    if (type == UniformType::Last || data_type == UniformDataType::Last) {
-      log::error("Unknown uniform type \"{}\"", line);
-      return;
-    }
-
-    json j;
-    switch (data_type) {
-      case UniformDataType::Float: {
-        j["value"] = "0.0f";
-        break;
-      }
-      case UniformDataType::Int: {
-        j["value"] = 0;
-        break;
-      }
-      case UniformDataType::Vec2: {
-        j["value"] = v2(0.0f);
-        break;
-      }
-      case UniformDataType::Vec3: {
-        j["value"] = v3(0.0f);
-        break;
-      }
-      case UniformDataType::Vec4: {
-        j["value"] = v4(0.0f);
-        break;
-      }
-      case UniformDataType::Mat4: {
-        // j["value"] = m4(0.0f);
-        break;
-      }
-      case UniformDataType::Sampler2D: {
-        j["value"] = "";
-        break;
-      }
-      case UniformDataType::Color: {
-        j["value"] = v4(1.0f);
-        break;
-      }
-      case UniformDataType::Last: {
-        break;
-      }
-    };
-
-    if (type != UniformType::Texture) {
-      _uniforms[(i32)type].push_back(Uniform(type, data_type, name, shader_type, j));
-      return;
-    }
-    if (line_type.length() != std::string("texturen").length()) {
-      log::error("Unknown uniform type \"{}\"", line);
-      return;
-    }
-    i32 texture_index = line_type.substr(line_type.length() - 1, 1).at(0) - '0';
-    if (texture_index < 0 || texture_index > MaxTextures) {
-      log::error("Unknown uniform type \"{}\"", line);
-      return;
-    }
-    _uniforms[(i32)type][texture_index] = Uniform(type, data_type, name, shader_type, j);
-  }
-
   std::string Shader::Read(const std::filesystem::path &path, ShaderType shader_type) {
     if (!std::filesystem::exists(path)) {
       log::error("Shader file \"{}\" does not exist", path.string());
@@ -362,10 +221,6 @@ namespace axl {
         buffer << include_data;
         buffer << "// " << line << " END\n";
         continue;
-      } else if (line.find("#uniform ") == 0) {
-        ParseUniform(line.substr(9), shader_type);
-        buffer << "// " << line << '\n';
-        continue;
       }
 
       buffer << line << '\n';
@@ -374,103 +229,8 @@ namespace axl {
     return buffer.str();
   }
 
-  void Shader::SetUniformModel(const m4 &model) {
-    glUniformMatrix4fv(0, 1, GL_FALSE, value_ptr(model));
-  }
-
-  void Shader::SetUniformView(const m4 &view) {
-    glUniformMatrix4fv(1, 1, GL_FALSE, value_ptr(view));
-  }
-
-  void Shader::SetUniformProjection(const m4 &projection) {
-    glUniformMatrix4fv(2, 1, GL_FALSE, value_ptr(projection));
-  }
-
-  void Shader::SetUniformTime(const f32 &time) {
-    for (Uniform &u : _uniforms[(i32)UniformType::Time])
-      SetUniformF32(u.name, time);
-  }
-
-  void Shader::SetUniformResolution(const v2 &resolution) {
-    for (Uniform &u : _uniforms[(i32)UniformType::Resolution])
-      SetUniformV2(u.name, resolution);
-  }
-
-  void Shader::SetUniformMouse(const v2 &mouse) {
-    for (Uniform &u : _uniforms[(i32)UniformType::Mouse])
-      SetUniformV2(u.name, mouse);
-  }
-
-  void Shader::SetUniformMouseDelta(const v2 &mouse_delta) {
-    for (Uniform &u : _uniforms[(i32)UniformType::MouseDelta])
-      SetUniformV2(u.name, mouse_delta);
-  }
-
-  void Shader::SetUniformTexture(u32 unit, u32 id) {
-    if (unit >= MaxTextures) {
-      log::error("Texture unit {} is out of range", unit);
-      return;
-    }
-
-    // const Uniform &uniform = _uniforms[(i32)UniformType::Texture][unit];
-    // if (uniform.name.empty())
-    //   return;
-
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, id);
-    _uniform_texture_cache[unit] = id;
-  }
-
-  void Shader::SetOthers() {
-    for (Uniform &u : _uniforms[(i32)UniformType::Other]) {
-      switch (u.data_type) {
-        case UniformDataType::Float: {
-          f32 v = u.value["value"];
-          SetUniformF32(u.name, v);
-          break;
-        }
-        case UniformDataType::Int: {
-          i32 v = u.value["value"];
-          SetUniformI32(u.name, v);
-          break;
-        }
-        case UniformDataType::Vec2: {
-          v2 v = u.value["value"];
-          SetUniformV2(u.name, v);
-          break;
-        }
-        case UniformDataType::Vec3: {
-          v3 v = u.value["value"];
-          SetUniformV3(u.name, v);
-          break;
-        }
-        case UniformDataType::Vec4: {
-          v4 v = u.value["value"];
-          SetUniformV4(u.name, v);
-          break;
-        }
-        case UniformDataType::Mat4: {
-          // j["value"] = m4(0.0f);
-          break;
-        }
-        case UniformDataType::Sampler2D: {
-          // j["value"] = "";
-          break;
-        }
-        case UniformDataType::Color: {
-          v4 v = u.value["value"];
-          SetUniformV4(u.name, v);
-          break;
-        }
-        case UniformDataType::Last: {
-          break;
-        }
-      };
-
-    }
-  }
-
   void Shader::GetUniformData() {
+    Bind();
     i32 num_active_attribs = 0;
     i32 num_active_uniforms = 0;
 
@@ -500,7 +260,63 @@ namespace axl {
       name_buffer.resize(values[0]);
       glGetProgramResourceName(_program, GL_UNIFORM, i, name_buffer.size(), nullptr, name_buffer.data());
       std::string name(name_buffer.data());
+
       log::debug("Uniforms {}: {} | location {}", i, name, values[3]);
+
+      UniformDataType data_type = GLToUniformDataType(values[1]);
+      i32 location = values[3];
+      _uniform_locations.insert({ name, location });
+      _uniform_locations_reverse.insert({ location, name });
+      _uniform_data_type.insert({ location, data_type });
+
+      switch (data_type) {
+        case UniformDataType::Vector2:
+          _uniform_v2.insert({ location, v2(1.0f) });
+          SetUniformV2(location, _uniform_v2[location]);
+          break;
+        case UniformDataType::Vector3:
+          _uniform_v3.insert({ location, v3(1.0f) });
+          SetUniformV3(location, _uniform_v3[location]);
+          break;
+        case UniformDataType::Vector4:
+          _uniform_v4.insert({ location, v4(1.0f) });
+          SetUniformV4(location, _uniform_v4[location]);
+          break;
+        case UniformDataType::Matrix3:
+          _uniform_m3.insert({ location, m3(1.0f) });
+          SetUniformM3(location, _uniform_m3[location]);
+          break;
+        case UniformDataType::Matrix4:
+          _uniform_m4.insert({ location, m4(1.0f) });
+          SetUniformM4(location, _uniform_m4[location]);
+          break;
+        case UniformDataType::Float:
+          _uniform_f32.insert({ location, 1.0f });
+          SetUniformF32(location, _uniform_f32[location]);
+          break;
+        case UniformDataType::Double:
+          _uniform_f64.insert({ location, 1.0 });
+          break;
+        case UniformDataType::Int:
+          _uniform_i32.insert({ location, 0 });
+          SetUniformI32(location, _uniform_i32[location]);
+          break;
+        case UniformDataType::UInt:
+          _uniform_u32.insert({ location, 0u });
+          SetUniformU32(location, _uniform_u32[location]);
+          break;
+        case UniformDataType::Texture:
+        case UniformDataType::TextureArray:
+          std::array<i32, MaxTextures> textures;
+          std::fill(textures.begin(), textures.end(),-1);
+          _uniform_textures.insert({ location, textures });
+
+          for (i32 i = 0; i < (i32)TextureType::Last; ++i)
+            SetUniformTexture((TextureType)i, -1);
+          break;
+        case UniformDataType::Last:
+          break;
+      }
     }
   }
 
@@ -544,7 +360,22 @@ namespace axl {
     }
 
     _uniform_locations.clear();
+    _uniform_locations_reverse.clear();
+    _uniform_data_type.clear();
+
+    _uniform_v2.clear();
+    _uniform_v3.clear();
+    _uniform_v4.clear();
+    _uniform_m3.clear();
+    _uniform_m4.clear();
+    _uniform_f32.clear();
+    _uniform_f64.clear();
+    _uniform_i32.clear();
+    _uniform_u32.clear();
+    _uniform_textures.clear();
+
     GetUniformData();
+    VerifyUniforms();
 
     return true;
   }
@@ -628,33 +459,12 @@ namespace axl {
 
     log::debug("Reloading shader program {}, type {}", _program, ShaderTypeToString(type));
 
-    std::vector<Uniform> uniforms_copy[(i32)UniformType::Last];
-    std::copy(_uniforms[(i32)type].begin(), _uniforms[(i32)type].end(), std::back_inserter(uniforms_copy[(i32)type]));
-
-    for (i32 i = 0; i < (i32)UniformType::Last; ++i) {
-      if ((UniformType)i == UniformType::Texture) {
-        for (i32 j = 0; j < MaxTextures; ++j) {
-          if (_uniforms[i][j].shader_type != type)
-            continue;
-          _uniforms[i][j].name = "";
-          _uniforms[i][j].value = json::object();
-          _uniforms[i][j].shader_type = ShaderType::Last;
-        }
-        continue;
-      }
-
-      _uniforms[i].erase(std::remove_if(_uniforms[i].begin(), _uniforms[i].end(), [type](const Uniform &u) {
-        return u.shader_type == type;
-      }), _uniforms[i].end());
-    }
-
     std::string data = Read(_paths[(i32)type], type);
     if (data.empty())
       return false;
 
     u32 shader_id = CompileShader(type, data);
     if (shader_id == 0) {
-      std::copy(uniforms_copy[(i32)type].begin(), uniforms_copy[(i32)type].end(), std::back_inserter(_uniforms[(i32)type]));
       return false;
     }
 
@@ -681,213 +491,270 @@ namespace axl {
     return location;
   }
 
-  void Shader::SetUniformV2(const std::string &name, const v2 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform2fv(location, 1, value_ptr(value));
-  }
-
-  void Shader::SetUniformV3(const std::string &name, const v3 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform3fv(location, 1, value_ptr(value));
-  }
-
-  void Shader::SetUniformV4(const std::string &name, const v4 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform4fv(location, 1, value_ptr(value));
-  }
-
-  void Shader::SetUniformM3(const std::string &name, const m3 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(value));
-  }
-
-  void Shader::SetUniformM4(const std::string &name, const m4 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
-  }
-
-  void Shader::SetUniformF32(const std::string &name, const f32 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1f(location, value);
-  }
-
-  void Shader::SetUniformI32(const std::string &name, const i32 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1i(location, value);
-  }
-
-  void Shader::SetUniformI32(u32 location, const i32 &value) {
-    glUniform1i(location, value);
-  }
-
-  void Shader::SetUniformU32(const std::string &name, const u32 &value) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1ui(location, value);
-  }
-
-  void Shader::SetUniformF32V(const std::string &name, const f32 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1fv(location, count, value);
-  }
-
-  void Shader::SetUniformI32V(const std::string &name, const i32 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1iv(location, count, value);
-  }
-
-  void Shader::SetUniformU32V(const std::string &name, const u32 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform1uiv(location, count, value);
-  }
-
-  void Shader::SetUniformV2V(const std::string &name, const v2 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform2fv(location, count, value_ptr(value[0]));
-  }
-
-  void Shader::SetUniformV3V(const std::string &name, const v3 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform3fv(location, count, value_ptr(value[0]));
-  }
-
-  void Shader::SetUniformV4V(const std::string &name, const v4 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniform4fv(location, count, value_ptr(value[0]));
-  }
-
-  void Shader::SetUniformM3V(const std::string &name, const m3 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniformMatrix3fv(location, count, GL_FALSE, value_ptr(value[0]));
-  }
-
-  void Shader::SetUniformM4V(const std::string &name, const m4 *value, u32 count) {
-    i32 location = GetUniformLocation(name);
-    if (location == -1)
-      return;
-    glUniformMatrix4fv(location, count, GL_FALSE, value_ptr(value[0]));
-  }
-
-  void Shader::ShowData(Uniform &u) {
-    switch (u.data_type) {
-      case UniformDataType::Float: {
-        json j = u.value;
-        f32 v = j["value"];
-        if (!axl::ShowData(u.name, v))
-          return;
-        SetUniformF32(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Int: {
-        json j = u.value;
-        i32 v = j["value"];
-        if (!axl::ShowData(u.name, v))
-          return;
-        SetUniformI32(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Vec2: {
-        json j = u.value;
-        v2 v = j["value"];
-        if (!axl::ShowData(u.name, v))
-          return;
-        SetUniformV2(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Vec3: {
-        json j = u.value;
-        v3 v = j["value"];
-        if (!axl::ShowData(u.name, v))
-          return;
-        SetUniformV3(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Vec4: {
-        json j = u.value;
-        v4 v = j["value"];
-        if (!axl::ShowData(u.name, v))
-          return;
-        SetUniformV4(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Mat4: {
-        break;
-      }
-      case UniformDataType::Sampler2D: {
-        break;
-      }
-      case UniformDataType::Color: {
-        json j = u.value;
-        v4 v = j["value"];
-        if (!axl::ShowDataColor(u.name, v))
-          return;
-        SetUniformV4(u.name, v);
-        j["value"] = v;
-        u.value = j;
-        break;
-      }
-      case UniformDataType::Last: {
-        break;
-      }
-    };
-  }
-
   bool Shader::ShowData() {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
     if (ImGui::CollapsingHeader("Shader", flags)) {
-      for (Uniform &u : _uniforms[(i32)UniformType::Other]) {
-        ShowData(u);
-      }
-      for (i32 i = 0; i < MaxTextures; ++i) {
-        if (_uniform_texture_cache[i] == 0)
-          continue;
-        std::string texture_unit_name = "Texture" + std::to_string(i);
-        const u32 &id = _uniform_texture_cache[i];
-        ImGui::Text("%s : %s", _uniforms[(i32)UniformType::Texture][i].name.c_str(), texture_unit_name.c_str());
-        f32 size = ImGui::CalcItemWidth();
-        ImGui::Image((void *)(intptr_t)id, v2(size));
+      for (auto itr = _uniform_data_type.cbegin(); itr != _uniform_data_type.cend(); ++itr) {
+        const UniformDataType &type = itr->second;
+        const i32 &location = itr->first;
+        const std::string &name = _uniform_locations_reverse[location];
+
+        switch (type) {
+          case UniformDataType::Vector2:
+            if (axl::ShowData(name, _uniform_v2[location]))
+              SetUniformV2(location, _uniform_v2[location]);
+            break;
+          case UniformDataType::Vector3:
+            if (axl::ShowData(name, _uniform_v3[location]))
+              SetUniformV3(location, _uniform_v3[location]);
+            break;
+          case UniformDataType::Vector4:
+            if (axl::ShowDataColor(name, _uniform_v4[location]))
+              SetUniformV4(location, _uniform_v4[location]);
+            break;
+          case UniformDataType::Matrix3:
+            break;
+          case UniformDataType::Matrix4:
+            break;
+          case UniformDataType::Float:
+            if (axl::ShowData(name, _uniform_f32[location]))
+              SetUniformF32(location, _uniform_f32[location]);
+            break;
+          case UniformDataType::Double:
+            break;
+          case UniformDataType::Int:
+            if (axl::ShowData(name, _uniform_i32[location]))
+              SetUniformI32(location, _uniform_i32[location]);
+            break;
+          case UniformDataType::UInt:
+            if (axl::ShowData(name, _uniform_u32[location]))
+              SetUniformU32(location, _uniform_u32[location]);
+            break;
+          case UniformDataType::Texture:
+          case UniformDataType::TextureArray:
+            if (ImGui::CollapsingHeader(name.c_str())) {
+              for (i32 i = 0; i < MaxTextures; ++i) {
+                if (_uniform_textures[location][i] == -1)
+                  continue;
+                std::string type_name = Texture::TextureTypeToString((TextureType)i);
+                axl::ShowDataTexture(type_name.c_str(), _uniform_textures[location][i]);
+              }
+            }
+            break;
+          case UniformDataType::Last:
+            break;
+        }
       }
     }
     return false;
   }
+
+#pragma region Uniforms
+  UniformDataType Shader::GLToUniformDataType(u32 type) {
+    switch (type) {
+      case GL_FLOAT_VEC2:
+        return UniformDataType::Vector2;
+      case GL_FLOAT_VEC3:
+        return UniformDataType::Vector3;
+      case GL_FLOAT_VEC4:
+        return UniformDataType::Vector4;
+      case GL_FLOAT_MAT3:
+        return UniformDataType::Matrix3;
+      case GL_FLOAT_MAT4:
+        return UniformDataType::Matrix4;
+      case GL_FLOAT:
+        return UniformDataType::Float;
+      case GL_DOUBLE:
+        return UniformDataType::Double;
+      case GL_INT:
+        return UniformDataType::Int;
+      case GL_UNSIGNED_INT:
+        return UniformDataType::UInt;
+      case GL_SAMPLER_2D:
+        return UniformDataType::Texture;
+      case GL_SAMPLER_2D_ARRAY:
+        return UniformDataType::TextureArray;
+    }
+    return UniformDataType::Last;
+  }
+
+  u32 Shader::UniformDataTypeToGL(UniformDataType type) {
+    switch (type) {
+      case UniformDataType::Vector2:
+        return GL_FLOAT_VEC2;
+      case UniformDataType::Vector3:
+        return GL_FLOAT_VEC3;
+      case UniformDataType::Vector4:
+        return GL_FLOAT_VEC4;
+      case UniformDataType::Matrix3:
+        return GL_FLOAT_MAT3;
+      case UniformDataType::Matrix4:
+        return GL_FLOAT_MAT4;
+      case UniformDataType::Float:
+        return GL_FLOAT;
+      case UniformDataType::Double:
+        return GL_DOUBLE;
+      case UniformDataType::Int:
+        return GL_INT;
+      case UniformDataType::UInt:
+        return GL_UNSIGNED_INT;
+      case UniformDataType::Texture:
+        return GL_SAMPLER_2D;
+      case UniformDataType::TextureArray:
+        return GL_SAMPLER_2D_ARRAY;
+      case UniformDataType::Last:
+        return 0;
+    }
+  }
+
+  void Shader::SetUniformV2(u32 location, const v2 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Vector2)
+      return;
+    glUniform2fv(location, 1, value_ptr(value));
+    _uniform_v2[location] = value;
+  }
+
+  void Shader::SetUniformV3(u32 location, const v3 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Vector3)
+      return;
+    glUniform3fv(location, 1, value_ptr(value));
+    _uniform_v3[location] = value;
+  }
+
+  void Shader::SetUniformV4(u32 location, const v4 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Vector4)
+      return;
+    glUniform4fv(location, 1, value_ptr(value));
+    _uniform_v4[location] = value;
+  }
+
+  void Shader::SetUniformM3(u32 location, const m3 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Matrix3)
+      return;
+    glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(value));
+    _uniform_m3[location] = value;
+  }
+
+  void Shader::SetUniformM4(u32 location, const m4 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Matrix4)
+      return;
+    glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
+    _uniform_m4[location] = value;
+  }
+
+  void Shader::SetUniformF32(u32 location, const f32 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Float)
+      return;
+    glUniform1f(location, value);
+    _uniform_f32[location] = value;
+  }
+
+  void Shader::SetUniformI32(u32 location, const i32 &value) {
+    if (_uniform_data_type[location] != UniformDataType::Int)
+      return;
+    glUniform1i(location, value);
+    _uniform_i32[location] = value;
+  }
+
+  void Shader::SetUniformU32(u32 location, const u32 &value) {
+    if (_uniform_data_type[location] != UniformDataType::UInt)
+      return;
+    glUniform1ui(location, value);
+    _uniform_u32[location] = value;
+  }
+
+  void Shader::SetUniformTexture(TextureType type, i32 unit) {
+    if (type == TextureType::Last || !_uniform_textures.count((i32)UniformLocation::Textures))
+      return;
+    if (unit < 0)
+      return;
+
+    i32 location = (i32)UniformLocation::Textures + (i32)type;
+    glUniform1i(location, unit);
+
+    i32 active_texture;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &active_texture);
+
+    glActiveTexture(GL_TEXTURE0 + unit);
+    i32 value;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &value);
+
+    _uniform_textures[(i32)UniformLocation::Textures][(i32)type] = value;
+
+    glActiveTexture(active_texture);
+  }
+
+  void Shader::SetUniformV2(const std::string &name, const v2 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformV2(location, value);
+  }
+
+  void Shader::SetUniformV3(const std::string &name, const v3 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformV3(location, value);
+  }
+
+  void Shader::SetUniformV4(const std::string &name, const v4 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformV4(location, value);
+  }
+
+  void Shader::SetUniformM3(const std::string &name, const m3 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformM3(location, value);
+  }
+
+  void Shader::SetUniformM4(const std::string &name, const m4 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformM4(location, value);
+  }
+
+  void Shader::SetUniformF32(const std::string &name, const f32 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformF32(location, value);
+  }
+
+  void Shader::SetUniformI32(const std::string &name, const i32 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformI32(location, value);
+  }
+
+  void Shader::SetUniformU32(const std::string &name, const u32 &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformU32(location, value);
+  }
+
+  void Shader::VerifyUniforms() {
+    if (_uniform_data_type.count((i32)UniformLocation::ModelMatrix) &&
+        _uniform_data_type[(i32)UniformLocation::ModelMatrix] != UniformDataType::Matrix4)
+        log::warn("Shader uniform 'ModelMatrix' is not a matrix4");
+    if (_uniform_data_type.count((i32)UniformLocation::ViewMatrix) &&
+        _uniform_data_type[(i32)UniformLocation::ViewMatrix] != UniformDataType::Matrix4)
+        log::warn("Shader uniform 'ViewMatrix' is not a matrix4");
+    if (_uniform_data_type.count((i32)UniformLocation::ProjectionMatrix) &&
+        _uniform_data_type[(i32)UniformLocation::ProjectionMatrix] != UniformDataType::Matrix4)
+        log::warn("Shader uniform 'ProjectionMatrix' is not a matrix4");
+    if (_uniform_data_type.count((i32)UniformLocation::Time) &&
+        _uniform_data_type[(i32)UniformLocation::Time] != UniformDataType::Float)
+        log::warn("Shader uniform 'Time' is not a f32");
+    if (_uniform_data_type.count((i32)UniformLocation::Resolution) &&
+        _uniform_data_type[(i32)UniformLocation::Resolution] != UniformDataType::Vector2)
+        log::warn("Shader uniform 'Resolution' is not a vector2");
+    if (_uniform_data_type.count((i32)UniformLocation::Mouse) &&
+        _uniform_data_type[(i32)UniformLocation::Mouse] != UniformDataType::Vector2)
+        log::warn("Shader uniform 'Mouse' is not a vector2");
+
+    if (_uniform_data_type.count((i32)UniformLocation::Textures) &&
+        _uniform_data_type[(i32)UniformLocation::Textures] != UniformDataType::Texture &&
+        _uniform_data_type[(i32)UniformLocation::Textures] != UniformDataType::TextureArray)
+    {
+        log::warn("Shader uniform 'Textures' is not a texture or texture array");
+
+        for (i32 i = 1; i < (i32)TextureType::Last; ++i)
+          if (_uniform_data_type.count((i32)UniformLocation::Textures + i))
+            log::warn("Shader uniform at location {} collides with other texture uniforms", (i32)UniformLocation::Textures + i);
+    }
+  }
+#pragma endregion
 
 } // namespace axl

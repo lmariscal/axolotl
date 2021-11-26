@@ -41,7 +41,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -61,7 +61,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -81,7 +81,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
 
@@ -129,7 +129,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -149,7 +149,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
 
@@ -197,7 +197,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -217,7 +217,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
 
@@ -237,7 +237,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -257,7 +257,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
 
@@ -291,7 +291,7 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragFloat("##v", &v, 0.1f, 0.0f, 0.0f, "%.2f"))
+    if (ImGui::DragFloat("##v", &v, 0.1f, min, max, "%.3f"))
       modified = true;
 
     ImGui::Columns(1);
@@ -329,8 +329,45 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragInt("##v", &v, 0.1f, 0.0f, 0.0f))
+    if (ImGui::DragInt("##v", &v, 0.1f, min, max))
       modified = true;
+
+    ImGui::Columns(1);
+    ImGui::PopID();
+    return modified;
+  }
+
+  bool ShowDataTexture(const std::string &label, i32 texture_id) {
+    bool modified = false;
+
+    ImGui::PushID(label.c_str());
+
+    f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
+    ImGui::Text("%s", label.c_str());
+
+    f32 size = ImGui::CalcItemWidth();
+    ImGui::Image((void *)(intptr_t)texture_id, v2(size));
+
+    ImGui::PopID();
+    return modified;
+  }
+
+  bool ShowData(const std::string &label, u32 &v, const u32 &reset_value, u32 min, u32 max) {
+    bool modified = false;
+
+    ImGui::PushID(label.c_str());
+
+    ImGui::Columns(2);
+    f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
+    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    ImGui::Text("%s", label.c_str());
+    ImGui::NextColumn();
+
+    i32 tmp;
+    if (ImGui::DragInt("##v", &tmp, 0.1f, min, max)) {
+      modified = true;
+      v = tmp;
+    }
 
     ImGui::Columns(1);
     ImGui::PopID();

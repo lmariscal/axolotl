@@ -62,6 +62,10 @@ namespace axl {
   bool ShowData(const std::string &label, i32 &v,
                 const i32 &reset_value = 0, i32 min = std::numeric_limits<i32>::min(),
                 i32 max = std::numeric_limits<i32>::max());
+  bool ShowData(const std::string &label, u32 &v,
+                const u32 &reset_value = 0, u32 min = std::numeric_limits<u32>::min(),
+                u32 max = std::numeric_limits<u32>::max());
+  bool ShowDataTexture(const std::string &label, i32 texture_id);
 } // namespace axl
 
 namespace nlohmann {

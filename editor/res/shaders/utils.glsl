@@ -23,15 +23,17 @@ vec4 rgba(vec3 color, float a) {
 #define TEXTURE_SPECULAR  1
 #define TEXTURE_NORMAL    2
 #define TEXTURE_AMBIENT   3
-#define TEXTURE_NORMALS   4
-#define TEXTURE_HEIGHT    5
-#define TEXTURE_BUFFER    6
-#define TEXTURE_COUNT     7
+#define TEXTURE_HEIGHT    4
+#define TEXTURE_BUFFER    5
+#define TEXTURE_COUNT     6
 
 // Vertex uniform locations
 #define UNIFORM_MODEL_MATRIX      0
 #define UNIFORM_VIEW_MATRIX       1
 #define UNIFORM_PROJECTION_MATRIX 2
+#define UNIFORM_TIME              3
+#define UNIFORM_RESOLUTION        4
+#define UNIFORM_MOUSE             5
 
 // Fragment uniform locations
 #define UNIFORM_TEXTURES 10

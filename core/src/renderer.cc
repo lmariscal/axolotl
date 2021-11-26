@@ -55,10 +55,9 @@ namespace axl {
       glEnable(GL_DEPTH_TEST);
 
       material.GetShader()->Bind();
-      material.GetShader()->SetUniformModel(model_mat);
-      material.GetShader()->SetUniformView(view);
-      material.GetShader()->SetUniformProjection(projection);
-      material.GetShader()->SetOthers();
+      material.GetShader()->SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
+      material.GetShader()->SetUniformM4((u32)UniformLocation::ViewMatrix, view);
+      material.GetShader()->SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
       model.Draw();
     }
   }

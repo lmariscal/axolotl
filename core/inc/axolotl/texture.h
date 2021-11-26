@@ -10,7 +10,6 @@ namespace axl {
     Specular,
     Normal,
     Ambient,
-    Normals,
     Height,
     Buffer,
     Last

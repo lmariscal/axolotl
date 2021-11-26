@@ -23,8 +23,6 @@ namespace axl {
         return "normal";
       case TextureType::Ambient:
         return "ambient";
-      case TextureType::Normals:
-        return "normals";
       case TextureType::Height:
         return "height";
       default:

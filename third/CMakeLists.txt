@@ -79,6 +79,39 @@ add_library(imterm INTERFACE)
 
 target_include_directories(imterm INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ImTerm/include)
 
+# Native File Manager
+
+file(GLOB NFM_SOURCES nativefiledialog/src/nfd_common.c)
+
+if (WIN32)
+  list(APPEND NFM_SOURCES nativefiledialog/src/nfd_win.cpp)
+  list(APPEND PREPROCESSOR_DEFINITIONS
+      UNICODE
+      _UNICODE
+  )
+elseif (APPLE)
+  list(APPEND NFM_SOURCES nativefiledialog/src/nfd_cocoa.m)
+elseif (LINUX)
+  list(APPEND NFM_SOURCES nativefiledialog/src/nfd_gtk.c)
+else()
+  message(FATAL_ERROR "Cannot detect your system")
+endif()
+
+add_library(nativefiledialog ${NFM_SOURCES})
+target_include_directories(nativefiledialog PUBLIC nativefiledialog/src/include)
+target_compile_definitions(nativefiledialog PUBLIC ${PREPROCESSOR_DEFINITIONS})
+
+if(LINUX)
+  find_package(PkgConfig)
+  if (PKG_CONFIG_FOUND)
+    pkg_check_modules(GTK "gtk+-3.0")
+    if (GTK_FOUND)
+      target_link_libraries(nativefiledialog ${GTK_LIBRARIES})
+      add_definitions(${GTK_CFLAGS} ${GTK_CFLAGS_OTHER})
+    endif()
+  endif()
+endif()
+
 # JSON
 
 add_subdirectory(json)

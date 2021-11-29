@@ -64,6 +64,7 @@ target_link_libraries(axolotl PUBLIC imterm)
 target_link_libraries(axolotl PUBLIC IconFontCppHeaders)
 target_link_libraries(axolotl PUBLIC EnTT::EnTT)
 target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(axolotl PUBLIC nativefiledialog)
 target_link_libraries(axolotl PUBLIC stduuid)
 target_link_libraries(axolotl PUBLIC assimp)
 

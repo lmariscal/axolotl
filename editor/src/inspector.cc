@@ -7,6 +7,7 @@
 #include <axolotl/model.h>
 #include <IconsFontAwesome5Pro.h>
 #include <imgui.h>
+#include <nfd.h>
 
 namespace axl {
 
@@ -59,6 +60,28 @@ namespace axl {
       ImGui::OpenPopup("ModelPopUp");
     if (ImGui::BeginPopupModal("ModelPopUp", &_want_model, ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::Text("Model Path");
+
+      if (ImGui::Button(ICON_FA_FOLDER " Open")) {
+        nfdchar_t *out_path = nullptr;
+        nfdresult_t result = NFD_OpenDialog("gltf", nullptr, &out_path);
+
+        if (result == NFD_OKAY) {
+          i32 len = std::strlen(out_path);
+          _model_path.resize(len);
+          std::strncpy(_model_path.data(), out_path, len);
+          NFD_Free(out_path);
+
+          _add_model = true;
+          _want_model = false;
+          log::info("Selected model path: {}", _model_path);
+          ImGui::CloseCurrentPopup();
+        } else if (result == NFD_CANCEL) {
+          log::info("User pressed cancel");
+        } else {
+          log::error("Error: {}", NFD_GetError());
+        }
+      }
+      ImGui::SameLine();
 
       std::array<char, 256> buffer;
       std::fill(buffer.begin(), buffer.end(), 0);

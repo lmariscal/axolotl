@@ -34,3 +34,6 @@
 [submodule "third/assimp"]
 	path = third/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "third/nativefiledialog"]
+	path = third/nativefiledialog
+	url = https://github.com/mlabbe/nativefiledialog.git

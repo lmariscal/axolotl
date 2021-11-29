@@ -10,12 +10,18 @@ namespace axl {
 
   class Inspector {
    public:
+    Inspector();
 
     void Draw(Scene &scene);
 
    protected:
     friend class FrameEditor;
 
+    void ShowAddComponent(Scene &scene);
+
+    std::string _model_path;
+    bool _add_model = false;
+    bool _want_model = false;
     entt::entity _selected_entity = entt::null;
   };
 

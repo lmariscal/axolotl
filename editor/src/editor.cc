@@ -36,6 +36,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
+    TextureStore::ProcessQueue();
+
     entt::registry *registry = scene.GetRegistry();
     auto ento_view = registry->view<Ento>();
     for (auto ento_it = ento_view.begin(); ento_it != ento_view.end(); ento_it++) {

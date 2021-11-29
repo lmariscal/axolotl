@@ -49,6 +49,7 @@ namespace axl {
     u32 instances = 0;
     u32 gl_id = 0;
     v2i size = v2i(0);
+    bool loaded = false;
 
     TextureFormat format = TextureFormat::Last;
     TextureInternalFormat internal_format = TextureInternalFormat::Last;
@@ -57,6 +58,9 @@ namespace axl {
 
   struct Texture {
     Texture(const std::filesystem::path &path = "", TextureType type = TextureType::Last, const TextureData &data = { });
+    Texture(const Texture &other);
+    Texture(Texture &&other);
+    ~Texture();
 
     void Init();
     void Bind(u32 unit = 0);
@@ -72,7 +76,7 @@ namespace axl {
     static u32 GetTextureID(const std::filesystem::path &path);
     static std::filesystem::path GetPath(u32 id);
     static u32 GetRendererTextureID(u32 id);
-    static const TextureData & GetData(u32);
+    static TextureData & GetData(u32);
     static void RegisterTexture(Texture &texture, const std::filesystem::path &path, TextureType type, const TextureData &data);
     static void ProcessQueue();
     static void DeregisterTexture(u32 id);

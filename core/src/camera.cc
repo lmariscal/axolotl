@@ -12,7 +12,8 @@ namespace axl {
     _world_up({ 0.0f, 1.0f, 0.0f }),
     _movement_speed(6.0f),
     _mouse_sensitivity(2.0f),
-    _fov(60.0f)
+    _fov(60.0f),
+    Component("camera")
   {
   }
 
@@ -128,7 +129,7 @@ namespace axl {
   }
 
   json Camera::Serialize() const {
-    json j = GetRootNode("camera");
+    json j = GetRootNode();
     j["is_orthographic"] = _is_orthographic;
     j["movement_speed"] = _movement_speed;
     j["mouse_sensitivity"] = _mouse_sensitivity;
@@ -136,7 +137,7 @@ namespace axl {
   }
 
   void Camera::Deserialize(const json &j) {
-    if (!VerifyRootNode(j, "transform"))
+    if (!VerifyRootNode(j))
       return;
 
     if (j.find("is_orthographic") != j.end())

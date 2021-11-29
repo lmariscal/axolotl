@@ -8,14 +8,18 @@ namespace axl {
 
   Material::Material(const ShaderPaths &paths):
     _shader(std::make_shared<Shader>(paths)),
-    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>())
+    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>()),
+    Component("material")
   {
     std::fill(_textures->begin(), _textures->end(), std::vector<Texture *>());
   }
 
   Material::~Material() {
+    log::debug("Material destroyed, texture use cound is {}", _textures.use_count());
     if (_textures.use_count() > 1)
       return;
+
+    log::debug("Destroying textures");
 
     for (i32 i = 0; i < (i32)TextureType::Last; ++i)
       for (Texture *texture : (*_textures)[i])
@@ -75,7 +79,7 @@ namespace axl {
   }
 
   json Material::Serialize() const {
-    json j = GetRootNode("material");
+    json j = GetRootNode();
     return j;
   }
 

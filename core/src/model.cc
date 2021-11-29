@@ -14,7 +14,8 @@ namespace axl {
     _path(path),
     _shader_paths(paths),
     _root(root),
-    _meshes(std::make_shared<std::vector<Mesh *>>())
+    _meshes(std::make_shared<std::vector<Mesh *>>()),
+    Component("model")
   {
   }
 
@@ -172,10 +173,12 @@ namespace axl {
     transform.SetScale(v3(scale.x, scale.y, scale.z));
 
     ProcessNode(scene->mRootNode, scene, this);
+
+    TextureStore::ProcessQueue();
   }
 
   json Model::Serialize() const {
-    json j = GetRootNode("model");
+    json j = GetRootNode();
     return j;
   }
 

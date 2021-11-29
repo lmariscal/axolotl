@@ -8,7 +8,8 @@ namespace axl {
   Transform::Transform():
     _position({ 0.0f, 0.0f, 0.0f }),
     _scale({ 1.0f, 1.0f, 1.0f }),
-    _rotation()
+    _rotation(),
+    Component("transform")
   { }
 
   Transform::~Transform() { }
@@ -16,12 +17,15 @@ namespace axl {
   Transform::Transform(const v3& position, const v3& scale, const quat& rotation):
     _position(position),
     _scale(scale),
-    _rotation(rotation)
+    _rotation(rotation),
+    Component("transform")
   { }
+
   Transform::Transform(const Transform& other):
     _position(other._position),
     _scale(other._scale),
-    _rotation(other._rotation)
+    _rotation(other._rotation),
+    Component("transform")
   { }
 
   void Transform::Init() { }
@@ -59,7 +63,7 @@ namespace axl {
   }
 
   json Transform::Serialize() const {
-    json j = GetRootNode("transform");
+    json j = GetRootNode();
     j["position"] = _position;
     j["scale"] = _scale;
     j["rotation"] = _rotation;
@@ -67,7 +71,7 @@ namespace axl {
   }
 
   void Transform::Deserialize(const json &j) {
-    if (!VerifyRootNode(j, "transform"))
+    if (!VerifyRootNode(j))
       return;
 
     if (j.find("position") != j.end())

@@ -12,6 +12,21 @@ namespace axl {
     TextureStore::RegisterTexture(*this, path, type, data);
   }
 
+  Texture::Texture(const Texture &other) {
+    TextureStore::GetData(other.texture_id).instances++;
+    texture_id = other.texture_id;
+    type = other.type;
+  }
+
+  Texture::Texture(Texture &&other) {
+    TextureStore::GetData(other.texture_id).instances++;
+    texture_id = other.texture_id;
+    type = other.type;
+  }
+
+  Texture::~Texture() {
+    TextureStore::DeregisterTexture(texture_id);
+  }
 
   std::string Texture::TextureTypeToString(TextureType type) {
     switch (type) {
@@ -66,6 +81,7 @@ namespace axl {
     if (!path.empty())
       _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
     _data.insert(std::pair<u32, TextureData>(_id_count, data));
+    _data[texture.texture_id].instances++;
     _texture_queue.push_back(texture);
     return;
   }
@@ -82,6 +98,7 @@ namespace axl {
     while (!_texture_queue.empty()) {
       Texture t = *(--_texture_queue.end());
       std::filesystem::path path = GetPath(t.texture_id);
+      log::debug("Processing texture: {}", path.string());
       if (!path.empty())
         LoadTexture(t, path);
       else
@@ -115,6 +132,7 @@ namespace axl {
 
     _data[texture.texture_id].gl_id = tex;
     _data[texture.texture_id].size = v2i(width, height);
+    _data[texture.texture_id].loaded = true;
 
     stbi_image_free(data);
   }
@@ -122,9 +140,14 @@ namespace axl {
   void TextureStore::CreateTexture(const Texture &texture) {
     v2i &size = _data[texture.texture_id].size;
     if (size.x <= 0 || size.y <= 0) {
-      DeregisterTexture(texture.texture_id);
+      log::debug("Texture \"{}\" has invalid size {}x{}", Texture::TextureTypeToString(texture.type), size.x, size.y);
+      _data[texture.texture_id].loaded = false;
       return;
     }
+  }
+
+  TextureData & TextureStore::GetData(u32 id) {
+    return _data[id];
   }
 
   void TextureStore::DeregisterTexture(u32 id) {

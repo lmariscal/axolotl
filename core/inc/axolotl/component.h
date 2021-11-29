@@ -30,6 +30,8 @@ namespace axl {
 
   class Component {
    public:
+    Component(std::string name): _name(name) { }
+
     virtual json Serialize() const = 0;
     virtual void Deserialize(const json &json) = 0;
 
@@ -38,8 +40,8 @@ namespace axl {
     virtual void Init() = 0;
     virtual void Destroy() {  };
 
-    json GetRootNode(const std::string data_type) const;
-    bool VerifyRootNode(const json &j, const std::string &data_type) const;
+    json GetRootNode() const;
+    bool VerifyRootNode(const json &j) const;
 
    protected:
     friend class Scene;
@@ -49,6 +51,7 @@ namespace axl {
 
     Ento *_parent;
     Scene *_scene = nullptr;
+    std::string _name;
   };
 
   bool ShowData(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });

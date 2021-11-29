@@ -374,9 +374,9 @@ namespace axl {
     return modified;
   }
 
-  json Component::GetRootNode(const std::string data_type) const {
+  json Component::GetRootNode() const {
     json j;
-    j["type"] = data_type;
+    j["type"] = _name;
     j["version"] = {
       { "major", _version_major },
       { "minor", _version_minor },
@@ -384,7 +384,7 @@ namespace axl {
     return j;
   }
 
-  bool Component::VerifyRootNode(const json &j, const std::string &data_type) const {
+  bool Component::VerifyRootNode(const json &j) const {
     if (j.find("version") != j.end()) {
       if (j["version"]["major"] != _version_major) {
         log::error("Transform::Deserialize: version.major mismatch");
@@ -395,7 +395,7 @@ namespace axl {
     }
 
     if (j.find("type") != j.end()) {
-      if (j["type"] != "transform") {
+      if (j["type"] != _name) {
         log::error("Transform::Deserialize: invalid type");
         return false;
       }

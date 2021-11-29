@@ -37,15 +37,22 @@ namespace axl {
   }
 
   void Renderer::Render(entt::registry &registry) {
+    m4 view(1.0f);
+    m4 projection(1.0f);
+
     Camera *camera = Camera::GetActiveCamera();
-    m4 view = camera->GetViewMatrix();
-    m4 projection = camera->GetProjectionMatrix(*_window);
+    if (camera) {
+      view = camera->GetViewMatrix();
+      projection = camera->GetProjectionMatrix(*_window);
+    }
 
     auto entities = registry.view<Ento, Model, Material>();
     for (auto entity : entities) {
       Model &model = entities.get<Model>(entity);
       Material &material = entities.get<Material>(entity);
       Ento &ento = entities.get<Ento>(entity);
+      if (ento.marked_for_deletion)
+        continue;
 
       m4 model_mat(1.0f);
       Transform *transform = registry.try_get<Transform>(entity);
@@ -54,10 +61,10 @@ namespace axl {
 
       glEnable(GL_DEPTH_TEST);
 
-      material.GetShader()->Bind();
-      material.GetShader()->SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
-      material.GetShader()->SetUniformM4((u32)UniformLocation::ViewMatrix, view);
-      material.GetShader()->SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
+      material.GetShader().Bind();
+      material.GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
+      material.GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
+      material.GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
       model.Draw();
     }
   }

@@ -36,6 +36,16 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
+    entt::registry *registry = scene.GetRegistry();
+    auto ento_view = registry->view<Ento>();
+    for (auto ento_it = ento_view.begin(); ento_it != ento_view.end(); ento_it++) {
+      Ento &ento = ento_view.get<Ento>(*ento_it);
+      if (!ento.marked_for_deletion)
+        continue;
+
+      scene.RemoveEntity(ento.entity);
+    }
+
     bool no_frame = terminal_data.scene_playing && frame_editor.frame_focused && frame_editor.fullscreen_play;
     if (frame_editor.frame_focused && io_manager->KeyTriggered(Key::Escape))
       frame_editor.frame_focused = false;

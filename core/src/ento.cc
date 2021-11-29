@@ -5,7 +5,8 @@ namespace axl {
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
 
   Ento::Ento():
-    parent(nullptr)
+    parent(nullptr),
+    marked_for_deletion(false)
   {
     if (_first_gen) {
       std::random_device rd;
@@ -29,6 +30,9 @@ namespace axl {
       parent->RemoveChild(this);
 
     _ento_map.erase(id);
+
+    for (auto child : children)
+      child->parent = nullptr;
   }
 
   void Ento::AddChild(Ento *ento) {

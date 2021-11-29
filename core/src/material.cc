@@ -7,18 +7,18 @@
 namespace axl {
 
   Material::Material(const ShaderPaths &paths):
-    _shader(nullptr)
+    _shader(std::make_shared<Shader>(paths)),
+    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>())
   {
-    for (i32 i = 0; i < (i32)TextureType::Last; ++i)
-      _textures[i] = { };
-
-    _shader = new Shader(paths);
+    std::fill(_textures->begin(), _textures->end(), std::vector<Texture *>());
   }
 
   Material::~Material() {
-    delete _shader;
+    if (_textures.use_count() > 1)
+      return;
+
     for (i32 i = 0; i < (i32)TextureType::Last; ++i)
-      for (Texture *texture : _textures[i])
+      for (Texture *texture : (*_textures)[i])
         delete texture;
   }
 
@@ -35,7 +35,7 @@ namespace axl {
 
     u32 unit_count = 0;
     for (i32 i = 0; i < (i32)TextureType::Last; ++i) {
-      for (i32 j = 0; j < _textures[i].size(); ++j) {
+      for (i32 j = 0; j < _textures->size(); ++j) {
         u32 count = counter[i]++;
         if (Bind(j, unit_count, count, (TextureType)i))
           unit_count++;
@@ -44,10 +44,10 @@ namespace axl {
   }
 
   bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
-    if (type == TextureType::Last || _textures[(i32)type].empty() || id >= _textures[(i32)type].size())
+    if (type == TextureType::Last || (*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size())
       return false;
 
-    auto &t = _textures[(i32)type];
+    auto &t = (*_textures)[(i32)type];
     Texture *texture = t[id];
     std::string name = Texture::TextureTypeToString(type) + std::to_string(count + 1);
     texture->Bind(unit);
@@ -60,7 +60,7 @@ namespace axl {
       return;
 
     Texture *texture = new Texture(path, type);
-    _textures[(i32)type].push_back(texture);
+    (*_textures)[(i32)type].push_back(texture);
     _textures_path.insert(path);
     log::debug("Added texture {} of type {}", path.string(), Texture::TextureTypeToString(type));
   }
@@ -70,8 +70,8 @@ namespace axl {
     AddTexture(path, type);
   }
 
-  Shader * Material::GetShader() {
-    return _shader;
+  Shader & Material::GetShader() {
+    return *_shader;
   }
 
   json Material::Serialize() const {

@@ -13,12 +13,15 @@ namespace axl {
   Model::Model(const std::filesystem::path &path, const ShaderPaths &paths, bool root):
     _path(path),
     _shader_paths(paths),
-    _root(root)
+    _root(root),
+    _meshes(std::make_shared<std::vector<Mesh *>>())
   {
   }
 
   Model::~Model() {
-    for (Mesh *mesh : _meshes)
+    if (_meshes.use_count() > 1)
+      return;
+    for (Mesh *mesh : *_meshes)
       delete mesh;
   }
 
@@ -100,7 +103,7 @@ namespace axl {
       Mesh *m = ProcessMesh(mesh, scene, model);
       if (node->mNumMeshes > 1)
         m->_single_mesh = false;
-      model->_meshes.push_back(m);
+      (*model->_meshes).push_back(m);
       m->SetMaterialID(mesh->mMaterialIndex);
     }
 
@@ -126,7 +129,7 @@ namespace axl {
 
   void Model::Draw() {
     Material &material = _scene->GetComponent<Material>(*_parent);
-    for (Mesh *mesh : _meshes) {
+    for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
         i32 unit_count = 0;

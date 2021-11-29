@@ -32,10 +32,10 @@ namespace axl {
     // GetComponent<Ento>(sponza).name = "Sponza";
     // AddComponent<Model>(sponza, "/home/coffee/dev/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", shader_paths);
 
-    // entt::entity town = CreateEntity();
-    // GetComponent<Ento>(town).name = "Town";
-    // AddComponent<Model>(town, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
-    // GetComponent<Transform>(town).SetPosition({ 0.0f, 0.0f, 20.0f });
+    entt::entity town = CreateEntity();
+    GetComponent<Ento>(town).name = "Town";
+    AddComponent<Model>(town, "/home/coffee/docs/models/town/scene.gltf", shader_paths);
+    GetComponent<Transform>(town).SetPosition({ 0.0f, 0.0f, 20.0f });
 
     // entt::entity backpack = CreateEntity();
     // GetComponent<Ento>(backpack).name = "Backpack";

@@ -17,6 +17,7 @@ namespace axl {
 
     uuids::uuid id;
     std::string name;
+    bool marked_for_deletion;
 
     void AddChild(Ento *ento);
     void RemoveChild(Ento *ento);

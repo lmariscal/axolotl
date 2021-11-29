@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <axolotl/window.h>
 #include <axolotl/transform.h>
+#include <axolotl/camera.h>
 #include <axolotl/iomanager.h>
 #include <axolotl/ento.h>
 #include <axolotl/scene.h>
@@ -63,9 +64,13 @@ namespace axl {
     texture_pos.y += 30 + (cursor_pos.y * 0.1f);
     ImGui::SetCursorPos(texture_pos);
 
-    ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
-    if (data.scene_playing && ImGui::IsItemClicked())
-      frame_focused = true;
+    bool one_camera_active = Camera::GetActiveCamera() != nullptr;
+
+    if (one_camera_active) {
+      ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
+      if (data.scene_playing && ImGui::IsItemClicked())
+        frame_focused = true;
+    }
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
     // ImGui::Checkbox(" Frame Ratio", &bound_frame_ratio);
@@ -103,35 +108,45 @@ namespace axl {
       ImGui::PopStyleColor();
     ImGui::SameLine();
 
-    // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
-    // ImGui::Text("Hi there");
+    if (one_camera_active) {
+      // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
+      // ImGui::Text("Hi there");
 
-    v4 button_color = colors[(i32)ImGuiCol_Button];
-    v4 button_color_active = colors[(i32)ImGuiCol_ButtonActive];
-    v4 button_color_hovered = colors[(i32)ImGuiCol_ButtonHovered];
-    button_color.w = 0.75f;
-    button_color_active.w = 0.75f;
-    button_color_hovered.w = 0.75f;
-    ImGui::PushStyleColor(ImGuiCol_Button, button_color);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, button_color_active);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, button_color_hovered);
+      v4 button_color = colors[(i32)ImGuiCol_Button];
+      v4 button_color_active = colors[(i32)ImGuiCol_ButtonActive];
+      v4 button_color_hovered = colors[(i32)ImGuiCol_ButtonHovered];
+      button_color.w = 0.75f;
+      button_color_active.w = 0.75f;
+      button_color_hovered.w = 0.75f;
+      ImGui::PushStyleColor(ImGuiCol_Button, button_color);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, button_color_active);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, button_color_hovered);
 
-    cursor_pos = ImGui::GetCursorPos();
-    cursor_pos.x = 12;
-    cursor_pos.y += 42;
-    ImGui::SetCursorPos(cursor_pos);
-    ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30));
-    cursor_pos.x += 30;
-    ImGui::SetCursorPos(cursor_pos);
-    ImGui::Button(ICON_FA_ARROWS, v2(30, 30));
-    cursor_pos.x += 30;
-    ImGui::SetCursorPos(cursor_pos);
-    ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30));
-    cursor_pos.x += 30;
-    ImGui::SetCursorPos(cursor_pos);
-    ImGui::Button(ICON_FA_EXPAND, v2(30, 30));
+      cursor_pos = ImGui::GetCursorPos();
+      cursor_pos.x = 12;
+      cursor_pos.y += 42;
+      ImGui::SetCursorPos(cursor_pos);
+      ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30));
+      cursor_pos.x += 30;
+      ImGui::SetCursorPos(cursor_pos);
+      ImGui::Button(ICON_FA_ARROWS, v2(30, 30));
+      cursor_pos.x += 30;
+      ImGui::SetCursorPos(cursor_pos);
+      ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30));
+      cursor_pos.x += 30;
+      ImGui::SetCursorPos(cursor_pos);
+      ImGui::Button(ICON_FA_EXPAND, v2(30, 30));
 
-    ImGui::PopStyleColor(3);
+      ImGui::PopStyleColor(3);
+    }
+
+    if (!one_camera_active) {
+      v2 window_size = ImGui::GetWindowSize();
+      std::string text = "No active camera";
+      v2 text_size = ImGui::CalcTextSize(text.c_str());
+      ImGui::SetCursorPos(v2(window_size.x - text_size.x, window_size.y) / 2.0f);
+      ImGui::Text("%s", text.c_str());
+    }
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -195,7 +210,7 @@ namespace axl {
       return;
 
     if (ImGui::MenuItem(ICON_FA_TRASH_ALT " Delete")) {
-      scene.RemoveEntity(ento->entity);
+      ento->marked_for_deletion = true;
       _inspector._selected_entity = entt::null;
       ImGui::CloseCurrentPopup();
     }

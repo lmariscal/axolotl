@@ -16,7 +16,10 @@ namespace axl {
   {
   }
 
-  Camera::~Camera() {
+  void Camera::Destroy() {
+    log::debug("Camera::Destroy()");
+    if (_parent->entity == _active_camera)
+      _active_camera = entt::null;
   }
 
   void Camera::Init() {
@@ -27,9 +30,6 @@ namespace axl {
   }
 
   void Camera::MoveCamera(CameraDirection direction, Window &window) {
-    if (_active_camera != this)
-      return;
-
     Transform &transform = _scene->GetComponent<Transform>(*_parent);
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
@@ -56,9 +56,6 @@ namespace axl {
   }
 
   void Camera::RotateCamera(const v2 &mouse_delta, Window &window) {
-    if (_active_camera != this)
-      return;
-
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
     Transform &transform = _scene->GetComponent<Transform>(*_parent);
@@ -113,11 +110,13 @@ namespace axl {
   }
 
   void Camera::SetAsActive() {
-    _active_camera = this;
+    _active_camera = *_parent;
   }
 
   Camera * Camera::GetActiveCamera() {
-    return _active_camera;
+    if (_active_camera == entt::null)
+      return nullptr;
+    return &Scene::GetActiveScene()->GetComponent<Camera>(_active_camera);
   }
 
   void Camera::SetPerspective() {

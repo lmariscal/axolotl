@@ -7,6 +7,7 @@
 namespace axl {
 
   Scene::Scene() {
+    _active_scene = this;
   }
 
   Scene::~Scene() {
@@ -26,13 +27,24 @@ namespace axl {
 
   void Scene::RemoveEntity(entt::entity e) {
     ENTT_ASSERT(_registry.valid(e), "Invalid entity");
-    std::string id = uuids::to_string(_registry.get<Ento>(e).id);
+    Ento *ento = _registry.try_get<Ento>(e);
+
+    for (Component *c : ento->components)
+      c->Destroy();
+
+    for (Ento *c : ento->children)
+      RemoveEntity(*c);
+
     _registry.destroy(e);
-    log::debug("Removed entity with id {}", id);
+    log::debug("Removed entity with id {}", uuids::to_string(ento->id));
   }
 
   void Scene::Draw(Renderer &renderer) {
     renderer.Render(_registry);
+  }
+
+  Scene * Scene::GetActiveScene() {
+    return _active_scene;
   }
 
 }

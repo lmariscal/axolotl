@@ -21,11 +21,11 @@ namespace axl {
     void Build();
     void AddTexture(const std::filesystem::path &path, TextureType type = TextureType::Last);
     void AddTexture(u32 id, TextureType type = TextureType::Last);
-    Shader * GetShader();
+    Shader & GetShader();
 
     protected:
-     Shader *_shader;
-     std::vector<Texture *> _textures[(i32)TextureType::Last];
+     std::shared_ptr<Shader> _shader;
+     std::shared_ptr<std::array<std::vector<Texture *>, (i32)TextureType::Last>> _textures;
      std::set<std::filesystem::path> _textures_path;
   };
 

@@ -140,6 +140,7 @@ namespace axl {
     delete _watcher;
 
     _shaders_programs.erase(std::find(_shaders_programs.begin(), _shaders_programs.end(), this));
+    log::debug("Shader {} destroyed", _program);
   }
 
   bool Shader::Watch() {

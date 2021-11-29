@@ -36,6 +36,7 @@ namespace axl {
     virtual bool ShowData() = 0;
 
     virtual void Init() = 0;
+    virtual void Destroy() {  };
 
     json GetRootNode(const std::string data_type) const;
     bool VerifyRootNode(const json &j, const std::string &data_type) const;

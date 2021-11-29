@@ -20,12 +20,12 @@ namespace axl {
   struct Camera : public Component {
    public:
     Camera();
-    ~Camera();
 
     virtual json Serialize() const;
     virtual void Deserialize(const json &json);
     virtual bool ShowData();
     virtual void Init();
+    virtual void Destroy();
 
     void MoveCamera(CameraDirection direction, Window &window);
     void RotateCamera(const v2 &mouse_delta, Window &window); // euler angles
@@ -42,7 +42,7 @@ namespace axl {
 
    protected:
 
-    inline static Camera * _active_camera;
+    inline static entt::entity _active_camera;
 
     v3 _last_position;
     v3 _last_rotation;

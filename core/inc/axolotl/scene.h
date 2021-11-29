@@ -23,6 +23,8 @@ namespace axl {
     void RemoveEntity(const entt::entity entity);
     void Draw(Renderer &renderer);
 
+    static Scene * GetActiveScene();
+
     template<typename ComponentType, typename... Args>
     decltype(auto) AddComponent(const entt::entity entity, Args &&...args) {
       ENTT_ASSERT(_registry.valid(entity), "Invalid entity");
@@ -61,6 +63,8 @@ namespace axl {
 
    protected:
     entt::registry _registry;
+
+    static inline Scene *_active_scene = nullptr;
   };
 
 } // namespace axl

@@ -27,7 +27,7 @@ namespace axl {
     static Mesh * ProcessMesh(aiMesh *mesh, const aiScene *scene, Model *model);
     static void ProcessMaterialTextures(aiMaterial *material, aiTextureType type, const aiScene *scene, Model *model);
 
-    std::vector<Mesh *> _meshes;
+    std::shared_ptr<std::vector<Mesh *>> _meshes;
     std::filesystem::path _path;
     ShaderPaths _shader_paths;
     bool _root = true;

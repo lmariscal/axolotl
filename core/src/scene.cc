@@ -24,6 +24,13 @@ namespace axl {
     return e;
   }
 
+  void Scene::RemoveEntity(entt::entity e) {
+    ENTT_ASSERT(_registry.valid(e), "Invalid entity");
+    std::string id = uuids::to_string(_registry.get<Ento>(e).id);
+    _registry.destroy(e);
+    log::debug("Removed entity with id {}", id);
+  }
+
   void Scene::Draw(Renderer &renderer) {
     renderer.Render(_registry);
   }

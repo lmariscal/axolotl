@@ -30,7 +30,8 @@ namespace axl {
     bool fullscreen_play;
 
    protected:
-    void ShowTreeEnto(Ento *ento, u32 depth);
+    void ShowTreeEnto(Ento *ento, u32 depth, Scene &scene);
+    void ShowEntityPopUp(Ento *ento, Scene &scene);
 
     FrameBuffer _frame;
     Inspector _inspector;

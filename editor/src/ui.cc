@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 #include <axolotl/window.h>
+#include <axolotl/transform.h>
 #include <axolotl/iomanager.h>
 #include <axolotl/ento.h>
 #include <axolotl/scene.h>
@@ -67,17 +68,8 @@ namespace axl {
       frame_focused = true;
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
-    ImGui::Button(ICON_FA_EXPAND_ARROWS, v2(24, 24));
-    ImGui::SameLine(0.0f, 5.0f);
-    ImGui::Button(ICON_FA_UNDO, v2(24, 24));
-    ImGui::SameLine(0.0f, 5.0f);
-    ImGui::Button(ICON_FA_EXPAND_ALT, v2(24, 24));
-    ImGui::SameLine();
-
-    ImGui::Checkbox(" Frame Ratio", &bound_frame_ratio);
-    ImGui::SameLine();
-    ImGui::Checkbox(" Fullscreen", &fullscreen_play);
-    ImGui::SameLine();
+    // ImGui::Checkbox(" Frame Ratio", &bound_frame_ratio);
+    // ImGui::SameLine();
 
     ImVec4 *colors = ImGui::GetStyle().Colors;
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 71) / 2.0f);
@@ -114,6 +106,33 @@ namespace axl {
     // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
     // ImGui::Text("Hi there");
 
+    v4 button_color = colors[(i32)ImGuiCol_Button];
+    v4 button_color_active = colors[(i32)ImGuiCol_ButtonActive];
+    v4 button_color_hovered = colors[(i32)ImGuiCol_ButtonHovered];
+    button_color.w = 0.75f;
+    button_color_active.w = 0.75f;
+    button_color_hovered.w = 0.75f;
+    ImGui::PushStyleColor(ImGuiCol_Button, button_color);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, button_color_active);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, button_color_hovered);
+
+    cursor_pos = ImGui::GetCursorPos();
+    cursor_pos.x = 12;
+    cursor_pos.y += 42;
+    ImGui::SetCursorPos(cursor_pos);
+    ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30));
+    cursor_pos.x += 30;
+    ImGui::SetCursorPos(cursor_pos);
+    ImGui::Button(ICON_FA_ARROWS, v2(30, 30));
+    cursor_pos.x += 30;
+    ImGui::SetCursorPos(cursor_pos);
+    ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30));
+    cursor_pos.x += 30;
+    ImGui::SetCursorPos(cursor_pos);
+    ImGui::Button(ICON_FA_EXPAND, v2(30, 30));
+
+    ImGui::PopStyleColor(3);
+
     ImGui::End();
     ImGui::PopStyleVar();
 
@@ -128,7 +147,7 @@ namespace axl {
     bound_frame_ratio = state;
   }
 
-  void FrameEditor::ShowTreeEnto(Ento *ento, u32 depth) {
+  void FrameEditor::ShowTreeEnto(Ento *ento, u32 depth, Scene &scene) {
     ImGui::PushID(uuids::to_string(ento->id).c_str());
     std::stringstream label;
     label << ICON_FA_BOX << " ";
@@ -145,31 +164,68 @@ namespace axl {
     if (ImGui::IsItemClicked())
       _inspector._selected_entity = *ento;
 
-    ImGui::PopStyleVar();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
+    if (ImGui::BeginPopupContextItem()) {
+      ShowEntityPopUp(ento, scene);
+      ImGui::EndPopup();
+    }
+    ImGui::PopStyleVar(2);
 
+    ImGui::PopStyleVar();
     ImGui::PopID();
 
     if (!tree_open || ento->children.empty())
       return;
 
     for (Ento *c : ento->children)
-      ShowTreeEnto(c, depth + 1);
+      ShowTreeEnto(c, depth + 1, scene);
     ImGui::TreePop();
     return;
+  }
+
+  void FrameEditor::ShowEntityPopUp(Ento *ento, Scene &scene) {
+    if (ImGui::MenuItem(ICON_FA_PLUS_CIRCLE " Add")) {
+      entt::entity new_entity = scene.CreateEntity();
+      scene.AddComponent<Transform>(new_entity);
+      ImGui::CloseCurrentPopup();
+    }
+
+    if (!ento)
+      return;
+
+    if (ImGui::MenuItem(ICON_FA_TRASH_ALT " Delete")) {
+      scene.RemoveEntity(ento->entity);
+      _inspector._selected_entity = entt::null;
+      ImGui::CloseCurrentPopup();
+    }
   }
 
   void FrameEditor::DrawEntityList(Scene &scene) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 12.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 6.0f));
     ImGui::Begin("Entities");
+
     entt::registry *registry = scene.GetRegistry();
     auto view = registry->view<Ento>();
     for (auto entity : view) {
       Ento &ento = registry->get<Ento>(entity);
       if (ento.parent)
         continue;
-      ShowTreeEnto(&ento, 0);
+      ShowTreeEnto(&ento, 0, scene);
     }
+
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
+      _inspector._selected_entity = entt::null;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
+    if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {
+      ShowEntityPopUp(nullptr, scene);
+      ImGui::EndPopup();
+    }
+    ImGui::PopStyleVar(2);
+
     ImGui::End();
     ImGui::PopStyleVar(2);
   }

@@ -91,7 +91,7 @@ namespace axl {
     _watcher = new efsw::FileWatcher();
     _shader_watcher = new ShaderWatcher(this);
 
-    _watcher->watch();
+    // _watcher->watch();
 
     _shaders_programs.push_back(this);
 
@@ -130,7 +130,8 @@ namespace axl {
       if (_watch_ids[i] == 0 || _paths[i].empty())
         continue;
 
-      _watcher->removeWatch(_watch_ids[i]);
+      if (_watcher)
+        _watcher->removeWatch(_watch_ids[i]);
     }
 
     glDeleteProgram(_program);

@@ -20,6 +20,7 @@ namespace axl {
 
     entt::registry * GetRegistry();
     entt::entity CreateEntity();
+    void RemoveEntity(const entt::entity entity);
     void Draw(Renderer &renderer);
 
     template<typename ComponentType, typename... Args>

@@ -1,6 +1,7 @@
 #include "inspector.h"
 
 #include <axolotl/scene.h>
+#include <IconsFontAwesome5Pro.h>
 #include <imgui.h>
 
 namespace axl {
@@ -19,12 +20,15 @@ namespace axl {
 
     std::string name = ento.name.empty() ? "Unnamed" : ento.name;
     name.resize(64);
-    ImGui::Text("ID %s", uuids::to_string(ento.id).c_str());
+    ImGui::Text(ICON_FA_ID_BADGE " %s", uuids::to_string(ento.id).c_str());
     ImGui::Text("Name ");
     ImGui::SameLine();
     if (ImGui::InputText("##entity_name", name.data(), ento.name.capacity())) {
       ento.name = name;
     }
+    ImGui::SameLine();
+    ImGui::Button(ICON_FA_LAYER_PLUS " Add");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 12.0f);
 
     for (Component *s : ento.components) {
       s->ShowData();

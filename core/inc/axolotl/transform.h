@@ -15,8 +15,7 @@ namespace axl {
 
     json Serialize() const;
     void Deserialize(const json &json);
-    bool ShowData();
-    void Init();
+    bool ShowComponent();
 
     const v3 & GetPosition() const;
     const v3 & GetScale() const;

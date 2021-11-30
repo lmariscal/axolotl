@@ -33,7 +33,7 @@ namespace axl {
     json Serialize() const;
 
     template<typename... Components>
-    bool HasAllOf() const {
+    bool HasComponent() const {
       return scene->_registry.all_of<Components...>(handle);
     }
 
@@ -48,35 +48,35 @@ namespace axl {
 
     template<typename T, typename... Args>
     T& AddComponent(Args&&... args) {
-      AXL_ASSERT(!HasAllOf<T>(), "Entity already has component");
+      AXL_ASSERT(!HasComponent<T>(), "Entity already has component");
 
       return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
     }
 
     template<typename T, typename... Args>
     T& TryAddComponent(Args&&... args) {
-      if (HasAllOf<T>())
+      if (HasComponent<T>())
         return GetComponent<T>();
       return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
     }
 
     template<typename T>
     T& GetComponent() {
-      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
     const T& GetComponent() const {
-      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
     void RemoveComponent() {
-      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
 
       scene->_registry.remove<T>(handle);
     }

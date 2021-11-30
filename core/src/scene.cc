@@ -29,7 +29,11 @@ namespace axl {
   }
 
   void Scene::RemoveEntity(Ento e) {
-    AXL_ASSERT(!_registry.valid(e.handle), "Trying to remove invalid entity {}->{}", e.handle, e.id);
+    AXL_ASSERT(_registry.valid(e.handle), "Trying to remove invalid entity {}->{}", e.handle, uuids::to_string(e.id));
+
+    if (e.HasChildren())
+      for (auto &child : e.Children())
+        RemoveEntity(child);
 
     Ento::_uuid_ento_map.erase(e.id);
     Ento::_handle_ento_map.erase(e.handle);
@@ -53,11 +57,15 @@ namespace axl {
   }
 
   void Scene::Draw(Renderer &renderer) {
-    renderer.Render(_registry);
+    renderer.Render(*this);
   }
 
   Scene * Scene::GetActiveScene() {
     return _active_scene;
+  }
+
+  entt::registry & Scene::GetRegistry() {
+    return _registry;
   }
 
   json Scene::Serialize() {

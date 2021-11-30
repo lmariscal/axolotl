@@ -11,13 +11,24 @@
 
 namespace axl {
 
-  Model::Model(Ento ento, const std::filesystem::path &path, const ShaderPaths &paths, bool root):
+  Model::Model(Ento ento, std::filesystem::path path, ShaderPaths paths, bool root):
     _path(path),
     _shader_paths(paths),
     _root(root),
     _meshes(std::make_shared<std::vector<Mesh *>>())
-  {
+  { }
+
+  Model::~Model() {
+    if (_meshes.use_count() > 1)
+      return;
+    for (Mesh *mesh : *_meshes)
+      delete mesh;
+  }
+
+  void Model::Init(Ento &ento) {
+    AXL_ASSERT((_shader_paths.vertex.string()[0] == '/'), "WTF?")
     ento.TryAddComponent<Material>(_shader_paths);
+    AXL_ASSERT((_shader_paths.vertex.string()[0] == '/'), "WTF?")
 
     if (!_root)
       return;
@@ -43,20 +54,12 @@ namespace axl {
     transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
     transform.SetScale(v3(scale.x, scale.y, scale.z));
 
-    ProcessNode(ento, scene->mRootNode, scene);
+    ProcessNode(ento, *this, scene->mRootNode, scene);
 
     TextureStore::ProcessQueue();
   }
 
-  Model::~Model() {
-    if (_meshes.use_count() > 1)
-      return;
-    for (Mesh *mesh : *_meshes)
-      delete mesh;
-  }
-
-  void Model::ProcessMaterialTextures(Ento ento, aiMaterial *ai_material, aiTextureType ai_type) {
-    Model &model = ento.GetComponent<Model>();
+  void Model::ProcessMaterialTextures(Ento ento, Model &model, aiMaterial *ai_material, aiTextureType ai_type) {
     TextureType type = TextureType::Last;
     switch (ai_type) {
       case aiTextureType_DIFFUSE:
@@ -88,7 +91,7 @@ namespace axl {
     }
   }
 
-  Mesh * Model::ProcessMesh(Ento ento, aiMesh *mesh, const aiScene *scene) {
+  Mesh * Model::ProcessMesh(Ento ento, Model &model, aiMesh *mesh, const aiScene *scene) {
     std::vector<f32> buffer_data;
     std::vector<u32> indices;
 
@@ -117,24 +120,23 @@ namespace axl {
     }
 
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-    Model &model = ento.GetComponent<Model>();
 
-    ProcessMaterialTextures(ento, material, aiTextureType_DIFFUSE);
-    ProcessMaterialTextures(ento, material, aiTextureType_SPECULAR);
-    ProcessMaterialTextures(ento, material, aiTextureType_AMBIENT);
-    ProcessMaterialTextures(ento, material, aiTextureType_NORMALS);
-    ProcessMaterialTextures(ento, material, aiTextureType_HEIGHT);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_DIFFUSE);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_SPECULAR);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_AMBIENT);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_NORMALS);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_HEIGHT);
 
     return new Mesh(buffer_data, indices);
   }
 
-  void Model::ProcessNode(Ento ento, aiNode *node, const aiScene *scene) {
-    Model &model = ento.GetComponent<Model>();
+  void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
+    AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
     ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-      Mesh *m = ProcessMesh(ento, mesh, scene);
+      Mesh *m = ProcessMesh(ento, model, mesh, scene);
 
       if (node->mNumMeshes > 1)
         m->_single_mesh = false;
@@ -145,10 +147,10 @@ namespace axl {
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
       Ento child = Scene::GetActiveScene()->CreateEntity();
-
-      Transform &transform = child.GetComponent<Transform>();
+      AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
       Model &child_model = child.AddComponent<Model>(child, model._path, model._shader_paths, false);
-      child.SetParent(ento);
+      child_model.Init(child);
+      ento.AddChild(child);
 
       // aiVector3D scale, position;
       // aiQuaternion rotation;
@@ -158,7 +160,7 @@ namespace axl {
       // transform.SetScale(v3(scale.x, scale.y, scale.z));
 
       log::debug("Processing node {}", node->mName.C_Str());
-      ProcessNode(child, node->mChildren[i], scene);
+      ProcessNode(child, child_model, node->mChildren[i], scene);
     }
   }
 
@@ -176,9 +178,6 @@ namespace axl {
       }
       mesh->Draw();
     }
-  }
-
-  void Model::Init() {
   }
 
   json Model::Serialize() const {

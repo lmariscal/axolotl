@@ -32,24 +32,25 @@ namespace axl {
     glViewport(0, 0, width, height);
   }
 
-  void Renderer::Render(entt::registry &registry) {
+  void Renderer::Render(Scene &scene) {
     m4 view(1.0f);
     m4 projection(1.0f);
 
     Camera *camera = Camera::GetActiveCamera();
     if (camera) {
-      view = camera->GetViewMatrix();
+      Ento camera_ento = Camera::GetActiveCameraEnto();
+      view = camera->GetViewMatrix(camera_ento);
       projection = camera->GetProjectionMatrix(*_window);
     }
 
-    auto entities = registry.group<Ento, Model, Material>();
+    auto entities = scene.GetRegistry().group<Model, Material>();
     for (auto entity : entities) {
-      Ento ento = entities.get<Ento>(entity);
+      Ento ento = scene.FromHandle(entity);
       Model &model = ento.GetComponent<Model>();
       Material &material = ento.GetComponent<Material>();
 
       m4 model_mat(1.0f);
-      if (ento.HasAllOf<Transform>())
+      if (ento.HasComponent<Transform>())
         model_mat = ento.GetComponent<Transform>().GetModelMatrix(ento);
 
       glEnable(GL_DEPTH_TEST);

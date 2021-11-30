@@ -7,14 +7,13 @@
 
 namespace axl {
 
-  struct Material : public Component {
+  struct Material {
     Material(const ShaderPaths &paths);
     ~Material();
 
     virtual json Serialize() const;
     virtual void Deserialize(const json &json);
     virtual bool ShowData();
-    virtual void Init();
 
     bool Bind(u32 id = 0, u32 unit = 0, u32 count = 0, TextureType type = TextureType::Last);
     void BindAll();

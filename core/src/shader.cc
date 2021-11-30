@@ -118,6 +118,7 @@ namespace axl {
   Shader::Shader():
     _program(0)
   {
+    log::info("Pase por aca");
   }
 
   Shader::~Shader() {
@@ -184,6 +185,7 @@ namespace axl {
 
   std::string Shader::Read(const std::filesystem::path &path, ShaderType shader_type) {
     if (!std::filesystem::exists(path)) {
+      AXL_ASSERT(false, "File {} doesn't exists", path.string());
       log::error("Shader file \"{}\" does not exist", path.string());
       return "";
     }

@@ -20,30 +20,29 @@ namespace axl {
 
   struct Camera {
    public:
-    Camera();
+    Camera(Ento &ento);
     ~Camera();
 
     json Serialize() const;
     void Deserialize(const json &json);
-    bool ShowData(Ento ento);
+    bool ShowComponent();
 
-    void MoveCamera(CameraDirection direction, f32 delta_time);
-    void RotateCamera(const v2 &mouse_delta, f32 delta_time); // euler angles
+    void MoveCamera(Ento &ento, CameraDirection direction, f32 delta_time);
+    void RotateCamera(Ento &ento, const v2 &mouse_delta, f32 delta_time); // euler angles
     void SetAsActive(Ento ento);
     void SetOrthographic();
     void SetPerspective();
     void SetMovementSpeed(f32 speed);
     void SetMouseSensitivity(f32 sensitivity);
-    void UpdateVectors();
-    m4 GetViewMatrix();
+    void UpdateVectors(Ento &ento);
+    m4 GetViewMatrix(Ento &ento);
     m4 GetProjectionMatrix(Window &window);
 
     static Camera * GetActiveCamera();
+    static Ento GetActiveCameraEnto();
 
    protected:
     inline static Ento _active_camera_ento;
-
-    Transform transform;
 
     v3 _last_position;
     v3 _last_rotation;

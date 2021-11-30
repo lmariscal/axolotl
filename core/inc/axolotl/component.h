@@ -26,44 +26,11 @@ namespace axl {
   // I am aware that I can use to_json and from_json to serialize and deserialize. The issue is
   // that these functions are not fully under my control and prefer to have a dedicated Serialize
   // and Deserialize function.
-  class Scene;
   class Ento;
 
-  class Component {
-   public:
-    Component(std::string name): _name(name) { }
-    virtual ~Component();
-
-    Component(const Component &other);
-    Component(Component &&other);
-
-    Component &operator=(const Component &other);
-
-    virtual json Serialize() const = 0;
-    virtual void Deserialize(const json &json) = 0;
-
-    virtual bool ShowData() = 0;
-
-    virtual void Init() = 0;
-    virtual void Destroy(Ento *ento);
-
-    json GetRootNode() const;
-    bool VerifyRootNode(const json &j) const;
-
-   protected:
-    friend class Scene;
-    friend class Ento;
-
-    u32 _version_major = 0;
-    u32 _version_minor = 1;
-
-    entt::entity _parent;
-    Scene *_scene = nullptr;
-    std::string _name;
-  };
-
   bool ShowData(const std::string &label, v2 &v, const v2 &reset_values = { 0.0f, 0.0f });
-  bool ShowData(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
+  bool ShowData(const std::string &label, v3 &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f },
+                f32 min = 0.0f, f32 max = 0.0f);
   bool ShowData(const std::string &label, v4 &v, const v4 &reset_values = { 0.0f, 0.0f, 0.0f, 0.0f });
   bool ShowDataColor(const std::string &label, v4 &v);
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });

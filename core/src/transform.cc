@@ -58,7 +58,21 @@ namespace axl {
     if (!ento.HasParent() || !ento.Parent())
       return model;
 
-    return ento.Parent().GetComponent<Transform>().GetModelMatrix(ento) * model;
+    Ento parent = ento.Parent();
+    return parent.GetComponent<Transform>().GetModelMatrix(parent) * model;
+  }
+
+  bool Transform::ShowComponent() {
+    bool modified = false;
+
+    if (ShowData("Position", _position))
+      modified = true;
+    if (ShowData("Scale", _scale, v3(1.0f)))
+      modified = true;
+    if (ShowData("Rotation", _rotation))
+      modified = true;
+
+    return modified;
   }
 
 } // namespace axl

@@ -1,6 +1,5 @@
 #include <axolotl/component.h>
 
-#include <axolotl/ento.h>
 #include <axolotl/scene.h>
 
 #include <imgui.h>
@@ -8,7 +7,7 @@
 
 namespace axl {
 
-  bool ShowData(const std::string &label, v3 &v, const v3 &reset_value) {
+  bool ShowData(const std::string &label, v3 &v, const v3 &reset_value, f32 min, f32 max) {
     i32 column_width = 100;
     bool modified = false;
 
@@ -44,7 +43,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, min, max, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -64,7 +63,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, min, max, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
@@ -84,7 +83,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f"))
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, min, max, "%.3f"))
       modified = true;
     ImGui::PopItemWidth();
 
@@ -273,10 +272,12 @@ namespace axl {
   }
 
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values) {
-    v3 euler = degrees(eulerAngles(v));
+    v3 original = degrees(eulerAngles(v));
+    v3 euler = original;
     if (!ShowData(label, euler, reset_values))
       return false;
-    v = quat(radians(euler));
+    quat offset = quat(radians(euler - original));
+    v *= offset;
     return true;
   }
 
@@ -375,66 +376,6 @@ namespace axl {
     ImGui::Columns(1);
     ImGui::PopID();
     return modified;
-  }
-
-  Component::Component(Component &&other) {
-    log::error("Trying to swap a component! Name: {}", other._name);
-  }
-
-  Component::Component(const Component &other) {
-    // _parent = other._parent;
-    // _scene = other._scene;
-    // _name = other._name;
-
-    // Ento &p = GetParent();
-    // p.components.push_back(this);
-    log::error("Trying to clone, not swap a component! Name: {}", other._name);
-  }
-
-  Component &Component::operator=(const Component &other) {
-    log::error("Trying to operator=, not swap a component! Name: {}", other._name);
-    return *this;
-  }
-
-  Component::~Component() {
-    if (_parent == entt::null)
-      return;
-  }
-
-  void Component::Destroy(Ento *ento) {
-    // std::vector<Component *> &c = ento->components;
-    // c.erase(std::remove(c.begin(), c.end(), this), c.end());
-    // _parent = entt::null;
-  }
-
-  json Component::GetRootNode() const {
-    json j;
-    j["type"] = _name;
-    j["version"] = {
-      { "major", _version_major },
-      { "minor", _version_minor },
-    };
-    return j;
-  }
-
-  bool Component::VerifyRootNode(const json &j) const {
-    if (j.find("version") != j.end()) {
-      if (j["version"]["major"] != _version_major) {
-        log::error("Transform::Deserialize: version.major mismatch");
-        return false;
-      }
-      if (j["version"]["minor"] != _version_minor)
-        log::warn("Transform::Deserialize: version.major mismatch");
-    }
-
-    if (j.find("type") != j.end()) {
-      if (j["type"] != _name) {
-        log::error("Transform::Deserialize: invalid type");
-        return false;
-      }
-    }
-
-    return true;
   }
 
   bool ShowDataColor(const std::string &label, v4 &v) {

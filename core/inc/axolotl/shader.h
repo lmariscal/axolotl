@@ -80,6 +80,7 @@ namespace axl {
     Shader();
     Shader(const ShaderPaths &paths);
     Shader(Shader &other) = delete;
+    Shader(Shader &&other) = delete;
     ~Shader();
 
     void Bind();

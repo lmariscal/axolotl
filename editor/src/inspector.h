@@ -18,6 +18,7 @@ namespace axl {
     friend class FrameEditor;
 
     void ShowAddComponent(Scene &scene);
+    void ShowComponents(Ento &ento, Scene &scene);
 
     std::string _model_path;
     bool _add_model = false;

@@ -14,7 +14,7 @@ namespace axl {
   void TestScene::Init() {
     Ento camera = CreateEntity();
     camera.Tag().value = "camera";
-    camera.AddComponent<Camera>().SetAsActive(camera);
+    camera.AddComponent<Camera>(camera).SetAsActive(camera);
   }
 
   void TestScene::Update(Window &window) {
@@ -23,20 +23,21 @@ namespace axl {
     f32 delta = window.GetDeltaTime();
     Camera *camera = Camera::GetActiveCamera();
     if (camera && window.GetLockMouse()) {
-      camera->RotateCamera(io.GetRelativePosition(), delta);
+      Ento camera_ento = Camera::GetActiveCameraEnto();
+      camera->RotateCamera(camera_ento, io.GetRelativePosition(), delta);
 
       if (io.KeyDown(Key::W))
-        camera->MoveCamera(CameraDirection::Front, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Front, delta);
       if (io.KeyDown(Key::S))
-        camera->MoveCamera(CameraDirection::Back, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Back, delta);
       if (io.KeyDown(Key::A))
-        camera->MoveCamera(CameraDirection::Left, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Left, delta);
       if (io.KeyDown(Key::D))
-        camera->MoveCamera(CameraDirection::Right, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Right, delta);
       if (io.KeyDown(Key::Q))
-        camera->MoveCamera(CameraDirection::Up, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Up, delta);
       if (io.KeyDown(Key::E))
-        camera->MoveCamera(CameraDirection::Down, delta);
+        camera->MoveCamera(camera_ento, CameraDirection::Down, delta);
     }
 
     ImGui::Begin("Test Scene");

@@ -8,10 +8,12 @@ namespace axl {
 
   Material::Material(const ShaderPaths &paths):
     _shader(std::make_shared<Shader>(paths)),
-    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>()),
-    Component("material")
+    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>())
   {
     std::fill(_textures->begin(), _textures->end(), std::vector<Texture *>());
+
+    _shader->Init();
+    _shader->Compile();
   }
 
   Material::~Material() {
@@ -24,11 +26,6 @@ namespace axl {
     for (i32 i = 0; i < (i32)TextureType::Last; ++i)
       for (Texture *texture : (*_textures)[i])
         delete texture;
-  }
-
-  void Material::Init() {
-    _shader->Init();
-    _shader->Compile();
   }
 
   void Material::BindAll() {
@@ -79,7 +76,7 @@ namespace axl {
   }
 
   json Material::Serialize() const {
-    json j = GetRootNode();
+    json j;
     return j;
   }
 

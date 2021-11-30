@@ -41,9 +41,7 @@ namespace axl {
 
     ImGui::Separator();
 
-    // for (Component *s : ento.components) {
-    //   s->ShowData();
-    // }
+    ShowComponents(_selected_entity, scene);
 
     ShowAddComponent(scene);
 
@@ -53,7 +51,8 @@ namespace axl {
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       };
       log::info("Adding model \"{}\"", _model_path);
-      _selected_entity.AddComponent<Model>(ento, _model_path, shader_paths);
+      Model &model = _selected_entity.AddComponent<Model>(ento, _model_path, shader_paths);
+      model.Init(ento);
       _add_model = false;
       _model_path = "";
     }
@@ -81,10 +80,10 @@ namespace axl {
       }
       ImGui::SameLine();
 
-      std::array<char, 256> buffer;
+      std::array<char, 512> buffer;
       std::fill(buffer.begin(), buffer.end(), 0);
       std::strncpy(buffer.begin(), _model_path.c_str(), _model_path.size());
-      if (ImGui::InputText("##model_path", buffer.data(), 256))
+      if (ImGui::InputText("##model_path", buffer.data(), buffer.size()))
         _model_path = std::string(buffer.data());
 
       ImGui::SameLine();
@@ -103,7 +102,7 @@ namespace axl {
   void Inspector::ShowAddComponent(Scene &scene) {
     if (ImGui::BeginPopup("ComponentAddPopUp")) {
       if (ImGui::MenuItem("Camera")) {
-        _selected_entity.TryAddComponent<Camera>();
+        _selected_entity.TryAddComponent<Camera>(_selected_entity);
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Transform")) {
@@ -116,6 +115,27 @@ namespace axl {
         ImGui::CloseCurrentPopup();
       }
       ImGui::EndPopup();
+    }
+  }
+
+  void Inspector::ShowComponents(Ento &ento, Scene &scene) {
+    if (ento.HasComponent<Transform>()) {
+      if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        Transform &transform = ento.GetComponent<Transform>();
+        if (transform.ShowComponent()) {
+
+          if (_selected_entity.HasComponent<Camera>())
+            _selected_entity.GetComponent<Camera>().UpdateVectors(_selected_entity);
+
+        }
+      }
+    }
+
+    if (ento.HasComponent<Camera>()) {
+      if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+        Camera &camera = ento.GetComponent<Camera>();
+        camera.ShowComponent();
+      }
     }
   }
 

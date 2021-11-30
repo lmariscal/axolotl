@@ -103,9 +103,9 @@ namespace axl {
         ImVec4(const axl::v4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
         operator axl::v4() const { return axl::v4(x,y,z,w); }
 
-#ifdef AXL_DEBUG
+#ifdef AXOLOTL_DEBUG
 #define AXL_ASSERT(validate, ...) { \
-  if (!validate) { log::error("Assertion failed..."); \
+  if (!validate) { \
     log::error("{}:{}:{}", __FILE__, __FUNCTION__, __LINE__); \
     log::error(__VA_ARGS__); \
     raise(SIGTRAP); \

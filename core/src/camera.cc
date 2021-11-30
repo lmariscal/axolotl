@@ -8,16 +8,17 @@
 
 namespace axl {
 
-  Camera::Camera():
+  Camera::Camera(Ento &ento):
     _is_orthographic(false),
     _world_up({ 0.0f, 1.0f, 0.0f }),
     _movement_speed(6.0f),
     _mouse_sensitivity(2.0f),
     _fov(60.0f)
   {
+    Transform &transform = ento.Transform();
     transform.SetPosition({ 0.0f, 0.0f, 0.0f });
     transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
-    UpdateVectors();
+    UpdateVectors(ento);
   }
 
   Camera::~Camera() {
@@ -25,7 +26,8 @@ namespace axl {
       _active_camera_ento = { };
   }
 
-  void Camera::MoveCamera(CameraDirection direction, f32 delta) {
+  void Camera::MoveCamera(Ento &ento, CameraDirection direction, f32 delta) {
+    Transform &transform = ento.Transform();
     switch (direction) {
       case CameraDirection::Down:
         transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * delta);
@@ -48,7 +50,8 @@ namespace axl {
     }
   }
 
-  void Camera::RotateCamera(const v2 &mouse_delta, f32 delta) {
+  void Camera::RotateCamera(Ento &ento, const v2 &mouse_delta, f32 delta) {
+    Transform &transform = ento.Transform();
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -56,17 +59,17 @@ namespace axl {
     yaw += mouse_delta.x * delta * _mouse_sensitivity * 10.0f;
     pitch -= mouse_delta.y * delta * _mouse_sensitivity * 10.0f;
 
-    // if (pitch > 89.0f)
-    //   pitch = 89.0f;
-    // if (pitch < -89.0f)
-    //   pitch = -89.0f;
+    if (pitch > 89.0f)
+      pitch = 89.0f;
+    if (pitch < -89.0f)
+      pitch = -89.0f;
 
-    // std::min(yaw, 360.0f);
-    // std::max(yaw, 0.0f);
+    std::min(yaw, 360.0f);
+    std::max(yaw, 0.0f);
 
     transform.SetRotation(euler);
 
-    UpdateVectors();
+    UpdateVectors(ento);
   }
 
   m4 Camera::GetProjectionMatrix(Window &window) {
@@ -78,7 +81,8 @@ namespace axl {
       return perspective(radians(_fov), aspect_ratio, 0.1f, 100.0f);
   }
 
-  void Camera::UpdateVectors() {
+  void Camera::UpdateVectors(Ento &ento) {
+    Transform &transform = ento.Transform();
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -92,7 +96,8 @@ namespace axl {
     _up = normalize(cross(_right, _front));
   }
 
-  m4 Camera::GetViewMatrix() {
+  m4 Camera::GetViewMatrix(Ento &ento) {
+    Transform &transform = ento.Transform();
     return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
   }
 
@@ -107,6 +112,10 @@ namespace axl {
     if (!_active_camera_ento)
       return nullptr;
     return &_active_camera_ento.GetComponent<Camera>();
+  }
+
+  Ento Camera::GetActiveCameraEnto() {
+    return _active_camera_ento;
   }
 
   void Camera::SetPerspective() {
@@ -134,8 +143,19 @@ namespace axl {
       _mouse_sensitivity = j["mouse_sensitivity"];
   }
 
-  bool Camera::ShowData(Ento ento) {
-    return false;
+  bool Camera::ShowComponent() {
+    bool modified = false;
+
+    if (ShowData("Orthographic", _is_orthographic))
+      modified = true;
+    if (ShowData("Speed", _movement_speed))
+      modified = true;
+    if (ShowData("Sensitivity", _mouse_sensitivity))
+      modified = true;
+    if (ShowData("FOV", _fov))
+      modified = true;
+
+    return modified;
   }
 
 } // namespace axl

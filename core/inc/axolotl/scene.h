@@ -20,6 +20,7 @@ namespace axl {
     void RemoveEntity(Ento ento);
     Ento FromID(uuid id);
     Ento FromHandle(entt::entity handle);
+    entt::registry & GetRegistry();
 
     void Draw(Renderer &renderer);
     json Serialize();

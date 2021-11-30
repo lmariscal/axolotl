@@ -132,7 +132,7 @@ namespace axl {
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
     AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
-    if (ento.Tag().value == "entity")
+    if (ento.Tag().value == Tag::DefaultTag)
       ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {

@@ -19,10 +19,12 @@ namespace axl {
   };
 
   struct Tag {
+    static constexpr std::string_view DefaultTag = "Entity";
+
     std::string value;
 
     Tag(const std::string &value): value(value) { }
-    Tag(): value("entity") {  }
+    Tag(): value(DefaultTag) {  }
   };
 
   struct Ento {

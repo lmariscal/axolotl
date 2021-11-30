@@ -13,12 +13,12 @@
 
 namespace axl {
 
-  void FontAddFontAwesomeChars(const std::string &font_awesome_path, ImGuiIO &io) {
+  void FontAddFontAwesomeChars(const std::string &font_awesome_path, ImGuiIO &io, f32 size) {
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
-    ImFont *font = io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), 15.0f, &icons_config, icons_ranges);
+    ImFont *font = io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), size, &icons_config, icons_ranges);
     if (!font) {
       log::error("Failed to load font \"{}\"", font_awesome_path);
     }
@@ -28,7 +28,7 @@ namespace axl {
     ImGuiIO &io = ImGui::GetIO();
     io.Fonts->Clear();
     std::string path = Axolotl::GetDistDir() + "res/misc/JetBrainsMono-Regular.ttf";
-    ImFont *font = io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f);
+    ImFont *font = io.Fonts->AddFontFromFileTTF(path.c_str(), 20.0f);
     if (!font) {
       io.Fonts->AddFontDefault();
       log::error("Failed to load GUI font\n...");
@@ -36,20 +36,21 @@ namespace axl {
     }
 
     std::string font_awesome_path = Axolotl::GetDistDir() + "res/misc/Font Awesome 6 Pro-Solid-900.otf";
-    FontAddFontAwesomeChars(font_awesome_path, io);
+    FontAddFontAwesomeChars(font_awesome_path, io, 20.0f);
 
     io.Fonts->Build();
 
     std::string bold_path = Axolotl::GetDistDir() + "res/misc/JetBrainsMono-Bold.ttf";
-    ImFont *bold_font = io.Fonts->AddFontFromFileTTF(bold_path.c_str(), 16.0f);
+    ImFont *bold_font = io.Fonts->AddFontFromFileTTF(bold_path.c_str(), 20.0f);
     if (!bold_font) {
       log::error("Failed to load Bold GUI font\n...");
       return;
     }
 
-    FontAddFontAwesomeChars(font_awesome_path, io);
-
+    FontAddFontAwesomeChars(font_awesome_path, io, 20.0f);
     io.Fonts->Build();
+
+    io.FontGlobalScale = 0.8f;
   }
 
   void YADarkTheme() {
@@ -57,6 +58,15 @@ namespace axl {
     ImVec4* colors = style.Colors;
 
     style.ColorButtonPosition = ImGuiDir_Left;
+    style.ScrollbarSize = 12.0f;
+    style.IndentSpacing = 19.0f;
+    style.WindowRounding = 3.0f;
+    style.PopupRounding = 3.0f;
+    style.GrabRounding = 3.0f;
+    style.TabRounding = 3.0f;
+    style.PopupBorderSize = 0.0f;
+    style.WindowBorderSize = 0.0f;
+    style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
 
     colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);

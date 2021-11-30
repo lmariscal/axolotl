@@ -25,19 +25,52 @@ namespace axl {
 
     Ento ento = Scene::GetActiveScene()->FromID(_selected_entity);
 
-    Tag &tag = ento.Tag();
-    std::string name = tag.value.empty() ? "Unnamed" : tag.value;
-    name.resize(64);
-    ImGui::Text(ICON_FA_ID_BADGE " %s", uuids::to_string(ento.id).c_str());
-    ImGui::Text("Name ");
-    ImGui::SameLine();
-    if (ImGui::InputText("##entity_name", name.data(), name.capacity())) {
-      tag.value = name;
+    v2 id_text_size = ImGui::CalcTextSize(uuids::to_string(ento.id).c_str());
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - id_text_size.x - ImGui::GetStyle().FramePadding.x) / 2.0f);
+
+    ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(ento.id).c_str());
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemClicked())
+      ImGui::SetClipboardText(uuids::to_string(ento.id).c_str());
+
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().ItemSpacing.y);
+
+    if (_edit_name) {
+      Tag &tag = ento.Tag();
+
+      std::string name = tag.value.empty() ? "Unnamed" : tag.value;
+      name.resize(64);
+      if (ImGui::InputText("##entity_name", name.data(), name.capacity(), ImGuiInputTextFlags_EnterReturnsTrue)) {
+        tag.value = name;
+      }
+      if (_edit_name_first) {
+        ImGui::SetKeyboardFocusHere(-1);
+        _edit_name_first = false;
+      } else if (!ImGui::IsItemActive()) {
+        tag.value = name;
+        _edit_name = false;
+        _edit_name_first = true;
+      }
+    } else {
+      ImGui::SetWindowFontScale(1.1f);
+      ImGui::Text("%s", ento.Tag().value.c_str());
+      if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      if (ImGui::IsItemClicked()) {
+        _edit_name = true;
+        _edit_name_first = true;
+      }
+      ImGui::SetWindowFontScale(1.0f);
     }
 
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_LAYER_PLUS " Add"))
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - 60.0f);
+    if (ImGui::Button(ICON_FA_LAYER_PLUS " Add", v2(60, 0)))
       ImGui::OpenPopup("ComponentAddPopUp");
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.0f);

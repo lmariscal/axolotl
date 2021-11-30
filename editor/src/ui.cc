@@ -178,6 +178,8 @@ namespace axl {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(4.0f, 4.0f));
     // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (depth * 18.0f));
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     if (ImGui::IsItemClicked())
       _inspector._selected_entity = ento;
     ImGui::PopStyleVar(1);
@@ -238,7 +240,7 @@ namespace axl {
     std::strcpy(buffer.data(), _search_string.c_str());
 
     ImGui::PushItemWidth(width);
-    if (ImGui::InputTextWithHint("##search", ICON_FA_SEARCH " Search", buffer.data(), ImGuiInputTextFlags_EnterReturnsTrue))
+    if (ImGui::InputTextWithHint("##search", ICON_FA_SEARCH " Search", buffer.data(), buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue))
       _search_string = buffer.data();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 9.0f);
 

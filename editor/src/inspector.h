@@ -23,6 +23,8 @@ namespace axl {
     std::string _model_path;
     bool _add_model = false;
     bool _want_model = false;
+    bool _edit_name = false;
+    bool _edit_name_first = false;
     Ento _selected_entity;
   };
 

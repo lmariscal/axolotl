@@ -36,6 +36,7 @@ namespace axl {
     FrameBuffer _frame;
     Inspector _inspector;
 
+    std::string _search_string;
     v2 _region_available;
   };
 

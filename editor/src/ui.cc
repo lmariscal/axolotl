@@ -165,19 +165,22 @@ namespace axl {
   void FrameEditor::ShowTreeEnto(Ento ento, u32 depth, Scene &scene) {
     ImGui::PushID(uuids::to_string(ento.id).c_str());
     std::stringstream label;
-    label << ICON_FA_BOX << " ";
+    label << ICON_FA_CIRCLE_NOTCH << " ";
     label << (ento.Tag().value.empty() ? uuids::to_string(ento.id) : ento.Tag().value);
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
     if (!ento.HasChildren())
       flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (_inspector._selected_entity == ento)
       flags |= ImGuiTreeNodeFlags_Selected;
 
-    ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
+    // ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(4.0f, 4.0f));
+    // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (depth * 18.0f));
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
     if (ImGui::IsItemClicked())
       _inspector._selected_entity = ento;
+    ImGui::PopStyleVar(1);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
@@ -188,7 +191,6 @@ namespace axl {
     }
     ImGui::PopStyleVar(2);
 
-    ImGui::PopStyleVar();
     ImGui::PopID();
 
     if (tree_open && ento.HasChildren()) {
@@ -224,9 +226,25 @@ namespace axl {
   }
 
   void FrameEditor::DrawEntityList(Scene &scene) {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 12.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 9.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 0.0f));
     ImGui::Begin("Entities");
+
+    f32 width = ImGui::GetWindowWidth() - ImGui::GetCursorPosX() - 40.0f;
+    ImGui::SetCursorPosX(20.0f);
+
+    std::array<char, 256> buffer;
+    std::fill(buffer.begin(), buffer.end(), 0);
+    std::strcpy(buffer.data(), _search_string.c_str());
+
+    ImGui::PushItemWidth(width);
+    if (ImGui::InputTextWithHint("##search", ICON_FA_SEARCH " Search", buffer.data(), ImGuiInputTextFlags_EnterReturnsTrue))
+      _search_string = buffer.data();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 9.0f);
+
+    ImGui::Separator();
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
 
     scene._registry.each([&](auto entity) {
       Ento ento = scene.FromHandle(entity);

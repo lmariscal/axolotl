@@ -17,9 +17,9 @@ namespace axl {
 
     void Draw(Material &material);
 
-    virtual json Serialize() const;
-    virtual void Deserialize(const json &json);
-    virtual bool ShowData();
+    json Serialize() const;
+    void Deserialize(const json &json);
+    bool ShowComponent();
     void Init(Ento &ento);
 
    protected:

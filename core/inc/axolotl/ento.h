@@ -22,7 +22,7 @@ namespace axl {
     std::string value;
 
     Tag(const std::string &value): value(value) { }
-    Tag(): value("Entity") {  }
+    Tag(): value("entity") {  }
   };
 
   struct Ento {

@@ -132,7 +132,8 @@ namespace axl {
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
     AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
-    ento.Tag().value = node->mName.C_Str();
+    if (ento.Tag().value == "entity")
+      ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -152,12 +153,38 @@ namespace axl {
       child_model.Init(child);
       ento.AddChild(child);
 
-      // aiVector3D scale, position;
-      // aiQuaternion rotation;
-      // node->mTransformation.Decompose(scale, rotation, position);
-      // transform.SetPosition(v3(position.x, position.y, position.z));
-      // transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
-      // transform.SetScale(v3(scale.x, scale.y, scale.z));
+      aiVector3D scale, position;
+      aiQuaternion rotation;
+      Transform &transform = child.GetComponent<Transform>();
+      node->mTransformation.Decompose(scale, rotation, position);
+      transform.SetPosition(v3(position.x, position.y, position.z));
+      transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
+      transform.SetScale(v3(scale.x, scale.y, scale.z));
+
+      if (model._root) {
+        Transform &p_transform = ento.Transform();
+        if (std::abs(transform.GetRotation().x + 90.0f) <= 1.0f) {
+          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f)
+            p_transform.SetRotation(v3(0.0f));
+        }
+      }
+
+      if (transform.GetScale().x >= 100.0f) {
+        Ento p = ento;
+        while (p) {
+          Model &p_model = p.GetComponent<Model>();
+          if (!p_model._root) {
+            p = p.Parent();
+            continue;
+          }
+
+          Transform &p_transform = p.GetComponent<Transform>();
+          if (p_transform.GetScale().x < 1.0f)
+            break;
+
+          p_transform.SetScale(p_transform.GetScale() / 100.0f);
+        }
+      }
 
       log::debug("Processing node {}", node->mName.C_Str());
       ProcessNode(child, child_model, node->mChildren[i], scene);
@@ -188,8 +215,12 @@ namespace axl {
   void Model::Deserialize(const json &j) {
   }
 
-  bool Model::ShowData() {
-    return false;
+  bool Model::ShowComponent() {
+    bool modified = false;
+
+    ImGui::Text("Path: %s", _path.string().c_str());
+
+    return modified;
   }
 
 } // namespace axl

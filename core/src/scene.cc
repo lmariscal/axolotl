@@ -18,7 +18,7 @@ namespace axl {
     e.AddComponent<HierarchyComponent>();
 
     Tag &tag = e.AddComponent<Tag>();
-    name.empty() ? tag.value = "Entity" : tag.value = name;
+    name.empty() ? tag.value = "entity" : tag.value = name;
 
     Ento::_uuid_ento_map.insert(std::make_pair(e.id, e));
     Ento::_handle_ento_map.insert(std::make_pair(e.handle, e));

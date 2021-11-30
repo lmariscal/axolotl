@@ -54,7 +54,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     if (no_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
-      renderer.ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
+      v3 color(33, 33, 33);
+      renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
     } else {
@@ -64,7 +65,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
       terminal.show();
       frame_editor.Bind(window);
-      renderer.ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
+      v3 color(33, 33, 33);
+      renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 

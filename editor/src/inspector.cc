@@ -40,6 +40,7 @@ namespace axl {
       ImGui::OpenPopup("ComponentAddPopUp");
 
     ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.0f);
 
     ShowComponents(_selected_entity, scene);
 
@@ -80,7 +81,7 @@ namespace axl {
       }
       ImGui::SameLine();
 
-      std::array<char, 512> buffer;
+      std::array<char, 256> buffer;
       std::fill(buffer.begin(), buffer.end(), 0);
       std::strncpy(buffer.begin(), _model_path.c_str(), _model_path.size());
       if (ImGui::InputText("##model_path", buffer.data(), buffer.size()))
@@ -129,6 +130,7 @@ namespace axl {
 
         }
       }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
     }
 
     if (ento.HasComponent<Camera>()) {
@@ -136,6 +138,15 @@ namespace axl {
         Camera &camera = ento.GetComponent<Camera>();
         camera.ShowComponent();
       }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+    }
+
+    if (ento.HasComponent<Model>()) {
+      if (ImGui::CollapsingHeader("Model", ImGuiTreeNodeFlags_DefaultOpen)) {
+        Model &model = ento.GetComponent<Model>();
+        model.ShowComponent();
+      }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
     }
   }
 

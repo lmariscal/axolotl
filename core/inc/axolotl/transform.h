@@ -8,7 +8,10 @@ namespace axl {
   struct Transform {
     Transform();
     Transform(const v3& position, const v3& scale = v3(1.0f), const quat& rotation = quat());
-    ~Transform();
+    Transform(const Transform& other) = default;
+    Transform(Transform&& other) = default;
+    Transform & operator=(const Transform& other) = default;
+    Transform & operator=(Transform&& other) = default;
 
     json Serialize() const;
     void Deserialize(const json &json);
@@ -25,7 +28,7 @@ namespace axl {
     void SetRotation(const quat &rotation);
     void SetRotation(const v3 &rotation);
 
-    m4 GetModelMatrix(Ento &ento) const;
+    m4 GetModelMatrix(Ento ento) const;
 
    protected:
     v3 _position;

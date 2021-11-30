@@ -4,19 +4,48 @@
 #include <axolotl/scene.h>
 #include <axolotl/mesh.h>
 #include <axolotl/transform.h>
+#include <axolotl/ento.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
 namespace axl {
 
-  Model::Model(const std::filesystem::path &path, const ShaderPaths &paths, bool root):
+  Model::Model(Ento ento, const std::filesystem::path &path, const ShaderPaths &paths, bool root):
     _path(path),
     _shader_paths(paths),
     _root(root),
-    _meshes(std::make_shared<std::vector<Mesh *>>()),
-    Component("model")
+    _meshes(std::make_shared<std::vector<Mesh *>>())
   {
+    ento.TryAddComponent<Material>(_shader_paths);
+
+    if (!_root)
+      return;
+
+    log::debug("Loading model from {}", _path.string());
+    Assimp::Importer importer;
+
+    u32 flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs;
+    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb")
+      flags &= ~aiProcess_FlipUVs;
+    const aiScene *scene = importer.ReadFile(_path.string(), flags);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      log::error("Assimp error: {}", importer.GetErrorString());
+      return;
+    }
+
+    aiVector3D scale, position;
+    aiQuaternion rotation;
+    scene->mRootNode->mTransformation.Decompose(scale, rotation, position);
+    Transform &transform = ento.TryAddComponent<Transform>();
+    transform.SetPosition(v3(position.x, position.y, position.z));
+    transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
+    transform.SetScale(v3(scale.x, scale.y, scale.z));
+
+    ProcessNode(ento, scene->mRootNode, scene);
+
+    TextureStore::ProcessQueue();
   }
 
   Model::~Model() {
@@ -26,7 +55,8 @@ namespace axl {
       delete mesh;
   }
 
-  void Model::ProcessMaterialTextures(aiMaterial *ai_material, aiTextureType ai_type, const aiScene *scene, Model *model) {
+  void Model::ProcessMaterialTextures(Ento ento, aiMaterial *ai_material, aiTextureType ai_type) {
+    Model &model = ento.GetComponent<Model>();
     TextureType type = TextureType::Last;
     switch (ai_type) {
       case aiTextureType_DIFFUSE:
@@ -48,17 +78,17 @@ namespace axl {
         break;
     }
 
-    Material &material = model->_scene->GetComponent<Material>(model->_parent);
+    Material &material = ento.GetComponent<Material>();
     for (unsigned int i = 0; i < ai_material->GetTextureCount(ai_type); ++i) {
       aiString path;
       ai_material->GetTexture(ai_type, i, &path);
 
-      std::filesystem::path full_path = model->_path.parent_path() / path.C_Str();
+      std::filesystem::path full_path = model._path.parent_path() / path.C_Str();
       material.AddTexture(full_path, type);
     }
   }
 
-  Mesh * Model::ProcessMesh(aiMesh *mesh, const aiScene *scene, Model *model) {
+  Mesh * Model::ProcessMesh(Ento ento, aiMesh *mesh, const aiScene *scene) {
     std::vector<f32> buffer_data;
     std::vector<u32> indices;
 
@@ -87,35 +117,38 @@ namespace axl {
     }
 
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+    Model &model = ento.GetComponent<Model>();
 
-    ProcessMaterialTextures(material, aiTextureType_DIFFUSE, scene, model);
-    ProcessMaterialTextures(material, aiTextureType_SPECULAR, scene, model);
-    ProcessMaterialTextures(material, aiTextureType_AMBIENT, scene, model);
-    ProcessMaterialTextures(material, aiTextureType_NORMALS, scene, model);
-    ProcessMaterialTextures(material, aiTextureType_HEIGHT, scene, model);
+    ProcessMaterialTextures(ento, material, aiTextureType_DIFFUSE);
+    ProcessMaterialTextures(ento, material, aiTextureType_SPECULAR);
+    ProcessMaterialTextures(ento, material, aiTextureType_AMBIENT);
+    ProcessMaterialTextures(ento, material, aiTextureType_NORMALS);
+    ProcessMaterialTextures(ento, material, aiTextureType_HEIGHT);
 
     return new Mesh(buffer_data, indices);
   }
 
-  void Model::ProcessNode(aiNode *node, const aiScene *scene, Model *model) {
-    Ento &ento_p = model->_scene->GetComponent<Ento>(model->_parent);
-    ento_p.name = node->mName.C_Str();
+  void Model::ProcessNode(Ento ento, aiNode *node, const aiScene *scene) {
+    Model &model = ento.GetComponent<Model>();
+    ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-      Mesh *m = ProcessMesh(mesh, scene, model);
+      Mesh *m = ProcessMesh(ento, mesh, scene);
+
       if (node->mNumMeshes > 1)
         m->_single_mesh = false;
-      (*model->_meshes).push_back(m);
+
+      model._meshes->push_back(m);
       m->SetMaterialID(mesh->mMaterialIndex);
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-      entt::entity child = model->_scene->CreateEntity();
+      Ento child = Scene::GetActiveScene()->CreateEntity();
 
-      Transform &transform = model->_scene->AddComponent<Transform>(child);
-      Model *child_model = &model->_scene->AddComponent<Model>(child, model->_path, model->_shader_paths, false);
-      ento_p.AddChild(child);
+      Transform &transform = child.GetComponent<Transform>();
+      Model &child_model = child.AddComponent<Model>(child, model._path, model._shader_paths, false);
+      child.SetParent(ento);
 
       // aiVector3D scale, position;
       // aiQuaternion rotation;
@@ -125,15 +158,11 @@ namespace axl {
       // transform.SetScale(v3(scale.x, scale.y, scale.z));
 
       log::debug("Processing node {}", node->mName.C_Str());
-      ProcessNode(node->mChildren[i], scene, child_model);
+      ProcessNode(child, node->mChildren[i], scene);
     }
   }
 
-  void Model::Draw() {
-    if (_parent == entt::null)
-      return;
-
-    Material &material = _scene->GetComponent<Material>(_parent);
+  void Model::Draw(Material &material) {
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
@@ -150,39 +179,10 @@ namespace axl {
   }
 
   void Model::Init() {
-    _scene->TryAddComponent<Material>(_parent, _shader_paths);
-
-    if (!_root)
-      return;
-
-    log::debug("Loading model from {}", _path.string());
-    Assimp::Importer importer;
-
-    u32 flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs;
-    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb")
-      flags &= ~aiProcess_FlipUVs;
-    const aiScene *scene = importer.ReadFile(_path.string(), flags);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      log::error("Assimp error: {}", importer.GetErrorString());
-      return;
-    }
-
-    aiVector3D scale, position;
-    aiQuaternion rotation;
-    scene->mRootNode->mTransformation.Decompose(scale, rotation, position);
-    Transform &transform = _scene->TryAddComponent<Transform>(_parent);
-    transform.SetPosition(v3(position.x, position.y, position.z));
-    transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
-    transform.SetScale(v3(scale.x, scale.y, scale.z));
-
-    ProcessNode(scene->mRootNode, scene, this);
-
-    TextureStore::ProcessQueue();
   }
 
   json Model::Serialize() const {
-    json j = GetRootNode();
+    json j;
     return j;
   }
 

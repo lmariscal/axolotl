@@ -2,6 +2,7 @@
 
 #include <axolotl/types.h>
 #include <axolotl/renderer.h>
+#include <axolotl/ento.h>
 #include <entt/entt.hpp>
 
 #include "inspector.h"
@@ -10,7 +11,6 @@ namespace axl {
 
   class Scene;
   struct TerminalData;
-  struct Ento;
 
   class FrameEditor {
    public:
@@ -30,8 +30,8 @@ namespace axl {
     bool fullscreen_play;
 
    protected:
-    void ShowTreeEnto(Ento &ento, u32 depth, Scene &scene);
-    void ShowEntityPopUp(Ento *ento, Scene &scene);
+    void ShowTreeEnto(Ento ento, u32 depth, Scene &scene);
+    bool ShowEntityPopUp(Ento ento, Scene &scene);
 
     FrameBuffer _frame;
     Inspector _inspector;

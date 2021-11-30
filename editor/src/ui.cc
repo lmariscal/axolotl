@@ -30,7 +30,7 @@ namespace axl {
   void FrameEditor::Unbind(Window &window) {
     _frame.Unbind();
     v2i size = window.GetWindowFrameBufferSize();
-    window.GetRenderer()->Resize(size.x, size.y);
+    window.GetRenderer().Resize(size.x, size.y);
   }
 
   void FrameEditor::Draw(Window &window, TerminalData &data) {
@@ -55,7 +55,7 @@ namespace axl {
     }
     v2 current_region_available = v2(buffer_size);
 
-    IOManager *io_manager = window.GetIOManager();
+    IOManager &io = window.GetIOManager();
 
     v2 cursor_pos = ImGui::GetCursorPos();
 
@@ -151,7 +151,7 @@ namespace axl {
     ImGui::End();
     ImGui::PopStyleVar();
 
-    if (!io_manager->ButtonDown(MouseButton::Left) && _region_available != current_region_available) {
+    if (!io.ButtonDown(MouseButton::Left) && _region_available != current_region_available) {
       _region_available = current_region_available;
       _frame.SetSize(_region_available.x, _region_available.y);
       _frame.RebuildFrameBuffer();
@@ -162,27 +162,28 @@ namespace axl {
     bound_frame_ratio = state;
   }
 
-  void FrameEditor::ShowTreeEnto(Ento &ento, u32 depth, Scene &scene) {
+  void FrameEditor::ShowTreeEnto(Ento ento, u32 depth, Scene &scene) {
     ImGui::PushID(uuids::to_string(ento.id).c_str());
     std::stringstream label;
     label << ICON_FA_BOX << " ";
-    label << (ento.name.empty() ? uuids::to_string(ento.id) : ento.name);
+    label << (ento.Tag().value.empty() ? uuids::to_string(ento.id) : ento.Tag().value);
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-    if (ento.children.empty())
+    if (!ento.HasChildren())
       flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (_inspector._selected_entity == ento.entity)
+    if (_inspector._selected_entity == ento)
       flags |= ImGuiTreeNodeFlags_Selected;
 
     ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
     if (ImGui::IsItemClicked())
-      _inspector._selected_entity = ento.entity;
+      _inspector._selected_entity = ento;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
+    bool marked_for_deletion = false;
     if (ImGui::BeginPopupContextItem()) {
-      ShowEntityPopUp(&ento, scene);
+      marked_for_deletion = ShowEntityPopUp(ento, scene);
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar(2);
@@ -190,33 +191,36 @@ namespace axl {
     ImGui::PopStyleVar();
     ImGui::PopID();
 
-    if (!tree_open || ento.children.empty())
-      return;
+    if (tree_open && ento.HasChildren()) {
+      for (Ento child : ento.Children()) {
+        ShowTreeEnto(child, depth + 1, scene);
+      }
 
-    for (entt::entity c : ento.children) {
-      Ento &ento_c = scene.GetComponent<Ento>(c);
-      ShowTreeEnto(ento_c, depth + 1, scene);
+      ImGui::TreePop();
     }
 
-    ImGui::TreePop();
+    if (marked_for_deletion)
+      scene.RemoveEntity(ento);
+
     return;
   }
 
-  void FrameEditor::ShowEntityPopUp(Ento *ento, Scene &scene) {
+  bool FrameEditor::ShowEntityPopUp(Ento ento, Scene &scene) {
     if (ImGui::MenuItem(ICON_FA_PLUS_CIRCLE " Add")) {
-      entt::entity new_entity = scene.CreateEntity();
-      scene.AddComponent<Transform>(new_entity);
+      scene.CreateEntity();
       ImGui::CloseCurrentPopup();
     }
 
     if (!ento)
-      return;
+      return false;
 
+    bool marked_for_deletion = false;
     if (ImGui::MenuItem(ICON_FA_TRASH_ALT " Delete")) {
-      ento->marked_for_deletion = true;
-      _inspector._selected_entity = entt::null;
+      marked_for_deletion = true;
+      _inspector._selected_entity = { };
       ImGui::CloseCurrentPopup();
     }
+    return marked_for_deletion;
   }
 
   void FrameEditor::DrawEntityList(Scene &scene) {
@@ -224,22 +228,20 @@ namespace axl {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 6.0f));
     ImGui::Begin("Entities");
 
-    entt::registry *registry = scene.GetRegistry();
-    auto view = registry->view<Ento>();
-    for (auto entity : view) {
-      Ento &ento = registry->get<Ento>(entity);
-      if (ento.parent != entt::null)
-        continue;
+    scene._registry.each([&](auto entity) {
+      Ento ento = scene.FromHandle(entity);
+      if (!ento || ento.HasParent())
+        return;
       ShowTreeEnto(ento, 0, scene);
-    }
+    });
 
     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
-      _inspector._selected_entity = entt::null;
+      _inspector._selected_entity = { };
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
     if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {
-      ShowEntityPopUp(nullptr, scene);
+      ShowEntityPopUp({ }, scene);
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar(2);

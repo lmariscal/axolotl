@@ -3,6 +3,7 @@
 #include <axolotl/scene.h>
 #include <axolotl/camera.h>
 #include <axolotl/transform.h>
+#include <axolotl/ento.h>
 #include <axolotl/axolotl.h>
 #include <axolotl/model.h>
 #include <assimp/Importer.hpp>
@@ -17,32 +18,32 @@ namespace axl {
 
   void Inspector::Draw(Scene &scene) {
     ImGui::Begin("Inspector");
-    entt::registry *registry = scene.GetRegistry();
-
-    if (_selected_entity == entt::null) {
+    if (!_selected_entity) {
       ImGui::End();
       return;
     }
 
-    Ento &ento = registry->get<Ento>(_selected_entity);
+    Ento ento = Scene::GetActiveScene()->FromID(_selected_entity);
 
-    std::string name = ento.name.empty() ? "Unnamed" : ento.name;
+    Tag &tag = ento.Tag();
+    std::string name = tag.value.empty() ? "Unnamed" : tag.value;
     name.resize(64);
     ImGui::Text(ICON_FA_ID_BADGE " %s", uuids::to_string(ento.id).c_str());
     ImGui::Text("Name ");
     ImGui::SameLine();
     if (ImGui::InputText("##entity_name", name.data(), name.capacity())) {
-      ento.name = name;
+      tag.value = name;
     }
+
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_LAYER_PLUS " Add"))
       ImGui::OpenPopup("ComponentAddPopUp");
 
     ImGui::Separator();
 
-    for (Component *s : ento.components) {
-      s->ShowData();
-    }
+    // for (Component *s : ento.components) {
+    //   s->ShowData();
+    // }
 
     ShowAddComponent(scene);
 
@@ -52,7 +53,7 @@ namespace axl {
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       };
       log::info("Adding model \"{}\"", _model_path);
-      scene.TryAddComponent<Model>(_selected_entity, _model_path, shader_paths);
+      _selected_entity.AddComponent<Model>(ento, _model_path, shader_paths);
       _add_model = false;
       _model_path = "";
     }
@@ -102,11 +103,11 @@ namespace axl {
   void Inspector::ShowAddComponent(Scene &scene) {
     if (ImGui::BeginPopup("ComponentAddPopUp")) {
       if (ImGui::MenuItem("Camera")) {
-        scene.TryAddComponent<Camera>(_selected_entity);
+        _selected_entity.TryAddComponent<Camera>();
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Transform")) {
-        scene.TryAddComponent<Transform>(_selected_entity);
+        _selected_entity.TryAddComponent<Transform>();
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Model")) {

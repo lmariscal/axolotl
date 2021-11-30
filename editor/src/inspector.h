@@ -1,7 +1,7 @@
 #pragma once
 
 #include <axolotl/types.h>
-#include <entt/entt.hpp>
+#include <axolotl/ento.h>
 
 namespace axl {
 
@@ -22,7 +22,7 @@ namespace axl {
     std::string _model_path;
     bool _add_model = false;
     bool _want_model = false;
-    entt::entity _selected_entity = entt::null;
+    Ento _selected_entity;
   };
 
 } // namespace axl

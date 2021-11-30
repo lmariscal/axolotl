@@ -49,20 +49,16 @@ namespace axl {
     _rotation = rotation;
   }
 
-  m4 Transform::GetModelMatrix(Ento &ento) const {
+  m4 Transform::GetModelMatrix(Ento ento) const {
     m4 model(1.0f);
     model = translate(model, _position);
     model *= toMat4(_rotation);
     model = scale(model, _scale);
 
-    if (ento.parent.is_nil())
+    if (!ento.HasParent() || !ento.Parent())
       return model;
 
-    Ento &parent = Ento::FromID(ento.parent);
-    if (!parent)
-      return model;
-
-    return parent.GetComponent<Transform>().GetModelMatrix(ento) * model;
+    return ento.Parent().GetComponent<Transform>().GetModelMatrix(ento) * model;
   }
 
 } // namespace axl

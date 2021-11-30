@@ -49,7 +49,6 @@ namespace axl {
 
     json GetRootNode() const;
     bool VerifyRootNode(const json &j) const;
-    Ento & GetParent();
 
    protected:
     friend class Scene;

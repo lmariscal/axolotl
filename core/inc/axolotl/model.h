@@ -11,11 +11,11 @@
 
 namespace axl {
 
-  struct Model : public Component {
-    Model(const std::filesystem::path &path = "", const ShaderPaths &paths = { }, bool root = true);
+  struct Model {
+    Model(Ento ento, const std::filesystem::path &path = "", const ShaderPaths &paths = { }, bool root = true);
     ~Model();
 
-    void Draw();
+    void Draw(Material &material);
 
     virtual json Serialize() const;
     virtual void Deserialize(const json &json);
@@ -23,9 +23,9 @@ namespace axl {
     virtual void Init();
 
    protected:
-    static void ProcessNode(aiNode *node, const aiScene *scene, Model *model);
-    static Mesh * ProcessMesh(aiMesh *mesh, const aiScene *scene, Model *model);
-    static void ProcessMaterialTextures(aiMaterial *material, aiTextureType type, const aiScene *scene, Model *model);
+    static void ProcessNode(Ento ento, aiNode *node, const aiScene *scene);
+    static Mesh * ProcessMesh(Ento ento, aiMesh *mesh, const aiScene *scene);
+    static void ProcessMaterialTextures(Ento ento, aiMaterial *material, aiTextureType type);
 
     std::shared_ptr<std::vector<Mesh *>> _meshes;
     std::filesystem::path _path;

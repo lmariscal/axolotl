@@ -21,13 +21,15 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
 
-  Scene::SetActiveScene(new TestScene());
-  auto scene = Scene::GetActiveScene();
+  TestScene scene;
+  Scene::SetActiveScene(&scene);
 
   FrameEditor frame_editor;
 
   IOManager &io = window.GetIOManager();
   DockSpace dock_space;
+
+  scene.Init();
 
   while (window.Update() && !terminal_data.quit_requested) {
     if (terminal_data.watch_shaders) {
@@ -48,7 +50,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
 
     if (terminal_data.scene_playing && !terminal_data.scene_paused)
-      scene->Update(window);
+      scene.Update(window);
 
     if (no_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
@@ -66,17 +68,17 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    scene->Draw(renderer);
+    scene.Draw(renderer);
 
     if (!no_frame) {
       frame_editor.Unbind(window);
       renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
       frame_editor.Draw(window, terminal_data);
-      frame_editor.DrawEntityList(*scene);
-      frame_editor.DrawInspector(*scene);
+      frame_editor.DrawEntityList(scene);
+      frame_editor.DrawInspector(scene);
     }
 
-    scene->Focused(window, frame_editor.frame_focused);
+    scene.Focused(window, frame_editor.frame_focused);
 
     window.Draw();
 

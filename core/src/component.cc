@@ -402,9 +402,9 @@ namespace axl {
   }
 
   void Component::Destroy(Ento *ento) {
-    std::vector<Component *> &c = ento->components;
-    c.erase(std::remove(c.begin(), c.end(), this), c.end());
-    _parent = entt::null;
+    // std::vector<Component *> &c = ento->components;
+    // c.erase(std::remove(c.begin(), c.end(), this), c.end());
+    // _parent = entt::null;
   }
 
   json Component::GetRootNode() const {
@@ -469,10 +469,6 @@ namespace axl {
     ImGui::PopID();
 
     return modified;
-  }
-
-  Ento & Component::GetParent() {
-    return _scene->GetComponent<Ento>(_parent);
   }
 
 } // namespace axl

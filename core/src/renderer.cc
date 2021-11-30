@@ -42,13 +42,11 @@ namespace axl {
       projection = camera->GetProjectionMatrix(*_window);
     }
 
-    auto entities = registry.view<Ento, Model, Material>();
+    auto entities = registry.group<Ento, Model, Material>();
     for (auto entity : entities) {
-      Ento &ento = entities.get<Ento>(entity);
+      Ento ento = entities.get<Ento>(entity);
       Model &model = ento.GetComponent<Model>();
       Material &material = ento.GetComponent<Material>();
-      if (ento.marked_for_deletion)
-        continue;
 
       m4 model_mat(1.0f);
       if (ento.HasAllOf<Transform>())
@@ -60,7 +58,8 @@ namespace axl {
       material.GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
       material.GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
       material.GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
-      model.Draw();
+
+      model.Draw(material);
     }
   }
 

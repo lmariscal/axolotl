@@ -3,6 +3,7 @@
 #include <axolotl/types.h>
 #include <axolotl/transform.h>
 #include <axolotl/component.h>
+#include <axolotl/ento.h>
 
 namespace axl {
 
@@ -17,19 +18,18 @@ namespace axl {
     Right
   };
 
-  struct Camera : public Component {
+  struct Camera {
    public:
     Camera();
+    ~Camera();
 
-    virtual json Serialize() const;
-    virtual void Deserialize(const json &json);
-    virtual bool ShowData();
-    virtual void Init();
-    virtual void Destroy(Ento *ento);
+    json Serialize() const;
+    void Deserialize(const json &json);
+    bool ShowData(Ento ento);
 
-    void MoveCamera(CameraDirection direction, Window &window);
-    void RotateCamera(const v2 &mouse_delta, Window &window); // euler angles
-    void SetAsActive();
+    void MoveCamera(CameraDirection direction, f32 delta_time);
+    void RotateCamera(const v2 &mouse_delta, f32 delta_time); // euler angles
+    void SetAsActive(Ento ento);
     void SetOrthographic();
     void SetPerspective();
     void SetMovementSpeed(f32 speed);
@@ -41,8 +41,9 @@ namespace axl {
     static Camera * GetActiveCamera();
 
    protected:
+    inline static Ento _active_camera_ento;
 
-    inline static entt::entity _active_camera;
+    Transform transform;
 
     v3 _last_position;
     v3 _last_rotation;
@@ -57,6 +58,7 @@ namespace axl {
     f32 _fov;
 
     bool _is_orthographic;
+    bool _is_active_camera;
   };
 
 } // namespace axl

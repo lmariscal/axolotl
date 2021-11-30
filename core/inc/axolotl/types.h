@@ -13,6 +13,8 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <cstdint>
+#include <signal.h>
+#include <uuid.h>
 
 namespace axl {
 
@@ -49,6 +51,7 @@ namespace axl {
   using m4 = mat4;
 
   using json = nlohmann::json;
+  using uuid = uuids::uuid;
 
 #ifndef M_PI
   constexpr f32 M_PI = 3.14159265358979323846;
@@ -99,3 +102,15 @@ namespace axl {
 #define IM_VEC4_CLASS_EXTRA                                                 \
         ImVec4(const axl::v4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
         operator axl::v4() const { return axl::v4(x,y,z,w); }
+
+#ifdef AXL_DEBUG
+#define AXL_ASSERT(validate, ...) { \
+  if (!validate) { log::error("Assertion failed..."); \
+    log::error("{}:{}:{}", __FILE__, __FUNCTION__, __LINE__); \
+    log::error(__VA_ARGS__); \
+    raise(SIGTRAP); \
+  } \
+}
+#else
+#define AXL_ASSERT(validate, ...)
+#endif

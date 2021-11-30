@@ -8,23 +8,28 @@
 #include <vector>
 
 #include <axolotl/component.h>
+#include <axolotl/transform.h>
 #include <axolotl/scene.h>
 
 namespace axl {
+
+  struct HierarchyComponent {
+    uuid parent;
+    std::vector<uuid> children;
+  };
 
   struct Tag {
     std::string value;
 
     Tag(const std::string &value): value(value) { }
+    Tag(): value("Entity") {  }
   };
 
   struct Ento {
-    Ento(): handle(entt::null), scene(nullptr) { }
+    Ento(): handle(entt::null), scene(nullptr), id(uuid()) { }
     Ento(entt::entity handle, Scene *scene);
     ~Ento();
 
-    void AddChild(entt::entity e);
-    void RemoveChild(entt::entity e);
     json Serialize() const;
 
     template<typename... Components>
@@ -43,28 +48,35 @@ namespace axl {
 
     template<typename T, typename... Args>
     T& AddComponent(Args&&... args) {
-      asssert(!HasAllOf<T>(), "Entity already has component");
+      AXL_ASSERT(!HasAllOf<T>(), "Entity already has component");
 
+      return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
+    }
+
+    template<typename T, typename... Args>
+    T& TryAddComponent(Args&&... args) {
+      if (HasAllOf<T>())
+        return GetComponent<T>();
       return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
     }
 
     template<typename T>
     T& GetComponent() {
-      asssert(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
     const T& GetComponent() const {
-      asssert(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
     void RemoveComponent() {
-      asssert(HasAllOf<T>(), "Entity does not have component");
+      AXL_ASSERT(HasAllOf<T>(), "Entity does not have component");
 
       scene->_registry.remove<T>(handle);
     }
@@ -73,21 +85,48 @@ namespace axl {
       return handle != entt::null;
     }
 
-    static Ento & FromID(uuids::uuid id);
+    operator entt::entity() const {
+      return handle;
+    }
 
-    uuids::uuid id;
+    operator uuid() const {
+      return id;
+    }
+
+    bool operator==(const Ento &other) const {
+      return handle == other.handle;
+    }
+
+    bool operator!=(const Ento &other) const {
+      return handle != other.handle;
+    }
+
+    Transform & Transform();
+    const struct Transform & Transform() const;
+
+    Tag & Tag();
+    const struct Tag & Tag() const;
+
+    bool HasParent() const;
+    bool HasChildren() const;
+    Ento Parent();
+    void SetParent(Ento parent);
+    void AddChild(Ento child);
+    void RemoveChild(Ento child);
+    std::vector<Ento> Children();
+
+    uuid id;
     entt::entity handle;
     Scene *scene;
 
-    bool marked_for_deletion;
-
-    uuids::uuid parent;
-    std::vector<uuids::uuid> children;
-
    protected:
+    friend class Scene;
+
     static uuids::uuid_random_generator _uuid_generator;
+
     inline static bool _first_gen = true;
-    inline static std::map<uuids::uuid, entt::entity> _ento_map;
+    inline static std::map<uuid, Ento> _uuid_ento_map;
+    inline static std::map<entt::entity, Ento> _handle_ento_map;
   };
 
 } // namespace axl

@@ -1,6 +1,5 @@
 #include <axolotl/ento.h>
-
-#include <axolotl/scene.h>
+#include <axolotl/transform.h>
 
 namespace axl {
 
@@ -22,72 +21,78 @@ namespace axl {
     }
 
     id = _uuid_generator();
-    _ento_map.insert(std::make_pair(id, handle));
   }
 
   Ento::~Ento() {
-    log::debug("Deleting ento {}", uuids::to_string(id));
+    if (id.is_nil())
+      return;
   }
 
-  void Ento::Destroy() {
-    if (parent != entt::null) {
-      Ento &ento_p = scene->GetComponent<Ento>(parent);
-      ento_p.RemoveChild(entity);
-    }
-
-    _ento_map.erase(id);
-
-    for (entt::entity child : children) {
-      Ento &ento_c = scene->GetComponent<Ento>(child);
-      ento_c.parent = entt::null;
-    }
-
-    for (Component *c : components)
-      c->_parent = entt::null;
-
-    entity = entt::null;
+  void Ento::AddChild(Ento child) {
+    HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    hierarchy.children.push_back(child.id);
+    child.SetParent(*this);
   }
 
-  entt::entity Ento::FromID(uuids::uuid id) {
-    return _ento_map[id];
-  }
-
-  void Ento::AddChild(entt::entity e) {
-    children.push_back(e);
-    Ento &ento_c = scene->GetComponent<Ento>(e);
-    ento_c.parent = entity;
-  }
-
-  void Ento::RemoveChild(entt::entity e) {
-    children.erase(std::remove(children.begin(), children.end(), e), children.end());
-    Ento &ento_c = scene->GetComponent<Ento>(e);
-    ento_c.parent = entt::null;
+  void Ento::RemoveChild(Ento child) {
+    HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    hierarchy.children.erase(
+        std::remove(hierarchy.children.begin(), hierarchy.children.end(), child),
+        hierarchy.children.end()
+      );
+    child.SetParent({ });
   }
 
   json Ento::Serialize() const {
     json j;
-    j["name"] = name;
-    j["id"] = uuids::to_string(id);
-    if (parent != entt::null) {
-      Ento &ento_p = scene->GetComponent<Ento>(parent);
-      j["parent"] = uuids::to_string(ento_p.id);
-    }
-
-    if (!components.empty()) {
-      j["components"] = json::array();
-      for (auto &c : components)
-        j["components"].push_back(c->Serialize());
-    }
-
-    if (!children.empty()) {
-      j["children"] = json::array();
-      for (auto &c : children) {
-        Ento &ento_c = scene->GetComponent<Ento>(c);
-        j["children"].push_back(uuids::to_string(ento_c.id));
-      }
-    }
-
     return j;
+  }
+
+  Transform & Ento::Transform() {
+    return GetComponent<struct Transform>();
+  }
+
+  const Transform & Ento::Transform() const {
+    return GetComponent<struct Transform>();
+  }
+
+  Tag & Ento::Tag() {
+    return GetComponent<struct Tag>();
+  }
+
+  const Tag & Ento::Tag() const {
+    return GetComponent<struct Tag>();
+  }
+
+  Ento Ento::Parent() {
+    HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    if (hierarchy.parent.is_nil())
+      return { };
+    return scene->FromID(hierarchy.parent);
+  }
+
+  bool Ento::HasParent() const {
+    const HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    return !hierarchy.parent.is_nil();
+  }
+
+  bool Ento::HasChildren() const {
+    const HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    return !hierarchy.children.empty();
+  }
+
+  void Ento::SetParent(Ento parent) {
+    HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    hierarchy.parent = parent.id;
+  }
+
+  std::vector<Ento> Ento::Children() {
+    HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    std::vector<Ento> children;
+    for (auto id : hierarchy.children) {
+      children.push_back(scene->FromID(id));
+    }
+    return children;
   }
 
 } // namespace axl

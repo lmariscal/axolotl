@@ -17,20 +17,33 @@ namespace axl {
     virtual void Focused(Window &window, bool stat) = 0;
 
     Ento CreateEntity(const std::string &name = "");
-    void RemoveEntity(Ento &ento);
+    void RemoveEntity(Ento ento);
+    Ento FromID(uuid id);
+    Ento FromHandle(entt::entity handle);
 
     void Draw(Renderer &renderer);
     json Serialize();
 
     static void SetActiveScene(Scene *scene);
-    static std::shared_ptr<Scene> GetActiveScene();
+    static Scene * GetActiveScene();
 
    protected:
     friend class Ento;
+    friend class FrameEditor;
+
+    template<typename T>
+    T & GetComponent(entt::entity handle) {
+      return _registry.get<T>(handle);
+    }
+
+    template<typename T>
+    T & GetComponent(entt::entity handle) const {
+      return _registry.get<T>(handle);
+    }
 
     entt::registry _registry;
 
-    static inline std::shared_ptr<Scene> _active_scene;
+    static inline Scene *_active_scene;
   };
 
 } // namespace axl

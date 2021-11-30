@@ -1,12 +1,17 @@
 #include <axolotl/ento.h>
 
+#include <axolotl/scene.h>
+
 namespace axl {
 
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
 
-  Ento::Ento():
-    parent(nullptr),
-    marked_for_deletion(false)
+  Ento::Ento(entt::entity e, Scene &scene):
+    parent(entt::null),
+    marked_for_deletion(false),
+    children({ }),
+    entity(e),
+    scene(&scene)
   {
     if (_first_gen) {
       std::random_device rd;
@@ -22,35 +27,56 @@ namespace axl {
     name.reserve(64);
     id = _uuid_generator();
 
-    _ento_map.insert(std::make_pair(id, this));
+    _ento_map.insert(std::make_pair(id, entity));
   }
 
   Ento::~Ento() {
-    if (parent)
-      parent->RemoveChild(this);
+    log::debug("Deleting ento {}", uuids::to_string(id));
+  }
+
+  void Ento::Destroy() {
+    if (parent != entt::null) {
+      Ento &ento_p = scene->GetComponent<Ento>(parent);
+      ento_p.RemoveChild(entity);
+    }
 
     _ento_map.erase(id);
 
-    for (auto child : children)
-      child->parent = nullptr;
+    for (entt::entity child : children) {
+      Ento &ento_c = scene->GetComponent<Ento>(child);
+      ento_c.parent = entt::null;
+    }
+
+    for (Component *c : components)
+      c->_parent = entt::null;
+
+    entity = entt::null;
   }
 
-  void Ento::AddChild(Ento *ento) {
-    children.push_back(ento);
-    ento->parent = this;
+  entt::entity Ento::FromID(uuids::uuid id) {
+    return _ento_map[id];
   }
 
-  void Ento::RemoveChild(Ento *ento) {
-    children.erase(std::remove(children.begin(), children.end(), ento), children.end());
-    ento->parent = nullptr;
+  void Ento::AddChild(entt::entity e) {
+    children.push_back(e);
+    Ento &ento_c = scene->GetComponent<Ento>(e);
+    ento_c.parent = entity;
+  }
+
+  void Ento::RemoveChild(entt::entity e) {
+    children.erase(std::remove(children.begin(), children.end(), e), children.end());
+    Ento &ento_c = scene->GetComponent<Ento>(e);
+    ento_c.parent = entt::null;
   }
 
   json Ento::Serialize() const {
     json j;
     j["name"] = name;
     j["id"] = uuids::to_string(id);
-    if (parent)
-      j["parent"] = uuids::to_string(parent->id);
+    if (parent != entt::null) {
+      Ento &ento_p = scene->GetComponent<Ento>(parent);
+      j["parent"] = uuids::to_string(ento_p.id);
+    }
 
     if (!components.empty()) {
       j["components"] = json::array();
@@ -60,8 +86,10 @@ namespace axl {
 
     if (!children.empty()) {
       j["children"] = json::array();
-      for (auto &c : children)
-        j["children"].push_back(uuids::to_string(id));
+      for (auto &c : children) {
+        Ento &ento_c = scene->GetComponent<Ento>(c);
+        j["children"].push_back(uuids::to_string(ento_c.id));
+      }
     }
 
     return j;

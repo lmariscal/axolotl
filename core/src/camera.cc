@@ -17,21 +17,21 @@ namespace axl {
   {
   }
 
-  void Camera::Destroy() {
+  void Camera::Destroy(Ento *ento) {
     log::debug("Camera::Destroy()");
-    if (_parent->entity == _active_camera)
+    if (_parent == _active_camera)
       _active_camera = entt::null;
   }
 
   void Camera::Init() {
-    Transform &transform = _scene->TryAddComponent<Transform>(*_parent);
+    Transform &transform = _scene->TryAddComponent<Transform>(_parent);
     transform.SetPosition({ 0.0f, 0.0f, 0.0f });
     transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
     UpdateVectors();
   }
 
   void Camera::MoveCamera(CameraDirection direction, Window &window) {
-    Transform &transform = _scene->GetComponent<Transform>(*_parent);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
     switch (direction) {
@@ -59,7 +59,7 @@ namespace axl {
   void Camera::RotateCamera(const v2 &mouse_delta, Window &window) {
     IOManager *io_manager = window.GetIOManager();
     f32 delta = window.GetDeltaTime();
-    Transform &transform = _scene->GetComponent<Transform>(*_parent);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
 
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
@@ -91,7 +91,7 @@ namespace axl {
   }
 
   void Camera::UpdateVectors() {
-    Transform &transform = _scene->GetComponent<Transform>(*_parent);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -106,12 +106,12 @@ namespace axl {
   }
 
   m4 Camera::GetViewMatrix() {
-    Transform &transform = _scene->GetComponent<Transform>(*_parent);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
     return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
   }
 
   void Camera::SetAsActive() {
-    _active_camera = *_parent;
+    _active_camera = _parent;
   }
 
   Camera * Camera::GetActiveCamera() {
@@ -153,6 +153,11 @@ namespace axl {
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
     if (ImGui::CollapsingHeader("Camera", flags)) {
+      bool active = _active_camera == _parent;
+      if (axl::ShowData("Active", active)) {
+        if (active)
+          SetAsActive();
+      }
       if (axl::ShowData("Orthographic", _is_orthographic))
         modified = true;
       if (axl::ShowData("Speed", _movement_speed))
@@ -163,7 +168,7 @@ namespace axl {
         modified = true;
     }
 
-    Transform &transform = _scene->GetComponent<Transform>(*_parent);
+    Transform &transform = _scene->GetComponent<Transform>(_parent);
     if (_last_position != transform.GetPosition()) {
       _last_position = transform.GetPosition();
       modified = true;

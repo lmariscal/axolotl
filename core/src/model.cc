@@ -48,7 +48,7 @@ namespace axl {
         break;
     }
 
-    Material &material = model->_scene->GetComponent<Material>(*model->_parent);
+    Material &material = model->_scene->GetComponent<Material>(model->_parent);
     for (unsigned int i = 0; i < ai_material->GetTextureCount(ai_type); ++i) {
       aiString path;
       ai_material->GetTexture(ai_type, i, &path);
@@ -98,7 +98,9 @@ namespace axl {
   }
 
   void Model::ProcessNode(aiNode *node, const aiScene *scene, Model *model) {
-      log::warn("Node with more than one mesh");
+    Ento &ento_p = model->_scene->GetComponent<Ento>(model->_parent);
+    ento_p.name = node->mName.C_Str();
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
       Mesh *m = ProcessMesh(mesh, scene, model);
@@ -113,8 +115,7 @@ namespace axl {
 
       Transform &transform = model->_scene->AddComponent<Transform>(child);
       Model *child_model = &model->_scene->AddComponent<Model>(child, model->_path, model->_shader_paths, false);
-      model->_parent->AddChild(child_model->_parent);
-      model->_parent->name = node->mName.C_Str();
+      ento_p.AddChild(child);
 
       // aiVector3D scale, position;
       // aiQuaternion rotation;
@@ -129,7 +130,10 @@ namespace axl {
   }
 
   void Model::Draw() {
-    Material &material = _scene->GetComponent<Material>(*_parent);
+    if (_parent == entt::null)
+      return;
+
+    Material &material = _scene->GetComponent<Material>(_parent);
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
@@ -146,7 +150,7 @@ namespace axl {
   }
 
   void Model::Init() {
-    _scene->TryAddComponent<Material>(*_parent, _shader_paths);
+    _scene->TryAddComponent<Material>(_parent, _shader_paths);
 
     if (!_root)
       return;
@@ -167,7 +171,7 @@ namespace axl {
     aiVector3D scale, position;
     aiQuaternion rotation;
     scene->mRootNode->mTransformation.Decompose(scale, rotation, position);
-    Transform &transform = _scene->TryAddComponent<Transform>(*_parent);
+    Transform &transform = _scene->TryAddComponent<Transform>(_parent);
     transform.SetPosition(v3(position.x, position.y, position.z));
     transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
     transform.SetScale(v3(scale.x, scale.y, scale.z));

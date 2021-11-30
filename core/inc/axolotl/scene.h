@@ -18,10 +18,10 @@ namespace axl {
     virtual void Update(Window &window) = 0;
     virtual void Focused(Window &window, bool stat) = 0;
 
-    entt::registry * GetRegistry();
     entt::entity CreateEntity();
     void RemoveEntity(const entt::entity entity);
     void Draw(Renderer &renderer);
+    json Serialize();
 
     static Scene * GetActiveScene();
 
@@ -30,9 +30,9 @@ namespace axl {
       ENTT_ASSERT(_registry.valid(entity), "Invalid entity");
       auto &c = _registry.emplace<ComponentType>(entity, std::forward<Args>(args)...);
       if constexpr (std::is_base_of_v<Component, ComponentType>) {
-        Ento *ento = &_registry.get<Ento>(entity);
-        ento->components.push_back(&c);
-        c._parent = ento;
+        Ento &ento = _registry.get<Ento>(entity);
+        ento.components.push_back(&c);
+        c._parent = entity;
         c._scene = this;
         c.Init();
       }

@@ -5,6 +5,7 @@
 #include <entt/entt.hpp>
 #include <imgui.h>
 #include <limits>
+#include <uuid.h>
 
 namespace axl {
 
@@ -31,6 +32,12 @@ namespace axl {
   class Component {
    public:
     Component(std::string name): _name(name) { }
+    virtual ~Component();
+
+    Component(const Component &other);
+    Component(Component &&other);
+
+    Component &operator=(const Component &other);
 
     virtual json Serialize() const = 0;
     virtual void Deserialize(const json &json) = 0;
@@ -38,18 +45,20 @@ namespace axl {
     virtual bool ShowData() = 0;
 
     virtual void Init() = 0;
-    virtual void Destroy() {  };
+    virtual void Destroy(Ento *ento);
 
     json GetRootNode() const;
     bool VerifyRootNode(const json &j) const;
+    Ento & GetParent();
 
    protected:
     friend class Scene;
+    friend class Ento;
 
     u32 _version_major = 0;
     u32 _version_minor = 1;
 
-    Ento *_parent;
+    entt::entity _parent;
     Scene *_scene = nullptr;
     std::string _name;
   };

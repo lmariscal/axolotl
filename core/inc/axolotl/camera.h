@@ -25,7 +25,7 @@ namespace axl {
     virtual void Deserialize(const json &json);
     virtual bool ShowData();
     virtual void Init();
-    virtual void Destroy();
+    virtual void Destroy(Ento *ento);
 
     void MoveCamera(CameraDirection direction, Window &window);
     void RotateCamera(const v2 &mouse_delta, Window &window); // euler angles

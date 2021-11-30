@@ -162,27 +162,27 @@ namespace axl {
     bound_frame_ratio = state;
   }
 
-  void FrameEditor::ShowTreeEnto(Ento *ento, u32 depth, Scene &scene) {
-    ImGui::PushID(uuids::to_string(ento->id).c_str());
+  void FrameEditor::ShowTreeEnto(Ento &ento, u32 depth, Scene &scene) {
+    ImGui::PushID(uuids::to_string(ento.id).c_str());
     std::stringstream label;
     label << ICON_FA_BOX << " ";
-    label << (ento->name.empty() ? uuids::to_string(ento->id) : ento->name);
+    label << (ento.name.empty() ? uuids::to_string(ento.id) : ento.name);
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-    if (ento->children.empty())
+    if (ento.children.empty())
       flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (_inspector._selected_entity == *ento)
+    if (_inspector._selected_entity == ento.entity)
       flags |= ImGuiTreeNodeFlags_Selected;
 
     ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
     if (ImGui::IsItemClicked())
-      _inspector._selected_entity = *ento;
+      _inspector._selected_entity = ento.entity;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
     if (ImGui::BeginPopupContextItem()) {
-      ShowEntityPopUp(ento, scene);
+      ShowEntityPopUp(&ento, scene);
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar(2);
@@ -190,11 +190,14 @@ namespace axl {
     ImGui::PopStyleVar();
     ImGui::PopID();
 
-    if (!tree_open || ento->children.empty())
+    if (!tree_open || ento.children.empty())
       return;
 
-    for (Ento *c : ento->children)
-      ShowTreeEnto(c, depth + 1, scene);
+    for (entt::entity c : ento.children) {
+      Ento &ento_c = scene.GetComponent<Ento>(c);
+      ShowTreeEnto(ento_c, depth + 1, scene);
+    }
+
     ImGui::TreePop();
     return;
   }
@@ -225,9 +228,9 @@ namespace axl {
     auto view = registry->view<Ento>();
     for (auto entity : view) {
       Ento &ento = registry->get<Ento>(entity);
-      if (ento.parent)
+      if (ento.parent != entt::null)
         continue;
-      ShowTreeEnto(&ento, 0, scene);
+      ShowTreeEnto(ento, 0, scene);
     }
 
     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))

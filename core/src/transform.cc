@@ -104,11 +104,14 @@ namespace axl {
     model *= toMat4(_rotation);
     model = scale(model, _scale);
 
-    Ento &ento = _scene->GetComponent<Ento>(*_parent);
-    if (!ento.parent)
+    if (_parent == entt::null)
       return model;
 
-    Transform *grandpa = _scene->TryGetComponent<Transform>(ento.parent->entity);
+    Ento &ento = _scene->GetComponent<Ento>(_parent);
+    if (ento.parent == entt::null)
+      return model;
+
+    Transform *grandpa = _scene->TryGetComponent<Transform>(ento.parent);
     if (!grandpa)
       return model;
 

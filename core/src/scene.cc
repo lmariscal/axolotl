@@ -13,27 +13,30 @@ namespace axl {
   Scene::~Scene() {
   }
 
-  entt::registry * Scene::GetRegistry() {
-    return &_registry;
-  }
-
   entt::entity Scene::CreateEntity() {
     entt::entity e = _registry.create();
-    Ento &ento = _registry.emplace<Ento>(e);
-    ento.entity = e;
+    Ento &ento = _registry.emplace<Ento>(e, e, *this);
     log::debug("Created entity with id {}", uuids::to_string(ento.id));
     return e;
   }
 
   void Scene::RemoveEntity(entt::entity e) {
-    ENTT_ASSERT(_registry.valid(e), "Invalid entity");
+    if (!_registry.valid(e)) {
+      log::error("Trying to remove invalid entity {}", e);
+      return;
+    }
+
     Ento *ento = _registry.try_get<Ento>(e);
 
-    for (Component *c : ento->components)
-      c->Destroy();
+    for (Component *c : ento->components) {
+      c->Destroy(ento);
+      c->_parent = entt::null;
+    }
 
-    for (Ento *c : ento->children)
-      RemoveEntity(*c);
+    for (entt::entity c : ento->children)
+      RemoveEntity(c);
+
+    ento->Destroy();
 
     _registry.destroy(e);
     log::debug("Removed entity with id {}", uuids::to_string(ento->id));
@@ -45,6 +48,16 @@ namespace axl {
 
   Scene * Scene::GetActiveScene() {
     return _active_scene;
+  }
+
+  json Scene::Serialize() {
+    json j;
+    j["entities"] = json::array();
+    for (auto &e : _registry.view<Ento>()) {
+      Ento &ento = _registry.get<Ento>(e);
+      j["entities"].push_back(ento.Serialize());
+    }
+    return j;
   }
 
 }

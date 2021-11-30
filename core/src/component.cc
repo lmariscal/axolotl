@@ -1,5 +1,8 @@
 #include <axolotl/component.h>
 
+#include <axolotl/ento.h>
+#include <axolotl/scene.h>
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -374,6 +377,36 @@ namespace axl {
     return modified;
   }
 
+  Component::Component(Component &&other) {
+    log::error("Trying to swap a component! Name: {}", other._name);
+  }
+
+  Component::Component(const Component &other) {
+    // _parent = other._parent;
+    // _scene = other._scene;
+    // _name = other._name;
+
+    // Ento &p = GetParent();
+    // p.components.push_back(this);
+    log::error("Trying to clone, not swap a component! Name: {}", other._name);
+  }
+
+  Component &Component::operator=(const Component &other) {
+    log::error("Trying to operator=, not swap a component! Name: {}", other._name);
+    return *this;
+  }
+
+  Component::~Component() {
+    if (_parent == entt::null)
+      return;
+  }
+
+  void Component::Destroy(Ento *ento) {
+    std::vector<Component *> &c = ento->components;
+    c.erase(std::remove(c.begin(), c.end(), this), c.end());
+    _parent = entt::null;
+  }
+
   json Component::GetRootNode() const {
     json j;
     j["type"] = _name;
@@ -436,6 +469,10 @@ namespace axl {
     ImGui::PopID();
 
     return modified;
+  }
+
+  Ento & Component::GetParent() {
+    return _scene->GetComponent<Ento>(_parent);
   }
 
 } // namespace axl

@@ -6,12 +6,9 @@ namespace axl {
 
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
 
-  Ento::Ento(entt::entity e, Scene &scene):
-    parent(entt::null),
-    marked_for_deletion(false),
-    children({ }),
-    entity(e),
-    scene(&scene)
+  Ento::Ento(entt::entity handle, Scene *scene):
+    handle(handle),
+    scene(scene)
   {
     if (_first_gen) {
       std::random_device rd;
@@ -24,10 +21,8 @@ namespace axl {
       _first_gen = false;
     }
 
-    name.reserve(64);
     id = _uuid_generator();
-
-    _ento_map.insert(std::make_pair(id, entity));
+    _ento_map.insert(std::make_pair(id, handle));
   }
 
   Ento::~Ento() {

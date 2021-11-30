@@ -179,8 +179,7 @@ namespace axl {
     style.WindowBorderSize = 1.0f;
   }
 
-  GUI::GUI(Renderer *renderer, Window *window):
-    _renderer(renderer),
+  GUI::GUI(Window *window):
     _lock_mouse(false)
   {
     IMGUI_CHECKVERSION();

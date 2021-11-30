@@ -33,7 +33,7 @@ namespace axl {
     RegisterEvents();
 
     _renderer = new Renderer(this);
-    _gui = new GUI(_renderer, this);
+    _gui = new GUI(this);
 
     v2d mouse_pos;
     glfwGetCursorPos(_window, &mouse_pos.x, &mouse_pos.y);
@@ -51,8 +51,8 @@ namespace axl {
     delete _io_manager;
   }
 
-  IOManager * Window::GetIOManager() const {
-    return _io_manager;
+  IOManager & Window::GetIOManager() const {
+    return *_io_manager;
   }
 
   bool Window::Update() {
@@ -75,12 +75,12 @@ namespace axl {
     glfwSwapBuffers(_window);
   }
 
-  Renderer * Window::GetRenderer() const {
-    return _renderer;
+  Renderer & Window::GetRenderer() const {
+    return *_renderer;
   }
 
-  GUI * Window::GetGUI() const {
-    return _gui;
+  GUI & Window::GetGUI() const {
+    return *_gui;
   }
 
   GLFWwindow * Window::GetGLFWWindow() const {

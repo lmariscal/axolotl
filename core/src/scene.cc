@@ -3,50 +3,38 @@
 #include <axolotl/shader.h>
 #include <axolotl/renderer.h>
 #include <axolotl/mesh.h>
+#include <axolotl/ento.h>
+#include <axolotl/transform.h>
 
 namespace axl {
 
-  Scene::Scene() {
-    _active_scene = this;
+  void Scene::SetActiveScene(Scene *scene) {
+    _active_scene = std::make_shared<Scene>(scene);
   }
 
-  Scene::~Scene() {
-  }
-
-  entt::entity Scene::CreateEntity() {
-    entt::entity e = _registry.create();
-    Ento &ento = _registry.emplace<Ento>(e, e, *this);
-    log::debug("Created entity with id {}", uuids::to_string(ento.id));
+  Ento Scene::CreateEntity(const std::string &name) {
+    Ento e(_registry.create(), this);
+    e.AddComponent<Transform>();
+    Tag &tag = e.AddComponent<Tag>();
+    name.empty() ? tag.value = "Entity" : tag.value = name;
     return e;
   }
 
-  void Scene::RemoveEntity(entt::entity e) {
-    if (!_registry.valid(e)) {
-      log::error("Trying to remove invalid entity {}", e);
+  void Scene::RemoveEntity(Ento &e) {
+    if (!_registry.valid(e.handle)) {
+      log::error("Trying to remove invalid entity {}->{}", e.handle, e.id);
       return;
     }
 
-    Ento *ento = _registry.try_get<Ento>(e);
-
-    for (Component *c : ento->components) {
-      c->Destroy(ento);
-      c->_parent = entt::null;
-    }
-
-    for (entt::entity c : ento->children)
-      RemoveEntity(c);
-
-    ento->Destroy();
-
-    _registry.destroy(e);
-    log::debug("Removed entity with id {}", uuids::to_string(ento->id));
+    _registry.destroy(e.handle);
+    log::debug("Removed entity with id {}", uuids::to_string(e.id));
   }
 
   void Scene::Draw(Renderer &renderer) {
     renderer.Render(_registry);
   }
 
-  Scene * Scene::GetActiveScene() {
+  std::shared_ptr<Scene> Scene::GetActiveScene() {
     return _active_scene;
   }
 

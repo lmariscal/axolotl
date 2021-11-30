@@ -23,10 +23,6 @@ namespace axl {
     }
   }
 
-  Renderer::~Renderer() {
-
-  }
-
   void Renderer::ClearScreen(const v3 &color) {
     glClearColor(color.x, color.y, color.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -48,16 +44,15 @@ namespace axl {
 
     auto entities = registry.view<Ento, Model, Material>();
     for (auto entity : entities) {
-      Model &model = entities.get<Model>(entity);
-      Material &material = entities.get<Material>(entity);
       Ento &ento = entities.get<Ento>(entity);
+      Model &model = ento.GetComponent<Model>();
+      Material &material = ento.GetComponent<Material>();
       if (ento.marked_for_deletion)
         continue;
 
       m4 model_mat(1.0f);
-      Transform *transform = registry.try_get<Transform>(entity);
-      if (transform)
-        model_mat = transform->GetModelMatrix();
+      if (ento.HasAllOf<Transform>())
+        model_mat = ento.GetComponent<Transform>().GetModelMatrix(ento);
 
       glEnable(GL_DEPTH_TEST);
 

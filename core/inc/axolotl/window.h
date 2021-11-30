@@ -29,9 +29,9 @@ namespace axl {
     const v2i & GetFrameBufferSize() const;
     // Returns Delta time in milliseconds
     f64 GetDeltaTime() const;
-    Renderer * GetRenderer() const;
-    IOManager * GetIOManager() const;
-    GUI * GetGUI() const;
+    Renderer & GetRenderer() const;
+    IOManager & GetIOManager() const;
+    GUI & GetGUI() const;
     GLFWwindow * GetGLFWWindow() const;
 
    protected:

@@ -15,18 +15,18 @@
 using namespace axl;
 
 void MainLoop(Window &window, TerminalData &terminal_data) {
-  Renderer *renderer = window.GetRenderer();
+  Renderer &renderer = window.GetRenderer();
 
   ImTerm::terminal<Terminal> terminal(terminal_data);
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
 
-  TestScene scene;
-  scene.Init();
+  Scene::SetActiveScene(new TestScene());
+  auto scene = Scene::GetActiveScene();
 
   FrameEditor frame_editor;
 
-  IOManager *io_manager = window.GetIOManager();
+  IOManager &io = window.GetIOManager();
   DockSpace dock_space;
 
   while (window.Update() && !terminal_data.quit_requested) {
@@ -36,20 +36,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
-    TextureStore::ProcessQueue();
-
-    entt::registry *registry = scene.GetRegistry();
-    auto ento_view = registry->view<Ento>();
-    for (auto ento_it = ento_view.begin(); ento_it != ento_view.end(); ento_it++) {
-      Ento &ento = ento_view.get<Ento>(*ento_it);
-      if (!ento.marked_for_deletion)
-        continue;
-
-      scene.RemoveEntity(ento.entity);
-    }
-
     bool no_frame = terminal_data.scene_playing && frame_editor.frame_focused && frame_editor.fullscreen_play;
-    if (frame_editor.frame_focused && io_manager->KeyTriggered(Key::Escape))
+    if (frame_editor.frame_focused && io.KeyTriggered(Key::Escape))
       frame_editor.frame_focused = false;
 
     if (!no_frame) {
@@ -60,12 +48,12 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
 
     if (terminal_data.scene_playing && !terminal_data.scene_paused)
-      scene.Update(window);
+      scene->Update(window);
 
     if (no_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
-      renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
-      renderer->Resize(region_available.x, region_available.y);
+      renderer.ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
+      renderer.Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
     } else {
       v2i region_available = frame_editor.GetRegionAvailable();
@@ -74,28 +62,28 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
       terminal.show();
       frame_editor.Bind(window);
-      renderer->ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
-      renderer->Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
+      renderer.ClearScreen({ 149.0f / 255.0f, 117.0f / 255.0f, 205.0f / 255.0f });
+      renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    scene.Draw(*renderer);
+    scene->Draw(renderer);
 
     if (!no_frame) {
       frame_editor.Unbind(window);
-      renderer->ClearScreen({ 0.13f, 0.13f, 0.13f });
+      renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
       frame_editor.Draw(window, terminal_data);
-      frame_editor.DrawEntityList(scene);
-      frame_editor.DrawInspector(scene);
+      frame_editor.DrawEntityList(*scene);
+      frame_editor.DrawInspector(*scene);
     }
 
-    scene.Focused(window, frame_editor.frame_focused);
+    scene->Focused(window, frame_editor.frame_focused);
 
     window.Draw();
 
-    if (terminal_data.scene_playing && io_manager->KeyTriggered(Key::GraveAccent))
+    if (terminal_data.scene_playing && io.KeyTriggered(Key::GraveAccent))
       terminal_data.scene_paused = !terminal_data.scene_paused;
-    if (io_manager->KeyDown(Key::LeftControl) || io_manager->KeyDown(Key::RightControl)) {
-      if (io_manager->KeyDown(Key::Q))
+    if (io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl)) {
+      if (io.KeyDown(Key::Q))
         terminal_data.quit_requested = true;
     }
   }

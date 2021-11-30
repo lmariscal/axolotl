@@ -11,7 +11,6 @@ namespace axl {
   class Renderer {
    public:
     Renderer(Window *window);
-    ~Renderer();
 
     void ClearScreen(const v3 &color);
     void Resize(u32 width, u32 height);

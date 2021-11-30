@@ -12,7 +12,7 @@ namespace axl {
 
   class GUI {
    public:
-    GUI(Renderer *renderer, Window *window);
+    GUI(Window *window);
     ~GUI();
 
     void Update();
@@ -32,7 +32,6 @@ namespace axl {
 
     static void MonitorCallback(GLFWmonitor* monitor, i32 event);
 
-    Renderer *_renderer;
     bool _lock_mouse;
   };
 

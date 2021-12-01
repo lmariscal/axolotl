@@ -10,6 +10,12 @@ namespace axl {
     TerminalData *terminal;
     bool fullscreen = false;
     bool ratio_locked = false;
+
+    bool show_world_editor = true;
+    bool show_terminal = true;
+    bool show_inspector = true;
+    bool show_hierarchy = true;
+    bool show_renderer = true;
     bool show_imgui_demo = false;
   };
 

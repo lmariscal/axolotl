@@ -16,8 +16,8 @@ namespace axl {
   Inspector::Inspector() {
   }
 
-  void Inspector::Draw(Scene &scene) {
-    ImGui::Begin("Inspector");
+  void Inspector::Draw(Scene &scene, DockSpace &dock) {
+    ImGui::Begin("Inspector", &dock.data.show_inspector);
     if (!_selected_entity) {
       v2 size = ImGui::GetWindowSize();
       std::string text = "No entity selected";

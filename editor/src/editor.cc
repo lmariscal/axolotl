@@ -82,22 +82,27 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       if (region_available.x > 0 && region_available.y > 0)
         window.SetFrameBufferSize(region_available);
 
-      terminal.show();
+      if (dock.data.show_terminal)
+        terminal.show();
       frame_editor.Bind(window);
       v3 color(33, 33, 33);
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    scene.Draw(renderer, show_frame);
+    if (dock.data.show_world_editor)
+      scene.Draw(renderer, dock.data.show_renderer && show_frame);
 
     if (show_frame) {
       frame_editor.Unbind(window);
 
       renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
-      frame_editor.Draw(window, dock);
-      frame_editor.DrawEntityList(scene);
-      frame_editor.DrawInspector(scene);
+      if (dock.data.show_world_editor)
+        frame_editor.Draw(window, dock);
+      if (dock.data.show_hierarchy)
+        frame_editor.DrawEntityList(scene, dock);
+      if (dock.data.show_inspector)
+        frame_editor.DrawInspector(scene, dock);
     }
 
     scene.Focused(window, frame_editor.focused);

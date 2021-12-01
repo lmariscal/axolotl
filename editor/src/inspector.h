@@ -3,6 +3,8 @@
 #include <axolotl/types.h>
 #include <axolotl/ento.h>
 
+#include "dockspace.h"
+
 namespace axl {
 
   class Scene;
@@ -12,7 +14,7 @@ namespace axl {
    public:
     Inspector();
 
-    void Draw(Scene &scene);
+    void Draw(Scene &scene, DockSpace &dock);
 
    protected:
     friend class FrameEditor;

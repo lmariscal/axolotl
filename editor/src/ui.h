@@ -27,8 +27,8 @@ namespace axl {
     void Bind(Window &window);
     void Unbind(Window &window);
     void Draw(Window &window, DockSpace &dock);
-    void DrawEntityList(Scene &scene);
-    void DrawInspector(Scene &scene);
+    void DrawEntityList(Scene &scene, DockSpace &dock);
+    void DrawInspector(Scene &scene, DockSpace &dock);
     const v2 & GetRegionAvailable() const;
 
     bool focused;

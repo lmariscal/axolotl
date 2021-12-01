@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <IconsFontAwesome5Pro.h>
+
 namespace axl {
 
   void DockSpace::Draw(Window &window) {
@@ -50,13 +52,42 @@ namespace axl {
       first_iteration = false;
     }
 
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(6.0f, 3.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(3.0f, 3.0f));
     if (ImGui::BeginMenuBar()) {
 
       if (ImGui::BeginMenu("File")) {
-        if (ImGui::MenuItem("Quit")) {
+        if (ImGui::MenuItem(ICON_FA_FILE_PLUS " New", "C-n")) {
+          // TODO
+        }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem(ICON_FA_FILE_SEARCH " Open", "C-o")) {
+          // TODO
+        }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem(ICON_FA_SAVE " Save", "C-s")) {
+          // TODO
+        }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem(ICON_FA_FILE_EXPORT " Save As", "C-S-s")) {
+          // TODO
+        }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem(ICON_FA_DOOR_OPEN " Quit", "C-q")) {
           data.terminal->quit_requested = true;
         }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
         ImGui::EndMenu();
       }
 
@@ -65,26 +96,59 @@ namespace axl {
       }
 
       if (ImGui::BeginMenu("View")) {
-        if (ImGui::MenuItem("Editor Aspect Ratio")) {
+        if (ImGui::MenuItem("Aspect Ratio")) {
         }
-        if (ImGui::MenuItem("Editor Full Screen", nullptr, data.fullscreen)) {
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem("Full Screen", "F11", data.fullscreen)) {
           data.fullscreen = !data.fullscreen;
         }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
         ImGui::EndMenu();
       }
 
       if (ImGui::BeginMenu("Window")) {
-        if (ImGui::MenuItem("World Editor")) {
+        if (ImGui::MenuItem("World Editor", nullptr, data.show_world_editor)) {
+          data.show_world_editor = !data.show_world_editor;
         }
-        if (ImGui::MenuItem("Entities")) {
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem("Entities", nullptr, data.show_hierarchy)) {
+          data.show_hierarchy = !data.show_hierarchy;
         }
-        if (ImGui::MenuItem("Inspector")) {
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem("Inspector", nullptr, data.show_inspector)) {
+          data.show_inspector = !data.show_inspector;
         }
-        if (ImGui::MenuItem("Terminal")) {
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem("Renderer", nullptr, data.show_renderer)) {
+          data.show_renderer = !data.show_renderer;
         }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        if (ImGui::MenuItem("Terminal", nullptr, data.show_terminal)) {
+          data.show_terminal = !data.show_terminal;
+        }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+        ImGui::Separator();
+
         if (ImGui::MenuItem("ImGui Demo", nullptr, data.show_imgui_demo)) {
           data.show_imgui_demo = !data.show_imgui_demo;
         }
+        if (ImGui::IsItemHovered())
+          ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
         ImGui::EndMenu();
       }
 

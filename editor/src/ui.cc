@@ -38,7 +38,7 @@ namespace axl {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
     window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
-    ImGui::Begin("World Editor", nullptr, window_flags);
+    ImGui::Begin("World Editor", &dock.data.show_world_editor, window_flags);
 
     v2 uv0(0.0f, 1.0f);
     v2 uv1(1.0f, 0.0f);
@@ -280,10 +280,10 @@ namespace axl {
     return marked_for_deletion;
   }
 
-  void FrameEditor::DrawEntityList(Scene &scene) {
+  void FrameEditor::DrawEntityList(Scene &scene, DockSpace &dock) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 9.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 0.0f));
-    ImGui::Begin("Entities");
+    ImGui::Begin("Entities", &dock.data.show_hierarchy);
 
     f32 width = ImGui::GetWindowWidth() - ImGui::GetCursorPosX() - 40.0f;
     ImGui::SetCursorPosX(20.0f);
@@ -322,8 +322,8 @@ namespace axl {
     ImGui::PopStyleVar(2);
   }
 
-  void FrameEditor::DrawInspector(Scene &scene) {
-    _inspector.Draw(scene);
+  void FrameEditor::DrawInspector(Scene &scene, DockSpace &dock) {
+    _inspector.Draw(scene, dock);
   }
 
   const v2 & FrameEditor::GetRegionAvailable() const {

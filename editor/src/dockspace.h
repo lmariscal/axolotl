@@ -7,13 +7,17 @@
 namespace axl {
 
   struct DockSpaceData {
-    TerminalData *terminal_data;
-    bool *resize_world_editor;
+    TerminalData *terminal;
+    bool fullscreen = false;
+    bool ratio_locked = false;
+    bool show_imgui_demo = false;
   };
 
   class DockSpace {
    public:
-    void Draw(Window &window, DockSpaceData &data);
+    void Draw(Window &window);
+
+    DockSpaceData data;
 
    protected:
     bool _first_iteration = true;

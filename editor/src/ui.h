@@ -10,7 +10,7 @@
 namespace axl {
 
   class Scene;
-  struct TerminalData;
+  class DockSpace;
 
   class FrameEditor {
    public:
@@ -19,15 +19,12 @@ namespace axl {
 
     void Bind(Window &window);
     void Unbind(Window &window);
-    void Draw(Window &window, TerminalData &data);
-    void SetBoundFrameRatio(bool state);
+    void Draw(Window &window, DockSpace &dock);
     void DrawEntityList(Scene &scene);
     void DrawInspector(Scene &scene);
     const v2 & GetRegionAvailable() const;
 
-    bool bound_frame_ratio;
-    bool frame_focused;
-    bool fullscreen_play;
+    bool focused;
 
    protected:
     void ShowTreeEnto(Ento ento, u32 depth, Scene &scene);

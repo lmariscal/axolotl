@@ -9,14 +9,13 @@
 #include <axolotl/scene.h>
 #include <axolotl/terminal.h>
 
+#include "dockspace.h"
+
 #include <IconsFontAwesome5Pro.h>
 
 namespace axl {
 
   FrameEditor::FrameEditor():
-    bound_frame_ratio(false),
-    frame_focused(false),
-    fullscreen_play(false),
     _frame(1280, 720),
     _region_available({ 0, 0 })
   { }
@@ -33,7 +32,7 @@ namespace axl {
     window.GetRenderer().Resize(size.x, size.y);
   }
 
-  void FrameEditor::Draw(Window &window, TerminalData &data) {
+  void FrameEditor::Draw(Window &window, DockSpace &dock) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -44,7 +43,7 @@ namespace axl {
     v2 uv1(1.0f, 0.0f);
     v2 cra = ImGui::GetContentRegionAvail();
     v2 buffer_size = cra;
-    if (bound_frame_ratio) {
+    if (dock.data.ratio_locked) {
       if (cra.x * 9.0f / 16.0f > cra.y) {
         buffer_size.x = cra.y * 16.0f / 9.0f;
         buffer_size.y = cra.y;
@@ -68,8 +67,8 @@ namespace axl {
 
     if (one_camera_active) {
       ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
-      if (data.scene_playing && ImGui::IsItemClicked())
-        frame_focused = true;
+      if (dock.data.terminal->scene_playing && ImGui::IsItemClicked())
+        focused = true;
     }
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
@@ -79,18 +78,18 @@ namespace axl {
     ImVec4 *colors = ImGui::GetStyle().Colors;
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 71) / 2.0f);
 
-    bool playing = data.scene_playing;
+    bool playing = dock.data.terminal->scene_playing;
     if (playing) {
       ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
     } else {
       ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, v2(0.36, 0.50));
     }
-    if (ImGui::Button(data.scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
-      data.scene_playing = !data.scene_playing;
-      if (data.scene_playing)
-        frame_focused = true;
-      if (!data.scene_playing && data.scene_paused)
-        data.scene_paused = false;
+    if (ImGui::Button(dock.data.terminal->scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
+      dock.data.terminal->scene_playing = !dock.data.terminal->scene_playing;
+      if (dock.data.terminal->scene_playing)
+        focused = true;
+      if (!dock.data.terminal->scene_playing && dock.data.terminal->scene_paused)
+        dock.data.terminal->scene_paused = false;
     }
     if (playing) {
       ImGui::PopStyleColor();
@@ -99,11 +98,11 @@ namespace axl {
     }
 
     ImGui::SameLine(0.0f, 5.0f);
-    bool paused = data.scene_paused;
+    bool paused = dock.data.terminal->scene_paused;
     if (paused)
       ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
     if (ImGui::Button(ICON_FA_PAUSE, v2(33, 24)))
-      data.scene_paused = !data.scene_paused;
+      dock.data.terminal->scene_paused = !dock.data.terminal->scene_paused;
     if (paused)
       ImGui::PopStyleColor();
     ImGui::SameLine();
@@ -156,10 +155,6 @@ namespace axl {
       _frame.SetSize(_region_available.x, _region_available.y);
       _frame.RebuildFrameBuffer();
     }
-  }
-
-  void FrameEditor::SetBoundFrameRatio(bool state) {
-    bound_frame_ratio = state;
   }
 
   void FrameEditor::ShowTreeEnto(Ento ento, u32 depth, Scene &scene) {

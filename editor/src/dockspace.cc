@@ -4,7 +4,7 @@
 
 namespace axl {
 
-  void DockSpace::Draw(Window &window, DockSpaceData &data) {
+  void DockSpace::Draw(Window &window) {
     ImGuiWindowFlags main_dock_space_window_flags = ImGuiWindowFlags_None;
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -53,7 +53,7 @@ namespace axl {
 
       if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Quit")) {
-          data.terminal_data->quit_requested = true;
+          data.terminal->quit_requested = true;
         }
         ImGui::EndMenu();
       }
@@ -65,7 +65,8 @@ namespace axl {
       if (ImGui::BeginMenu("View")) {
         if (ImGui::MenuItem("Editor Aspect Ratio")) {
         }
-        if (ImGui::MenuItem("Editor Full Screen")) {
+        if (ImGui::MenuItem("Editor Full Screen", nullptr, data.fullscreen)) {
+          data.fullscreen = !data.fullscreen;
         }
         ImGui::EndMenu();
       }
@@ -79,8 +80,8 @@ namespace axl {
         }
         if (ImGui::MenuItem("Terminal")) {
         }
-        if (ImGui::MenuItem("ImGui Demo", nullptr, data.terminal_data->show_imgui_demo)) {
-          data.terminal_data->show_imgui_demo = !data.terminal_data->show_imgui_demo;
+        if (ImGui::MenuItem("ImGui Demo", nullptr, data.show_imgui_demo)) {
+          data.show_imgui_demo = !data.show_imgui_demo;
         }
         ImGui::EndMenu();
       }
@@ -91,8 +92,8 @@ namespace axl {
 
     ImGui::End();
 
-    if (data.terminal_data->show_imgui_demo) {
-      ImGui::ShowDemoWindow(&data.terminal_data->show_imgui_demo);
+    if (data.show_imgui_demo) {
+      ImGui::ShowDemoWindow(&data.show_imgui_demo);
     }
   }
 

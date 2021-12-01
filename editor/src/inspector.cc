@@ -57,7 +57,7 @@ namespace axl {
       ImGui::SetWindowFontScale(1.1f);
       ImGui::Text("%s", ento.Tag().value.c_str());
       if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
       if (ImGui::IsItemClicked()) {
         _edit_name = true;
         _edit_name_first = true;

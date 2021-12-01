@@ -27,7 +27,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   FrameEditor frame_editor;
 
   IOManager &io = window.GetIOManager();
-  DockSpace dock_space;
+  DockSpace dock;
 
   scene.Init();
 
@@ -38,21 +38,19 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
-    bool no_frame = terminal_data.scene_playing && frame_editor.frame_focused && frame_editor.fullscreen_play;
-    if (frame_editor.frame_focused && io.KeyTriggered(Key::Escape))
-      frame_editor.frame_focused = false;
+    bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen && frame_editor.focused);
+    if (frame_editor.focused && io.KeyTriggered(Key::Escape))
+      frame_editor.focused = false;
 
-    if (!no_frame) {
-      DockSpaceData dock_space_data;
-      dock_space_data.terminal_data = &terminal_data;
-      dock_space_data.resize_world_editor = &frame_editor.bound_frame_ratio;
-      dock_space.Draw(window, dock_space_data);
+    if (show_frame) {
+      dock.data.terminal = &terminal_data;
+      dock.Draw(window);
     }
 
     if (terminal_data.scene_playing && !terminal_data.scene_paused)
       scene.Update(window);
 
-    if (no_frame) {
+    if (!show_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
       v3 color(33, 33, 33);
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
@@ -72,15 +70,16 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     scene.Draw(renderer);
 
-    if (!no_frame) {
+    if (show_frame) {
       frame_editor.Unbind(window);
+
       renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
-      frame_editor.Draw(window, terminal_data);
+      frame_editor.Draw(window, dock);
       frame_editor.DrawEntityList(scene);
       frame_editor.DrawInspector(scene);
     }
 
-    scene.Focused(window, frame_editor.frame_focused);
+    scene.Focused(window, frame_editor.focused);
 
     window.Draw();
 

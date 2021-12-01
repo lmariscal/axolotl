@@ -104,6 +104,10 @@ namespace axl {
     return _delta_time;
   }
 
+  f64 Window::GetTime() const {
+    return glfwGetTime();
+  }
+
   void Window::RegisterEvents() {
     glfwSetKeyCallback(_window, Window::KeyEvent);
     glfwSetCharCallback(_window, Window::CharEvent);

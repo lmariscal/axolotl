@@ -2,6 +2,8 @@
 
 #include <axolotl/types.h>
 
+#include <axolotl/texture.h>
+
 namespace axl {
 
   enum class FrameBufferTexture {
@@ -19,13 +21,13 @@ namespace axl {
     void SetSize(u32 width, u32 height);
     void Bind();
     void Unbind();
-    u32 GetTextureID(FrameBufferTexture texture);
+    Texture GetTexture(FrameBufferTexture texture);
 
    protected:
     u32 _width;
     u32 _height;
     u32 _frame_buffer;
-    u32 _textures[(u32)FrameBufferTexture::Last];
+    Texture *_textures[(u32)FrameBufferTexture::Last];
   };
 
 } // namespace axl

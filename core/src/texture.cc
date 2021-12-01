@@ -138,12 +138,112 @@ namespace axl {
   }
 
   void TextureStore::CreateTexture(const Texture &texture) {
-    v2i &size = _data[texture.texture_id].size;
-    if (size.x <= 0 || size.y <= 0) {
-      log::debug("Texture \"{}\" has invalid size {}x{}", Texture::TextureTypeToString(texture.type), size.x, size.y);
+    TextureData &data = _data[texture.texture_id];
+    if (data.size.x <= 0 || data.size.y <= 0) {
+      log::debug("Texture \"{}\" has invalid data.size {}x{}", Texture::TextureTypeToString(texture.type), data.size.x, data.size.y);
       _data[texture.texture_id].loaded = false;
       return;
     }
+
+    u32 internal_format = 0;
+    switch (data.internal_format) {
+      case TextureInternalFormat::RGB:
+        internal_format = GL_RGB;
+        break;
+      case TextureInternalFormat::RGBA:
+        internal_format = GL_RGBA;
+        break;
+      case TextureInternalFormat::DepthStencil:
+        internal_format = GL_DEPTH_STENCIL;
+        break;
+      case TextureInternalFormat::Depth:
+        internal_format = GL_DEPTH_COMPONENT;
+        break;
+      case TextureInternalFormat::Last:
+        break;
+    }
+
+    u32 format = 0;
+    switch (data.format) {
+      case TextureFormat::RGB:
+        format = GL_RGB;
+        break;
+      case TextureFormat::RGBA:
+        format = GL_RGBA;
+        break;
+      case TextureFormat::Depth:
+        format = GL_DEPTH_COMPONENT32F;
+        break;
+      case TextureFormat::DepthStencil:
+        format = GL_DEPTH24_STENCIL8;
+        break;
+      case TextureFormat::Stencil:
+        format = GL_STENCIL_INDEX;
+        break;
+      case TextureFormat::Last:
+        break;
+    }
+
+    u32 type = 0;
+    switch (data.data_type) {
+      case TextureDataType::U8:
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case TextureDataType::U16:
+        type = GL_UNSIGNED_SHORT;
+        break;
+      case TextureDataType::U24_8:
+        type = GL_UNSIGNED_INT_24_8;
+        break;
+      case TextureDataType::U32:
+        type = GL_UNSIGNED_INT;
+        break;
+      case TextureDataType::I8:
+        type = GL_BYTE;
+        break;
+      case TextureDataType::I16:
+        type = GL_SHORT;
+        break;
+      case TextureDataType::I32:
+        type = GL_INT;
+        break;
+      case TextureDataType::F16:
+        type = GL_HALF_FLOAT;
+        break;
+      case TextureDataType::F32:
+        type = GL_FLOAT;
+        break;
+      case TextureDataType::Last:
+        break;
+    }
+
+    u32 error = glGetError();
+    while (error != GL_NO_ERROR) {
+      log::error("Cleaning OpenGL error: {}", error);
+      error = glGetError();
+    }
+
+    u32 tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, data.size.x, data.size.y, 0, internal_format, type, nullptr);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    error = glGetError();
+    while (error != GL_NO_ERROR) {
+      log::error("OpenGL error: {}", error);
+      error = glGetError();
+    }
+
+    _data[texture.texture_id].gl_id = tex;
+    _data[texture.texture_id].loaded = true;
+
+    log::debug("Created Texture size {}x{} id {}", data.size.x, data.size.y, tex);
   }
 
   TextureData & TextureStore::GetData(u32 id) {
@@ -165,6 +265,10 @@ namespace axl {
 
     _data.erase(id);
     _path_to_id.erase(GetPath(id));
+  }
+
+  Texture::operator u32() const {
+    return TextureStore::GetRendererTextureID(texture_id); // renderer_id
   }
 
 } // namespace axl

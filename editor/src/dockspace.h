@@ -18,9 +18,14 @@ namespace axl {
     void Draw(Window &window);
 
     DockSpaceData data;
-
-   protected:
-    bool _first_iteration = true;
+    u32 dock_left;
+    u32 dock_right;
+    u32 dock_bottom;
+    u32 dock_top;
+    u32 dock_top_right;
+    u32 dock_top_left;
+    u32 dock_left_bottom;
+    bool first_iteration = true;
   };
 
 } // namespace axl

@@ -29,23 +29,25 @@ namespace axl {
     ImGuiID dock_id = ImGui::GetID("MainDockSpace");
     ImGui::DockSpace(dock_id, v2(0, 0), dock_flags);
 
-    if (_first_iteration) {
+    if (first_iteration) {
+      // TODO Copy dock layout to properly restore it
       ImGui::DockBuilderRemoveNode(dock_id);
       ImGui::DockBuilderAddNode(dock_id, main_dock_space_window_flags | ImGuiDockNodeFlags_DockSpace);
       ImGui::DockBuilderSetNodeSize(dock_id, v2(window_size.x, window_size.y));
 
-      auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.21f, nullptr, &dock_id);
-      // auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Right, 0.18f, nullptr, &dock_id);
-      auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.27f, nullptr, &dock_id);
+      ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 0.21f, &dock_left, &dock_right);
+      ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Down, 0.27f, &dock_bottom, &dock_top);
 
-      auto dock_id_left_bottom = ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.5f, nullptr, &dock_id_left);
+      ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.5f, &dock_left_bottom, &dock_left);
+      ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Right, 0.2f, &dock_top_right, &dock_top_left);
 
-      ImGui::DockBuilderDockWindow("World Editor", dock_id);
-      ImGui::DockBuilderDockWindow("Entities", dock_id_left);
-      ImGui::DockBuilderDockWindow("Inspector", dock_id_left_bottom);
-      ImGui::DockBuilderDockWindow("Terminal", dock_id_bottom);
+      ImGui::DockBuilderDockWindow("World Editor", dock_top_left);
+      ImGui::DockBuilderDockWindow("Entities", dock_left);
+      ImGui::DockBuilderDockWindow("Inspector", dock_left_bottom);
+      ImGui::DockBuilderDockWindow("Terminal", dock_bottom);
+      ImGui::DockBuilderDockWindow("Renderer", dock_top_right);
 
-      _first_iteration = false;
+      first_iteration = false;
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(6.0f, 3.0f));

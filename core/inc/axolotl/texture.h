@@ -19,7 +19,6 @@ namespace axl {
     RGB,
     RGBA,
     Depth,
-    Stencil,
     DepthStencil,
     Last
   };
@@ -34,14 +33,15 @@ namespace axl {
   };
 
   enum class TextureDataType {
-    u8,
-    u16,
+    U8,
+    U16,
+    U24_8,
     U32,
-    U64,
     I8,
     I16,
     I32,
-    I64,
+    F16,
+    F32,
     Last
   };
 
@@ -67,6 +67,8 @@ namespace axl {
 
     u32 texture_id = 0;
     TextureType type = TextureType::Last;
+
+    operator u32() const;
 
     static std::string TextureTypeToString(TextureType type);
   };

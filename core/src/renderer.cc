@@ -32,7 +32,7 @@ namespace axl {
     glViewport(0, 0, width, height);
   }
 
-  void Renderer::Render(Scene &scene) {
+  void Renderer::Render(Scene &scene, bool show_data) {
     m4 view(1.0f);
     m4 projection(1.0f);
 
@@ -42,6 +42,9 @@ namespace axl {
       view = camera->GetViewMatrix(camera_ento);
       projection = camera->GetProjectionMatrix(*_window);
     }
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     auto entities = scene.GetRegistry().group<Model, Material>();
     for (auto entity : entities) {
@@ -53,8 +56,6 @@ namespace axl {
       if (ento.HasComponent<Transform>())
         model_mat = ento.GetComponent<Transform>().GetModelMatrix(ento);
 
-      glEnable(GL_DEPTH_TEST);
-
       material.GetShader().Bind();
       material.GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
       material.GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
@@ -62,6 +63,34 @@ namespace axl {
 
       model.Draw(material);
     }
+
+    if (show_data)
+      ShowData();
+  }
+
+  void Renderer::ShowData() {
+    ImGui::Begin("Renderer");
+
+    if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImGui::Text("  FPS: %u", _fps);
+      ImGui::Text("Delta: %.4fms", _delta_time);
+    }
+
+    f64 now = _window->GetTime();
+    if (now - _last_time >= 0.25) {
+      _last_time = now;
+
+      _fps = _frame_count * 4;
+      _delta_time = _delta_time_accum / _frame_count;
+
+      _frame_count = 0;
+      _delta_time_accum = 0.0;
+    }
+
+    _delta_time_accum += _window->GetDeltaTime();
+    _frame_count++;
+
+    ImGui::End();
   }
 
   void Renderer::SetMeshWireframe(bool state) {

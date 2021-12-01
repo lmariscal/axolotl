@@ -54,3 +54,13 @@ namespace axl {
   }
 
 } // namespace axl
+
+#ifdef AXOLOTL_RUNTIME
+
+using namespace axl;
+
+i32 main() {
+  log::error("TODO Runtime");
+}
+
+#endif

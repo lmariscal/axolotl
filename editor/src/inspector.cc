@@ -19,43 +19,49 @@ namespace axl {
   void Inspector::Draw(Scene &scene) {
     ImGui::Begin("Inspector");
     if (!_selected_entity) {
+      v2 size = ImGui::GetWindowSize();
+      std::string text = "No entity selected";
+      f32 width = ImGui::CalcTextSize(text.c_str()).x;
+      ImGui::SetCursorPosY(size.y / 2.0f);
+      ImGui::SetCursorPosX((size.x - width) / 2.0f);
+      ImGui::TextColored(v4(v3(1.0f), 0.6f), "%s", text.c_str());
+
       ImGui::End();
       return;
     }
 
-    Ento ento = Scene::GetActiveScene()->FromID(_selected_entity);
-
-    v2 id_text_size = ImGui::CalcTextSize(uuids::to_string(ento.id).c_str());
+    v2 id_text_size = ImGui::CalcTextSize(uuids::to_string(_selected_entity.id).c_str());
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - id_text_size.x - ImGui::GetStyle().FramePadding.x) / 2.0f);
 
-    ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(ento.id).c_str());
+    ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(_selected_entity.id).c_str());
     if (ImGui::IsItemHovered())
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     if (ImGui::IsItemClicked())
-      ImGui::SetClipboardText(uuids::to_string(ento.id).c_str());
+      ImGui::SetClipboardText(uuids::to_string(_selected_entity.id).c_str());
 
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().ItemSpacing.y);
 
     if (_edit_name) {
-      Tag &tag = ento.Tag();
+      Tag &tag = _selected_entity.Tag();
 
-      std::string name = tag.value.empty() ? "Unnamed" : tag.value;
-      name.resize(64);
-      if (ImGui::InputText("##entity_name", name.data(), name.capacity(), ImGuiInputTextFlags_EnterReturnsTrue)) {
-        tag.value = name;
+      std::array<char, 128> name_buffer;
+      std::fill(name_buffer.begin(), name_buffer.end(), 0);
+      std::copy(tag.value.begin(), tag.value.end(), name_buffer.begin());
+      if (ImGui::InputText("##entity_name", name_buffer.data(), name_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue)) {
+        tag.value = name_buffer.data();
       }
       if (_edit_name_first) {
         ImGui::SetKeyboardFocusHere(-1);
         _edit_name_first = false;
       } else if (!ImGui::IsItemActive()) {
-        tag.value = name;
+        tag.value = name_buffer.data();
         _edit_name = false;
         _edit_name_first = true;
       }
     } else {
       ImGui::SetWindowFontScale(1.1f);
-      ImGui::Text("%s", ento.Tag().value.c_str());
+      ImGui::Text("%s", _selected_entity.Tag().value.c_str());
       if (ImGui::IsItemHovered())
         ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
       if (ImGui::IsItemClicked()) {
@@ -85,8 +91,8 @@ namespace axl {
         Axolotl::GetDistDir() + "res/shaders/testy.frag"
       };
       log::info("Adding model \"{}\"", _model_path);
-      Model &model = _selected_entity.AddComponent<Model>(ento, _model_path, shader_paths);
-      model.Init(ento);
+      Model &model = _selected_entity.AddComponent<Model>(_selected_entity, _model_path, shader_paths);
+      model.Init(_selected_entity);
       _add_model = false;
       _model_path = "";
     }
@@ -169,7 +175,7 @@ namespace axl {
     if (ento.HasComponent<Camera>()) {
       if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
         Camera &camera = ento.GetComponent<Camera>();
-        camera.ShowComponent();
+        camera.ShowComponent(ento);
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
     }

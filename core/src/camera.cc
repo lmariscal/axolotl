@@ -13,7 +13,8 @@ namespace axl {
     _world_up({ 0.0f, 1.0f, 0.0f }),
     _movement_speed(6.0f),
     _mouse_sensitivity(2.0f),
-    _fov(60.0f)
+    _fov(60.0f),
+    _is_active_camera(false)
   {
     Transform &transform = ento.Transform();
     transform.SetPosition({ 0.0f, 0.0f, 0.0f });
@@ -143,9 +144,20 @@ namespace axl {
       _mouse_sensitivity = j["mouse_sensitivity"];
   }
 
-  bool Camera::ShowComponent() {
+  bool Camera::ShowComponent(Ento &ento) {
     bool modified = false;
 
+    bool active = _is_active_camera;
+    if (ShowData("Active", active)) {
+      if (active) {
+        SetAsActive(ento);
+      } else {
+        if (GetActiveCameraEnto() == ento)
+          SetAsActive({ });
+        _is_active_camera = false;
+      }
+      modified = true;
+    }
     if (ShowData("Orthographic", _is_orthographic))
       modified = true;
     if (ShowData("Speed", _movement_speed))

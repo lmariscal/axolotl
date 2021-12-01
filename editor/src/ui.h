@@ -12,6 +12,13 @@ namespace axl {
   class Scene;
   class DockSpace;
 
+  enum class EditorAction {
+    Select,
+    Move,
+    Rotate,
+    Scale
+  };
+
   class FrameEditor {
    public:
     FrameEditor();
@@ -25,6 +32,7 @@ namespace axl {
     const v2 & GetRegionAvailable() const;
 
     bool focused;
+    EditorAction action;
 
    protected:
     void ShowTreeEnto(Ento ento, u32 depth, Scene &scene);

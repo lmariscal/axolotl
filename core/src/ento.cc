@@ -1,6 +1,8 @@
 #include <axolotl/ento.h>
 #include <axolotl/transform.h>
 
+#include <axolotl/model.h>
+
 namespace axl {
 
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
@@ -15,7 +17,7 @@ namespace axl {
       std::generate(std::begin(_seed_data), std::end(_seed_data), std::ref(rd));
       std::seed_seq seq(std::begin(_seed_data), std::end(_seed_data));
 
-      static std::mt19937 random_generator = std::mt19937(seq);
+      std::mt19937 random_generator = std::mt19937(seq);
       _uuid_generator = uuids::uuid_random_generator(random_generator);
       _first_gen = false;
     }
@@ -41,11 +43,6 @@ namespace axl {
         hierarchy.children.end()
       );
     child.SetParent({ });
-  }
-
-  json Ento::Serialize() const {
-    json j;
-    return j;
   }
 
   Transform & Ento::Transform() {
@@ -93,6 +90,25 @@ namespace axl {
       children.push_back(scene->FromID(id));
     }
     return children;
+  }
+
+  json Ento::Serialize() const {
+    json j;
+    j["id"] = uuids::to_string(id);
+    j["name"] = Tag().value;
+    const HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
+    j["parent"] = uuids::to_string(hierarchy.parent);
+    j["children"] = json::array();
+    for (auto id : hierarchy.children)
+      j["children"].push_back(uuids::to_string(id));
+
+    j["components"] = json::array();
+    j["components"].push_back(Transform().Serialize());
+
+    if (HasComponent<Model>())
+      j["components"].push_back(GetComponent<Model>().Serialize());
+
+    return j;
   }
 
 } // namespace axl

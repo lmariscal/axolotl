@@ -75,4 +75,19 @@ namespace axl {
     return modified;
   }
 
+  json Transform::Serialize() const {
+    json j;
+    j["version"]["major"] = 0;
+    j["version"]["minor"] = 1;
+    j["type"] = "transform";
+
+    j["position"] = _position;
+    j["scale"] = _scale;
+    j["rotation"] = _rotation;
+    return j;
+  }
+
+  void Transform::Deserialize(const json &json) {
+  }
+
 } // namespace axl

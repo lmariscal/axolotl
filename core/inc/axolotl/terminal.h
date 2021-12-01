@@ -12,6 +12,7 @@ namespace axl {
     bool watch_shaders = true;
     bool scene_playing = false;
     bool scene_paused = false;
+    bool display_terminal = false;
   };
 
   class Terminal : public ImTerm::basic_spdlog_terminal_helper<Terminal, TerminalData, std::mutex> {

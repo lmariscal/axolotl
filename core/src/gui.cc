@@ -36,7 +36,7 @@ namespace axl {
     }
 
     std::string font_awesome_path = Axolotl::GetDistDir() + "res/misc/Font Awesome 6 Pro-Solid-900.otf";
-    FontAddFontAwesomeChars(font_awesome_path, io, 20.0f);
+    FontAddFontAwesomeChars(font_awesome_path, io, 16.0f);
 
     io.Fonts->Build();
 
@@ -47,7 +47,7 @@ namespace axl {
       return;
     }
 
-    FontAddFontAwesomeChars(font_awesome_path, io, 20.0f);
+    FontAddFontAwesomeChars(font_awesome_path, io, 16.0f);
     io.Fonts->Build();
 
     io.FontGlobalScale = 0.8f;

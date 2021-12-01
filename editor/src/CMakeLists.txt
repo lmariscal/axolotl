@@ -1,16 +1,7 @@
-file(GLOB AXOLOTL_EDITOR_SOURCES
-  editor.cc
-  test_scene.cc
-  ui.cc
-  dockspace.cc
-  inspector.cc
-)
-
-file(GLOB_RECURSE AXOLOTL_EDITOR_HEADERS
+file(GLOB_RECURSE AXOLOTL_EDITOR_SOURCES
+  *.cc
   *.h
 )
-
-list(APPEND AXOLOTL_EDITOR_SOURCES ${AXOLOTL_EDITOR_HEADERS})
 
 add_executable(axolotl_editor ${AXOLOTL_EDITOR_SOURCES})
 

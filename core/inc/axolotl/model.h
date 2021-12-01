@@ -30,6 +30,7 @@ namespace axl {
     std::shared_ptr<std::vector<Mesh *>> _meshes;
     std::filesystem::path _path;
     ShaderPaths _shader_paths;
+    u32 _mesh_id;
     bool _root = true;
   };
 

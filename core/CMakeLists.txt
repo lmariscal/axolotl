@@ -1,28 +1,29 @@
-file(GLOB AXOLOTL_SOURCES
-  src/axolotl.cc
-  src/window.cc
-  src/renderer.cc
-  src/shader.cc
-  src/mesh.cc
-  src/texture.cc
-  src/framebuffer.cc
-  src/gui.cc
-  src/scene.cc
-  src/iomanager.cc
-  src/terminal.cc
-  src/camera.cc
-  src/transform.cc
-  src/ento.cc
-  src/component.cc
-  src/model.cc
-  src/material.cc
-)
-
-file(GLOB_RECURSE AXOLOTL_HEADERS
+file(GLOB_RECURSE AXOLOTL_SOURCES
+  src/*.cc
   inc/**/*.h
 )
 
-list(APPEND AXOLOTL_SOURCES ${AXOLOTL_HEADERS})
+set(PUBLIC_LIBS
+  glm
+  spdlog
+  imgui
+  imguizmo
+  imterm
+  IconFontCppHeaders
+  EnTT::EnTT
+  nlohmann_json::nlohmann_json
+  nativefiledialog
+  stduuid
+  assimp
+)
+
+set(PRIVATE_LIBS
+  efsw
+  glad
+  glfw
+  stb
+  OpenGL::GL
+)
 
 if(NOT DEFINED OpenGL_GL_PREFERENCE)
   set(OpenGL_GL_PREFERENCE "GLVND")
@@ -56,25 +57,45 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
   target_compile_definitions(axolotl PUBLIC AXOLOTL_32=1)
 endif()
 
-target_link_libraries(axolotl PUBLIC glm)
-target_link_libraries(axolotl PUBLIC spdlog)
-target_link_libraries(axolotl PUBLIC imgui)
-target_link_libraries(axolotl PUBLIC imguizmo)
-target_link_libraries(axolotl PUBLIC imterm)
-target_link_libraries(axolotl PUBLIC IconFontCppHeaders)
-target_link_libraries(axolotl PUBLIC EnTT::EnTT)
-target_link_libraries(axolotl PUBLIC nlohmann_json::nlohmann_json)
-target_link_libraries(axolotl PUBLIC nativefiledialog)
-target_link_libraries(axolotl PUBLIC stduuid)
-target_link_libraries(axolotl PUBLIC assimp)
+foreach(LIB ${PUBLIC_LIBS})
+  target_link_libraries(axolotl PUBLIC ${LIB})
+endforeach()
 
-target_link_libraries(axolotl PRIVATE efsw)
-target_link_libraries(axolotl PRIVATE glad)
-target_link_libraries(axolotl PRIVATE glfw)
-target_link_libraries(axolotl PRIVATE stb)
-target_link_libraries(axolotl PRIVATE OpenGL::GL)
+foreach(LIB ${PRIVATE_LIBS})
+  target_link_libraries(axolotl PRIVATE ${LIB})
+endforeach()
 
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/core/inc)
 target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third)
 # target_include_directories(axolotl PUBLIC ${CMAKE_SOURCE_DIR}/third/stduuid/include)
 target_include_directories(axolotl PRIVATE ${OPENGL_INCLUDE_DIR})
+
+# RUNTIME
+
+add_executable(axolotl_runtime ${AXOLOTL_SOURCES})
+
+set_target_properties(axolotl_runtime PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED YES
+  CXX_EXTENSIONS NO
+)
+
+set_target_properties(axolotl_runtime PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/dist/bin)
+set_target_properties(axolotl_runtime PROPERTIES OUTPUT_NAME axolotl)
+
+foreach(LIB ${PUBLIC_LIBS})
+  target_link_libraries(axolotl_runtime PUBLIC ${LIB})
+endforeach()
+
+foreach(LIB ${PRIVATE_LIBS})
+  target_link_libraries(axolotl_runtime PRIVATE ${LIB})
+endforeach()
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  target_compile_definitions(axolotl_runtime PUBLIC AXOLOTL_DEBUG=1)
+endif()
+target_compile_definitions(axolotl_runtime PUBLIC AXOLOTL_RUNTIME=1)
+
+target_include_directories(axolotl_runtime PUBLIC ${CMAKE_SOURCE_DIR}/core/inc)
+target_include_directories(axolotl_runtime PUBLIC ${CMAKE_SOURCE_DIR}/third)
+target_include_directories(axolotl_runtime PRIVATE ${OPENGL_INCLUDE_DIR})

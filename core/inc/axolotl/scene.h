@@ -22,7 +22,7 @@ namespace axl {
     Ento FromHandle(entt::entity handle);
     entt::registry & GetRegistry();
 
-    void Draw(Renderer &renderer);
+    void Draw(Renderer &renderer, bool show_data = false);
     json Serialize();
 
     static void SetActiveScene(Scene *scene);

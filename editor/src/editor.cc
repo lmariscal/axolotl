@@ -29,6 +29,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   IOManager &io = window.GetIOManager();
   DockSpace dock;
 
+  bool last_fullscreen = false;
+
   scene.Init();
 
   while (window.Update() && !terminal_data.quit_requested) {
@@ -38,9 +40,21 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         shader->Recompile();
     }
 
-    bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen && frame_editor.focused);
+    bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);
     if (frame_editor.focused && io.KeyTriggered(Key::Escape))
       frame_editor.focused = false;
+    if (io.KeyTriggered(Key::F11))
+      dock.data.fullscreen = !dock.data.fullscreen;
+
+    if (!show_frame != last_fullscreen) {
+      if (show_frame) {
+        dock.first_iteration = true;
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+      } else {
+        ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+      }
+    }
+    last_fullscreen = !show_frame;
 
     if (show_frame) {
       dock.data.terminal = &terminal_data;
@@ -56,6 +70,13 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
+
+      if (terminal_data.display_terminal)
+        terminal.show();
+
+      if (!frame_editor.focused && io.ButtonTriggered(MouseButton::Left) && !ImGui::GetIO().WantCaptureMouse) {
+        frame_editor.focused = true;
+      }
     } else {
       v2i region_available = frame_editor.GetRegionAvailable();
       if (region_available.x > 0 && region_available.y > 0)
@@ -68,7 +89,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    scene.Draw(renderer);
+    scene.Draw(renderer, show_frame);
 
     if (show_frame) {
       frame_editor.Unbind(window);
@@ -83,8 +104,15 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     window.Draw();
 
-    if (terminal_data.scene_playing && io.KeyTriggered(Key::GraveAccent))
-      terminal_data.scene_paused = !terminal_data.scene_paused;
+    if (dock.data.fullscreen && terminal_data.scene_playing && io.KeyTriggered(Key::GraveAccent)) {
+      // terminal_data.scene_paused = !terminal_data.scene_paused;
+      terminal_data.display_terminal = !terminal_data.display_terminal;
+      if (terminal_data.display_terminal) {
+        v2 window_size = window.GetFrameBufferSize();
+        ImGui::SetWindowSize("Terminal", v2(window_size.x * 0.4f, window_size.y * 0.4f));
+        ImGui::SetWindowPos("Terminal", v2(20.0f));
+      }
+    }
     if (io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl)) {
       if (io.KeyDown(Key::Q))
         terminal_data.quit_requested = true;

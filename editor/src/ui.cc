@@ -17,7 +17,8 @@ namespace axl {
 
   FrameEditor::FrameEditor():
     _frame(1280, 720),
-    _region_available({ 0, 0 })
+    _region_available({ 0, 0 }),
+    action(EditorAction::Select)
   { }
 
   FrameEditor::~FrameEditor() { }
@@ -66,7 +67,7 @@ namespace axl {
     bool one_camera_active = Camera::GetActiveCamera() != nullptr;
 
     if (one_camera_active) {
-      ImGui::Image((ImTextureID)(size_t)_frame.GetTextureID(FrameBufferTexture::Color), buffer_size, uv0, uv1);
+      ImGui::Image((ImTextureID)(size_t)_frame.GetTexture(FrameBufferTexture::Color), buffer_size, uv0, uv1);
       if (dock.data.terminal->scene_playing && ImGui::IsItemClicked())
         focused = true;
     }
@@ -91,6 +92,10 @@ namespace axl {
       if (!dock.data.terminal->scene_playing && dock.data.terminal->scene_paused)
         dock.data.terminal->scene_paused = false;
     }
+    if (ImGui::IsItemHovered()) {
+      ImGui::SetTooltip("Play/Stop Scene");
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    }
     if (playing) {
       ImGui::PopStyleColor();
     } else {
@@ -103,6 +108,10 @@ namespace axl {
       ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
     if (ImGui::Button(ICON_FA_PAUSE, v2(33, 24)))
       dock.data.terminal->scene_paused = !dock.data.terminal->scene_paused;
+    if (ImGui::IsItemHovered()) {
+      ImGui::SetTooltip("Pause Scene");
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    }
     if (paused)
       ImGui::PopStyleColor();
     ImGui::SameLine();
@@ -124,18 +133,55 @@ namespace axl {
       cursor_pos = ImGui::GetCursorPos();
       cursor_pos.x = 12;
       cursor_pos.y += 42;
-      ImGui::SetCursorPos(cursor_pos);
-      ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30));
-      cursor_pos.x += 30;
-      ImGui::SetCursorPos(cursor_pos);
-      ImGui::Button(ICON_FA_ARROWS, v2(30, 30));
-      cursor_pos.x += 30;
-      ImGui::SetCursorPos(cursor_pos);
-      ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30));
-      cursor_pos.x += 30;
-      ImGui::SetCursorPos(cursor_pos);
-      ImGui::Button(ICON_FA_EXPAND, v2(30, 30));
 
+      EditorAction original_action = action;
+      ImGui::SetWindowFontScale(1.1f);
+
+      if (original_action == EditorAction::Select)
+        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+      ImGui::SetCursorPos(cursor_pos);
+      if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30)))
+        action = EditorAction::Select;
+      if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      cursor_pos.x += 30;
+      if (original_action == EditorAction::Select)
+        ImGui::PopStyleColor();
+
+      if (original_action == EditorAction::Move)
+        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+      ImGui::SetCursorPos(cursor_pos);
+      if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30)))
+        action = EditorAction::Move;
+      if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      cursor_pos.x += 30;
+      if (original_action == EditorAction::Move)
+        ImGui::PopStyleColor();
+
+      if (original_action == EditorAction::Rotate)
+        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+      ImGui::SetCursorPos(cursor_pos);
+      if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30)))
+        action = EditorAction::Rotate;
+      if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      cursor_pos.x += 30;
+      if (original_action == EditorAction::Rotate)
+        ImGui::PopStyleColor();
+
+      if (original_action == EditorAction::Scale)
+        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+      ImGui::SetCursorPos(cursor_pos);
+      if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30)))
+        action = EditorAction::Scale;
+      if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      cursor_pos.x += 30;
+      if (original_action == EditorAction::Scale)
+        ImGui::PopStyleColor();
+
+      ImGui::SetWindowFontScale(1.0f);
       ImGui::PopStyleColor(3);
     }
 
@@ -144,7 +190,7 @@ namespace axl {
       std::string text = "No active camera";
       v2 text_size = ImGui::CalcTextSize(text.c_str());
       ImGui::SetCursorPos(v2(window_size.x - text_size.x, window_size.y) / 2.0f);
-      ImGui::Text("%s", text.c_str());
+      ImGui::TextColored(v4(v3(1.0f), 0.6f), "%s", text.c_str());
     }
 
     ImGui::End();
@@ -179,14 +225,13 @@ namespace axl {
       _inspector._selected_entity = ento;
     ImGui::PopStyleVar(1);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     bool marked_for_deletion = false;
     if (ImGui::BeginPopupContextItem()) {
       marked_for_deletion = ShowEntityPopUp(ento, scene);
       ImGui::EndPopup();
     }
-    ImGui::PopStyleVar(2);
+    ImGui::PopStyleVar();
 
     ImGui::PopID();
 
@@ -205,20 +250,33 @@ namespace axl {
   }
 
   bool FrameEditor::ShowEntityPopUp(Ento ento, Scene &scene) {
-    if (ImGui::MenuItem(ICON_FA_PLUS_CIRCLE " Add")) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(0.0f, 0.0f));
+    ImGui::SetWindowFontScale(0.95f);
+
+    f32 width = ImGui::GetWindowWidth();
+    v2 button_size = v2(100.0f, ImGui::GetTextLineHeight() + 9.0f);
+    if (ImGui::Button(ICON_FA_PLUS_CIRCLE " Add", button_size)) {
       scene.CreateEntity();
       ImGui::CloseCurrentPopup();
     }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
-    if (!ento)
+    if (!ento) {
+      ImGui::PopStyleVar();
       return false;
+    }
 
     bool marked_for_deletion = false;
-    if (ImGui::MenuItem(ICON_FA_TRASH_ALT " Delete")) {
+    if (ImGui::Button(ICON_FA_TRASH_ALT " Delete", button_size)) {
       marked_for_deletion = true;
       _inspector._selected_entity = { };
       ImGui::CloseCurrentPopup();
     }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    ImGui::PopStyleVar();
     return marked_for_deletion;
   }
 
@@ -253,13 +311,12 @@ namespace axl {
     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
       _inspector._selected_entity = { };
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(9.0f, 6.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(9.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {
       ShowEntityPopUp({ }, scene);
       ImGui::EndPopup();
     }
-    ImGui::PopStyleVar(2);
+    ImGui::PopStyleVar();
 
     ImGui::End();
     ImGui::PopStyleVar(2);

@@ -26,9 +26,7 @@ namespace axl {
   }
 
   void Model::Init(Ento &ento) {
-    AXL_ASSERT((_shader_paths.vertex.string()[0] == '/'), "WTF?")
     ento.TryAddComponent<Material>(_shader_paths);
-    AXL_ASSERT((_shader_paths.vertex.string()[0] == '/'), "WTF?")
 
     if (!_root)
       return;
@@ -131,7 +129,6 @@ namespace axl {
   }
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
-    AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
     if (ento.Tag().value == Tag::DefaultTag)
       ento.Tag().value = node->mName.C_Str();
 
@@ -146,11 +143,11 @@ namespace axl {
       m->SetMaterialID(mesh->mMaterialIndex);
     }
 
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+    for (u32 i = 0; i < node->mNumChildren; i++) {
       Ento child = Scene::GetActiveScene()->CreateEntity();
-      AXL_ASSERT((model._shader_paths.vertex.string()[0] == '/'), "WTF?")
       Model &child_model = child.AddComponent<Model>(child, model._path, model._shader_paths, false);
       child_model.Init(child);
+      child_model._mesh_id = i;
       ento.AddChild(child);
 
       aiVector3D scale, position;
@@ -209,6 +206,13 @@ namespace axl {
 
   json Model::Serialize() const {
     json j;
+    j["version"]["major"] = 0;
+    j["version"]["minor"] = 1;
+    j["type"] = "model";
+
+    j["path"] = _path.string();
+    j["mesh_id"] = _mesh_id;
+    j["root"] = _root;
     return j;
   }
 

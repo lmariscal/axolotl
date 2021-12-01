@@ -56,8 +56,8 @@ namespace axl {
     return Ento::_handle_ento_map[handle];
   }
 
-  void Scene::Draw(Renderer &renderer) {
-    renderer.Render(*this);
+  void Scene::Draw(Renderer &renderer, bool show_data) {
+    renderer.Render(*this, show_data);
   }
 
   Scene * Scene::GetActiveScene() {
@@ -71,10 +71,8 @@ namespace axl {
   json Scene::Serialize() {
     json j;
     j["entities"] = json::array();
-    for (auto &e : _registry.view<Ento>()) {
-      Ento &ento = _registry.get<Ento>(e);
-      j["entities"].push_back(ento.Serialize());
-    }
+    for (auto it = Ento::_uuid_ento_map.cbegin(); it != Ento::_uuid_ento_map.cend(); ++it)
+      j["entities"].push_back(it->second.Serialize());
     return j;
   }
 

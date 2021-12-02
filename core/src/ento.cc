@@ -1,7 +1,7 @@
-#include <axolotl/ento.h>
-#include <axolotl/transform.h>
+#include <axolotl/ento.hh>
+#include <axolotl/transform.hh>
 
-#include <axolotl/model.h>
+#include <axolotl/model.hh>
 
 namespace axl {
 

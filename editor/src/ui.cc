@@ -1,15 +1,15 @@
-#include "ui.h"
+#include "ui.hh"
 
 #include <imgui.h>
-#include <axolotl/window.h>
-#include <axolotl/transform.h>
-#include <axolotl/camera.h>
-#include <axolotl/iomanager.h>
-#include <axolotl/ento.h>
-#include <axolotl/scene.h>
-#include <axolotl/terminal.h>
+#include <axolotl/window.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/iomanager.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/terminal.hh>
 
-#include "dockspace.h"
+#include "dockspace.hh"
 
 #include <IconsFontAwesome5Pro.h>
 

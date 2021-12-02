@@ -1,9 +1,9 @@
-#include <axolotl/camera.h>
+#include <axolotl/camera.hh>
 
-#include <axolotl/window.h>
-#include <axolotl/iomanager.h>
-#include <axolotl/scene.h>
-#include <axolotl/ento.h>
+#include <axolotl/window.hh>
+#include <axolotl/iomanager.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/ento.hh>
 #include <algorithm>
 
 namespace axl {

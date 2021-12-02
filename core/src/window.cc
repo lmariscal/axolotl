@@ -1,7 +1,7 @@
-#include <axolotl/window.h>
+#include <axolotl/window.hh>
 
-#include <axolotl/renderer.h>
-#include <axolotl/gui.h>
+#include <axolotl/renderer.hh>
+#include <axolotl/gui.hh>
 
 #include <GLFW/glfw3.h>
 

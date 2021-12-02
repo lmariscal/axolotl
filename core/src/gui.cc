@@ -1,7 +1,7 @@
-#include <axolotl/gui.h>
+#include <axolotl/gui.hh>
 
-#include <axolotl/axolotl.h>
-#include <axolotl/window.h>
+#include <axolotl/axolotl.hh>
+#include <axolotl/window.hh>
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>

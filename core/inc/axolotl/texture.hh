@@ -1,6 +1,7 @@
 #pragma once
 
-#include <axolotl/types.h>
+#include <axolotl/types.hh>
+
 #include <map>
 
 namespace axl {

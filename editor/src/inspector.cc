@@ -1,11 +1,11 @@
-#include "inspector.h"
+#include "inspector.hh"
 
-#include <axolotl/scene.h>
-#include <axolotl/camera.h>
-#include <axolotl/transform.h>
-#include <axolotl/ento.h>
-#include <axolotl/axolotl.h>
-#include <axolotl/model.h>
+#include <axolotl/scene.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/axolotl.hh>
+#include <axolotl/model.hh>
 #include <assimp/Importer.hpp>
 #include <IconsFontAwesome5Pro.h>
 #include <imgui.h>

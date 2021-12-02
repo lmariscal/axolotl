@@ -1,10 +1,10 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/component.h>
-#include <axolotl/mesh.h>
-#include <axolotl/material.h>
+#include <axolotl/types.hh>
 
+#include <axolotl/component.hh>
+#include <axolotl/mesh.hh>
+#include <axolotl/material.hh>
 #include <assimp/scene.h>
 
 #include <vector>

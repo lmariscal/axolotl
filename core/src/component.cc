@@ -1,6 +1,6 @@
-#include <axolotl/component.h>
+#include <axolotl/component.hh>
 
-#include <axolotl/scene.h>
+#include <axolotl/scene.hh>
 
 #include <imgui.h>
 #include <imgui_internal.h>

@@ -1,10 +1,10 @@
-#include <axolotl/scene.h>
+#include <axolotl/scene.hh>
 
-#include <axolotl/shader.h>
-#include <axolotl/renderer.h>
-#include <axolotl/mesh.h>
-#include <axolotl/ento.h>
-#include <axolotl/transform.h>
+#include <axolotl/shader.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/mesh.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/transform.hh>
 
 namespace axl {
 

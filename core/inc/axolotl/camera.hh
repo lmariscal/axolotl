@@ -1,9 +1,9 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/transform.h>
-#include <axolotl/component.h>
-#include <axolotl/ento.h>
+#include <axolotl/types.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/component.hh>
+#include <axolotl/ento.hh>
 
 namespace axl {
 

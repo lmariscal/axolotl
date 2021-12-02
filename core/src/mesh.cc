@@ -1,4 +1,4 @@
-#include <axolotl/mesh.h>
+#include <axolotl/mesh.hh>
 
 #include <glad.h>
 

@@ -1,9 +1,9 @@
-#include <axolotl/terminal.h>
+#include <axolotl/terminal.hh>
 
 #include <imterm/utils.hpp>
 #include <imterm/misc.hpp>
 
-#include <axolotl/shader.h>
+#include <axolotl/shader.hh>
 #include <unordered_set>
 #include <sstream>
 

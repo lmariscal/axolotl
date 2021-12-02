@@ -1,15 +1,15 @@
 #pragma once
 
-#include <axolotl/types.h>
+#include <axolotl/types.hh>
 
 #include <uuid.h>
 #include <array>
 #include <random>
 #include <vector>
 
-#include <axolotl/component.h>
-#include <axolotl/transform.h>
-#include <axolotl/scene.h>
+#include <axolotl/component.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/scene.hh>
 
 namespace axl {
 

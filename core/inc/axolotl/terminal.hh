@@ -1,6 +1,7 @@
 #pragma once
 
-#include <axolotl/types.h>
+#include <axolotl/types.hh>
+
 #include <imterm/terminal.hpp>
 #include <imterm/terminal_helpers.hpp>
 #include <mutex>

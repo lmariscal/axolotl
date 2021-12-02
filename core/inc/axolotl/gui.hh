@@ -1,6 +1,6 @@
 #pragma once
 
-#include <axolotl/types.h>
+#include <axolotl/types.hh>
 
 struct GLFWwindow;
 struct GLFWmonitor;

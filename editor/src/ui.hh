@@ -1,11 +1,11 @@
-#include <axolotl/framebuffer.h>
+#include <axolotl/framebuffer.hh>
 
-#include <axolotl/types.h>
-#include <axolotl/renderer.h>
-#include <axolotl/ento.h>
+#include <axolotl/types.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/ento.hh>
 #include <entt/entt.hpp>
 
-#include "inspector.h"
+#include "inspector.hh"
 
 namespace axl {
 

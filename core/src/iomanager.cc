@@ -1,6 +1,6 @@
-#include <axolotl/iomanager.h>
+#include <axolotl/iomanager.hh>
 
-#include <axolotl/window.h>
+#include <axolotl/window.hh>
 #include <GLFW/glfw3.h>
 #include <algorithm>
 

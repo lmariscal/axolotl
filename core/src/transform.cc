@@ -1,6 +1,6 @@
-#include <axolotl/transform.h>
-#include <axolotl/ento.h>
-#include <axolotl/scene.h>
+#include <axolotl/transform.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/scene.hh>
 #include <imgui.h>
 
 namespace axl {

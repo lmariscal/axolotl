@@ -1,4 +1,4 @@
-#include <axolotl/framebuffer.h>
+#include <axolotl/framebuffer.hh>
 
 #include <glad.h>
 

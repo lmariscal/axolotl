@@ -1,13 +1,13 @@
-#include <axolotl/renderer.h>
+#include <axolotl/renderer.hh>
 
-#include <axolotl/window.h>
-#include <axolotl/model.h>
-#include <axolotl/material.h>
-#include <axolotl/window.h>
-#include <axolotl/camera.h>
-#include <axolotl/transform.h>
-#include <axolotl/texture.h>
-#include <axolotl/ento.h>
+#include <axolotl/window.hh>
+#include <axolotl/model.hh>
+#include <axolotl/material.hh>
+#include <axolotl/window.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/texture.hh>
+#include <axolotl/ento.hh>
 
 #include <glad.h>
 

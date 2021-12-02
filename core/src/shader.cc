@@ -1,4 +1,4 @@
-#include <axolotl/shader.h>
+#include <axolotl/shader.hh>
 
 #include <fstream>
 #include <sstream>

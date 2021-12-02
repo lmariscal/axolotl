@@ -1,16 +1,16 @@
 #include <iostream>
 
-#include <axolotl/axolotl.h>
-#include <axolotl/window.h>
-#include <axolotl/shader.h>
-#include <axolotl/renderer.h>
-#include <axolotl/gui.h>
-#include <axolotl/transform.h>
+#include <axolotl/axolotl.hh>
+#include <axolotl/window.hh>
+#include <axolotl/shader.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/gui.hh>
+#include <axolotl/transform.hh>
 #include <imgui.h>
 
-#include "ui.h"
-#include "dockspace.h"
-#include "test_scene.h"
+#include "ui.hh"
+#include "dockspace.hh"
+#include "test_scene.hh"
 
 using namespace axl;
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/scene.h>
+#include <axolotl/types.hh>
+#include <axolotl/scene.hh>
 
 namespace axl {
 

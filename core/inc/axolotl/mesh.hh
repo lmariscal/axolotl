@@ -1,6 +1,6 @@
 #pragma once
 
-#include <axolotl/types.h>
+#include <axolotl/types.hh>
 
 #include <vector>
 #include <memory>

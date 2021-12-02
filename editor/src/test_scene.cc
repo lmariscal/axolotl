@@ -1,12 +1,12 @@
-#include "test_scene.h"
+#include "test_scene.hh"
 
-#include <axolotl/material.h>
-#include <axolotl/model.h>
-#include <axolotl/axolotl.h>
-#include <axolotl/camera.h>
-#include <axolotl/window.h>
-#include <axolotl/texture.h>
-#include <axolotl/ento.h>
+#include <axolotl/material.hh>
+#include <axolotl/model.hh>
+#include <axolotl/axolotl.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/window.hh>
+#include <axolotl/texture.hh>
+#include <axolotl/ento.hh>
 #include <imgui.h>
 
 namespace axl {

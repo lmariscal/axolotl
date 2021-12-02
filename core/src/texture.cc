@@ -1,4 +1,4 @@
-#include <axolotl/texture.h>
+#include <axolotl/texture.hh>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

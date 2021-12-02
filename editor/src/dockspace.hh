@@ -1,8 +1,8 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/window.h>
-#include <axolotl/terminal.h>
+#include <axolotl/types.hh>
+#include <axolotl/window.hh>
+#include <axolotl/terminal.hh>
 
 namespace axl {
 

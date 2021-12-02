@@ -1,8 +1,8 @@
-#include <axolotl/material.h>
+#include <axolotl/material.hh>
 
-#include <axolotl/scene.h>
-#include <axolotl/shader.h>
-#include <axolotl/texture.h>
+#include <axolotl/scene.hh>
+#include <axolotl/shader.hh>
+#include <axolotl/texture.hh>
 
 namespace axl {
 

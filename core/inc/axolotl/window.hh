@@ -1,7 +1,7 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/iomanager.h>
+#include <axolotl/types.hh>
+#include <axolotl/iomanager.hh>
 
 struct GLFWwindow;
 struct GLFWmonitor;

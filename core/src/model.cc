@@ -1,10 +1,10 @@
-#include <axolotl/model.h>
+#include <axolotl/model.hh>
 
-#include <axolotl/material.h>
-#include <axolotl/scene.h>
-#include <axolotl/mesh.h>
-#include <axolotl/transform.h>
-#include <axolotl/ento.h>
+#include <axolotl/material.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/mesh.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/ento.hh>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

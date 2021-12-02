@@ -1,4 +1,4 @@
-#include <axolotl/axolotl.h>
+#include <axolotl/axolotl.hh>
 
 #if defined(WIN32) || defined(_WIN32)
 #include <windows.h>
@@ -9,7 +9,7 @@
 #endif
 
 #include <algorithm>
-#include <axolotl/shader.h>
+#include <axolotl/shader.hh>
 
 namespace axl {
 

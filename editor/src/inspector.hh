@@ -1,9 +1,9 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/ento.h>
+#include <axolotl/types.hh>
+#include <axolotl/ento.hh>
 
-#include "dockspace.h"
+#include "dockspace.hh"
 
 namespace axl {
 

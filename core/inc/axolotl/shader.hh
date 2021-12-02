@@ -1,8 +1,8 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/component.h>
-#include <axolotl/texture.h>
+#include <axolotl/types.hh>
+#include <axolotl/component.hh>
+#include <axolotl/texture.hh>
 
 #include <filesystem>
 #include <unordered_map>

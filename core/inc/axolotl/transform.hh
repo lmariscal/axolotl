@@ -1,7 +1,8 @@
 #pragma once
 
-#include <axolotl/types.h>
-#include <axolotl/component.h>
+#include <axolotl/types.hh>
+
+#include <axolotl/component.hh>
 
 namespace axl {
 

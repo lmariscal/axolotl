@@ -8,37 +8,30 @@
 
 namespace axl {
 
-  class ShaderWatcher : public efsw::FileWatchListener {
-   public:
-    ShaderWatcher(Shader* shader): _shader(shader) { }
-    virtual ~ShaderWatcher() { }
+  Shader::Shader(u32 shader_id):
+    shader_id(shader_id)
+  {
+    ShaderStore::GetData(shader_id).instances++;
+  }
 
-    virtual void handleFileAction(efsw::WatchID watchid, const std::string &dir, const std::string &filename,
-                                  efsw::Action action, std::string old_name = "") {
-      if (action != efsw::Actions::Modified)
-        return;
+  Shader::Shader(const ShaderData &data) {
+    ShaderStore::RegisterShader(*this, data);
+  }
 
-      ShaderType type = ShaderType::Last;
-      for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-        if (_shader->_paths[i].empty())
-          continue;
-        if (filename != _shader->_paths[i].filename().string())
-          continue;
-        if (dir != _shader->_paths[i].parent_path().string() + "/")
-          continue;
-        type = (ShaderType)i;
-        break;
-      }
+  Shader::Shader(const Shader &other) {
+    ShaderStore::GetData(other.shader_id).instances++;
+    shader_id = other.shader_id;
+  }
 
-      if (type == ShaderType::Last)
-        return;
+  Shader::Shader(Shader &&other) {
+    ShaderStore::GetData(other.shader_id).instances++;
+    shader_id = other.shader_id;
+  }
 
-      _shader->_need_reload[(i32)type] = true;
-    }
-
-   private:
-    Shader *_shader;
-  };
+  Shader::~Shader() {
+    log::debug("Shader destructor");
+    ShaderStore::DeregisterShader(shader_id);
+  }
 
   std::string Shader::ShaderTypeToString(ShaderType type) {
     switch (type) {
@@ -56,13 +49,15 @@ namespace axl {
   }
 
   ShaderType Shader::StringToShaderType(const std::string &str) {
-    if (str == "Vertex")
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if (lower == "vertex")
       return ShaderType::Vertex;
-    if (str == "Fragment")
+    if (lower == "fragment")
       return ShaderType::Fragment;
-    if (str == "Geometry")
+    if (lower == "geometry")
       return ShaderType::Geometry;
-    if (str == "Compute")
+    if (lower == "compute")
       return ShaderType::Compute;
     return ShaderType::Last;
   }
@@ -82,110 +77,188 @@ namespace axl {
     }
   }
 
-  void Shader::Init() {
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      _shaders[i] = 0;
-      _watch_ids[i] = 0;
-      _need_reload[i] = false;
-    }
-    _watcher = new efsw::FileWatcher();
-    _shader_watcher = new ShaderWatcher(this);
-
-    // _watcher->watch();
-
-    _shaders_programs.push_back(this);
-
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_paths[i].empty())
-        continue;
-      Load((ShaderType)i, _paths[i]);
-    }
-  }
-
-  Shader::Shader(const ShaderPaths &paths):
-    _program(0)
-  {
-    if (!paths.vertex.empty())
-      _paths[(i32)ShaderType::Vertex] = paths.vertex;
-    if (!paths.fragment.empty())
-      _paths[(i32)ShaderType::Fragment] = paths.fragment;
-    if (!paths.geometry.empty())
-      _paths[(i32)ShaderType::Geometry] = paths.geometry;
-    if (!paths.compute.empty())
-      _paths[(i32)ShaderType::Compute] = paths.compute;
-  }
-
-  Shader::Shader():
-    _program(0)
-  {
-    log::info("Pase por aca");
-  }
-
-  Shader::~Shader() {
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_shaders[i] == 0)
-        continue;
-
-      glDeleteShader(_shaders[i]);
-
-      if (_watch_ids[i] == 0 || _paths[i].empty())
-        continue;
-
-      if (_watcher)
-        _watcher->removeWatch(_watch_ids[i]);
+  i32 Shader::GetUniformLocation(const std::string &name) {
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data.gl_id == 0) {
+      log::error("Shader program {} not compiled", data.gl_id);
+      return -1;
     }
 
-    glDeleteProgram(_program);
+    if (data._uniform_locations.count(name))
+      return data._uniform_locations[name];
 
-    delete _shader_watcher;
-    delete _watcher;
-
-    _shaders_programs.erase(std::find(_shaders_programs.begin(), _shaders_programs.end(), this));
-    log::debug("Shader {} destroyed", _program);
+    i32 location = glGetUniformLocation(data.gl_id, name.c_str());
+    if (location == -1)
+      log::error("Shader uniform \"{}\" not found", name);
+    log::warn("Retrieving uniform location at runtime. Program {}, Uniform {}", data.gl_id, name);
+    data._uniform_locations[name] = location;
+    return location;
   }
 
-  bool Shader::Watch() {
-    bool need_recompile = false;
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (!_need_reload[i])
-        continue;
-
-      if (Reload((ShaderType)i))
-        need_recompile = true;
-
-      _need_reload[i] = false;
+  u32 ShaderStore::GetShaderFromPath(const ShaderData &data) {
+    for (auto itr = _shader_data.cbegin(); itr != _shader_data.cend(); ++itr) {
+      bool equal = true;
+      for (u32 i = 0; i < (i32)ShaderType::Last; ++i) {
+        if (itr->second.paths[i] != data.paths[i]) {
+          equal = false;
+          break;
+        }
+      }
+      if (equal)
+        return itr->first;
     }
-    return need_recompile;
+    return 0;
   }
 
-  void Shader::Load(ShaderType type, const std::filesystem::path &path) {
-    if (_shaders[(i32)type] != 0) {
-      log::error("Shader already loaded, type {}, path \"{}\"", ShaderTypeToString(type), _paths[(i32)type].string());
+  ShaderData & ShaderStore::GetData(u32 shader_id) {
+    return _shader_data[shader_id];
+  }
+
+  void Shader::Bind() {
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    AXL_ASSERT(data.gl_id, "Shader program {} not compiled", data.gl_id);
+    glUseProgram(data.gl_id);
+  }
+
+  void Shader::Unbind() {
+    glUseProgram(0);
+  }
+
+  void Shader::UnloadShader(ShaderType type) {
+    ShaderStore::UnloadShader(*this, type);
+  }
+
+  void Shader::LoadFromPath(ShaderType type, const std::filesystem::path &path) {
+    ShaderStore::LoadFromPath(*this, type, path);
+  }
+
+  void Shader::LoadFromData(ShaderType type, const std::string &data) {
+    ShaderStore::LoadFromData(*this, type, data);
+  }
+
+  bool Shader::ReloadShader(ShaderType type) {
+    return ShaderStore::ReloadShader(*this, type);
+  }
+
+  bool Shader::ReloadProgram() {
+    return ShaderStore::ReloadProgram(*this);
+  }
+
+  bool Shader::Compile() {
+    return ShaderStore::CompileProgram(*this);
+  }
+
+  bool Shader::Recompile() {
+    return ShaderStore::RecompileProgram(*this);
+  }
+
+  void Shader::ShowComponent() {
+    // TODO
+  }
+
+  std::unordered_map<u32, ShaderData> & ShaderStore::GetAllShadersData() {
+    return _shader_data;
+  }
+
+  Shader::operator u32() const {
+    return ShaderStore::GetRendererID(shader_id);
+  }
+
+  Shader ShaderStore::FromID(u32 id) {
+    return Shader(id);
+  }
+
+  u32 ShaderStore::GetRendererID(u32 shader_id) {
+    return _shader_data[shader_id].gl_id;
+  }
+
+  void ShaderStore::RegisterShader(Shader &shader, const ShaderData &data) {
+    if (data.paths[(i32)ShaderType::Vertex].empty() || data.paths[(i32)ShaderType::Fragment].empty()) {
+      log::error("Trying to register shader that has no vertex or fragment shader");
       return;
     }
 
-    log::debug("Loading shader, type {}, path \"{}\"", ShaderTypeToString(type), path.string());
-    std::string data = Read(path, type);
-
-    _paths[(i32)type] = path;
-    LoadData(type, data);
-
-    efsw::WatchID watch_id = _watcher->addWatch(path.parent_path().string(), _shader_watcher, false);
-    _watch_ids[(i32)type] = watch_id;
-  }
-
-  void Shader::LoadData(ShaderType type, const std::string &data) {
-    if (_shaders[(i32)type] != 0) {
-      log::error("Shader already loaded, type {}, path \"{}\"", ShaderTypeToString(type), _paths[(i32)type].string());
+    u32 shader_id = GetShaderFromPath(data);
+    if (shader_id > 0) {
+      shader.shader_id = shader_id;
+      _shader_data[shader_id].instances++;
       return;
     }
 
-    _shaders[(i32)type] = CompileShader(type, data);
+    _id_counter++;
+    shader.shader_id = _id_counter;
+    _shader_data.insert(std::pair<u32, ShaderData>(shader.shader_id, data));
+    _shader_data[shader.shader_id].instances++;
+    _shader_queue.emplace(shader);
+
+    _shader_data[shader.shader_id].id = shader.shader_id;
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (data.paths[i].empty())
+        continue;
+      LoadFromPath(shader, (ShaderType)i, data.paths[i]);
+    }
+    CompileProgram(shader);
   }
 
-  std::string Shader::Read(const std::filesystem::path &path, ShaderType shader_type) {
+  void ShaderStore::ProcessQueue() {
+    while (!_shader_queue.empty()) {
+      Shader &shader = _shader_queue.front();
+      ShaderData &data = _shader_data[shader.shader_id];
+
+      _shader_queue.pop();
+    }
+  }
+
+  void ShaderStore::DeregisterShader(u32 shader_id) {
+    if (!_shader_data.count(shader_id)) {
+      log::error("Shader id {} not registered", shader_id);
+      return;
+    }
+
+    _shader_data[shader_id].instances--;
+    if (_shader_data[shader_id].instances > 0)
+      return;
+
+    log::debug("Deleting shader id {}", shader_id);
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (_shader_data[shader_id].shaders[i] == 0)
+        continue;
+      glDeleteShader(_shader_data[shader_id].shaders[i]);
+    }
+
+    glDeleteProgram(_shader_data[shader_id].gl_id);
+    _shader_data.erase(shader_id);
+  }
+
+  void ShaderStore::LoadFromPath(Shader &shader, ShaderType type, const std::filesystem::path &path) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.shaders[(i32)type] != 0) {
+      log::warn("{} shader already compiled", Shader::ShaderTypeToString(type));
+      return;
+    }
+
+    log::debug("Loading {} shader from {}", Shader::ShaderTypeToString(type), path.string());
+    std::string source = ReadShader(type, path);
+
+    data.paths[(i32)type] = path;
+
+    LoadFromData(shader, type, source);
+  }
+
+  void ShaderStore::LoadFromData(Shader &shader, ShaderType type, const std::string &source) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.shaders[(i32)type] != 0) {
+      log::warn("{} shader already compiled", Shader::ShaderTypeToString(type));
+      return;
+    }
+
+    data.shaders[(i32)type] = CompileShader(type, source);
+  }
+
+  std::string ShaderStore::ReadShader(ShaderType type, const std::filesystem::path &path) {
     if (!std::filesystem::exists(path)) {
-      AXL_ASSERT(false, "File {} doesn't exists", path.string());
       log::error("Shader file \"{}\" does not exist", path.string());
       return "";
     }
@@ -213,8 +286,8 @@ namespace axl {
         }
 
         std::filesystem::path include_path = path.parent_path() / include;
-        // log::debug("Found include directive, path \"{}\", resolved \"{}\"", include, include_path.string());
-        std::string include_data = Read(include_path, shader_type);
+        log::debug("Found include directive, path \"{}\", resolved \"{}\"", include, include_path.string());
+        std::string include_data = ReadShader(type, include_path);
         if (include_data.empty()) {
           log::error("Shader include \"{}\" could not be read", include_path.string());
           buffer << "// include " << include << " could not be read\n";
@@ -233,13 +306,131 @@ namespace axl {
     return buffer.str();
   }
 
-  void Shader::GetUniformData() {
-    Bind();
+  u32 ShaderStore::CompileShader(ShaderType type, const std::string &source) {
+    if (source.empty())
+      return 0;
+
+    u32 shader_id = glCreateShader(ShaderTypeToGL(type));
+
+    const char *cstr = source.c_str();
+    glShaderSource(shader_id, 1, &cstr, nullptr);
+    glCompileShader(shader_id);
+
+    i32 status;
+    glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
+    if (status == GL_TRUE) {
+      log::debug("Shader {} compiled, type {}", shader_id, Shader::ShaderTypeToString(type));
+      return shader_id;
+    }
+
+    i32 length;
+    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &length);
+
+    std::string log(length, ' ');
+    glGetShaderInfoLog(shader_id, length, &length, &log[0]);
+
+    log::error("Shader {} compilation failed, type: {}\n{}", shader_id, Shader::ShaderTypeToString(type), log);
+
+    std::istringstream stream(source);
+    std::string line;
+    std::stringstream buffer;
+    i32 line_number = 1;
+    while (std::getline(stream, line)) {
+      buffer << std::setw(4) << std::setfill(' ') << line_number << ": " << line << '\n';
+      ++line_number;
+    }
+
+    log::error("Shader source\n{}", buffer.str());
+
+    glDeleteShader(shader_id);
+    return 0;
+  }
+
+  bool ShaderStore::CompileProgram(Shader &shader) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.gl_id != 0) {
+      log::warn("Shader id {} already compiled", shader.shader_id);
+      return false;
+    }
+
+    data.gl_id = glCreateProgram();
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (data.shaders[i] == 0)
+        continue;
+
+      glAttachShader(data.gl_id, data.shaders[i]);
+    }
+
+    glLinkProgram(data.gl_id);
+
+    i32 status;
+    glGetProgramiv(data.gl_id, GL_LINK_STATUS, &status);
+    if (status == GL_FALSE) {
+      i32 length;
+      glGetProgramiv(data.gl_id, GL_INFO_LOG_LENGTH, &length);
+
+      std::string log(length, ' ');
+      glGetProgramInfoLog(data.gl_id, length, &length, &log[0]);
+
+      log::error("Shader linking failed\n{}", log);
+      return false;
+    }
+
+    log::debug("Shader id {} compiled", shader.shader_id);
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (data.shaders[i] == 0)
+        continue;
+
+      glDetachShader(data.gl_id, data.shaders[i]);
+    }
+
+    data._uniform_locations.clear();
+    data._uniform_locations_reverse.clear();
+    data._attribute_locations.clear();
+    data._attribute_locations_reverse.clear();
+    data._uniform_data_types.clear();
+
+    data._uniform_v2.clear();
+    data._uniform_v3.clear();
+    data._uniform_v4.clear();
+    data._uniform_m3.clear();
+    data._uniform_m4.clear();
+    data._uniform_f32.clear();
+    data._uniform_f64.clear();
+    data._uniform_i32.clear();
+    data._uniform_u32.clear();
+    data._uniform_textures.clear();
+
+    GetUniformData(shader);
+    VerifyUniforms(shader);
+
+    return true;
+  }
+
+  bool ShaderStore::RecompileProgram(Shader &shader) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.gl_id == 0) {
+      log::warn("Shader id {} not compiled", shader.shader_id);
+      return false;
+    }
+
+    glDeleteProgram(data.gl_id);
+    data.gl_id = 0;
+
+    return CompileProgram(shader);
+  }
+
+  void ShaderStore::GetUniformData(Shader &shader) {
+    ShaderData &data = _shader_data[shader.shader_id];
+
+    shader.Bind();
     i32 num_active_attribs = 0;
     i32 num_active_uniforms = 0;
 
-    glGetProgramInterfaceiv(_program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &num_active_attribs);
-    glGetProgramInterfaceiv(_program, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
+    glGetProgramInterfaceiv(data.gl_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &num_active_attribs);
+    glGetProgramInterfaceiv(data.gl_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
 
     log::debug("Active attributes: {}", num_active_attribs);
     log::debug("Active uniforms: {}", num_active_uniforms);
@@ -252,71 +443,74 @@ namespace axl {
     properties.push_back(GL_LOCATION);
     std::vector<i32> values(properties.size());
     for (i32 i = 0; i < num_active_attribs; ++i) {
-      glGetProgramResourceiv(_program, GL_PROGRAM_INPUT, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
+      glGetProgramResourceiv(data.gl_id, GL_PROGRAM_INPUT, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
       name_buffer.resize(values[0]);
-      glGetProgramResourceName(_program, GL_PROGRAM_INPUT, i, name_buffer.size(), nullptr, name_buffer.data());
+      glGetProgramResourceName(data.gl_id, GL_PROGRAM_INPUT, i, name_buffer.size(), nullptr, name_buffer.data());
       std::string name(name_buffer.data());
       log::debug("Attribute {}: {} | location {}", i, name, values[3]);
+
+      data._attribute_locations[name] = values[3];
+      data._attribute_locations_reverse[values[3]] = name;
     }
 
     for (i32 i = 0; i < num_active_uniforms; ++i) {
-      glGetProgramResourceiv(_program, GL_UNIFORM, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
+      glGetProgramResourceiv(data.gl_id, GL_UNIFORM, i, properties.size(), properties.data(), properties.size(), nullptr, values.data());
       name_buffer.resize(values[0]);
-      glGetProgramResourceName(_program, GL_UNIFORM, i, name_buffer.size(), nullptr, name_buffer.data());
+      glGetProgramResourceName(data.gl_id, GL_UNIFORM, i, name_buffer.size(), nullptr, name_buffer.data());
       std::string name(name_buffer.data());
 
       log::debug("Uniforms {}: {} | location {}", i, name, values[3]);
 
-      UniformDataType data_type = GLToUniformDataType(values[1]);
+      UniformDataType data_type = Shader::GLToUniformDataType(values[1]);
       i32 location = values[3];
-      _uniform_locations.insert({ name, location });
-      _uniform_locations_reverse.insert({ location, name });
-      _uniform_data_type.insert({ location, data_type });
+      data._uniform_locations.insert({ name, location });
+      data._uniform_locations_reverse.insert({ location, name });
+      data._uniform_data_types.insert({ location, data_type });
 
       switch (data_type) {
         case UniformDataType::Vector2:
-          _uniform_v2.insert({ location, v2(1.0f) });
-          SetUniformV2(location, _uniform_v2[location]);
+          data._uniform_v2.insert({ location, v2(1.0f) });
+          shader.SetUniformV2(location, data._uniform_v2[location]);
           break;
         case UniformDataType::Vector3:
-          _uniform_v3.insert({ location, v3(1.0f) });
-          SetUniformV3(location, _uniform_v3[location]);
+          data._uniform_v3.insert({ location, v3(1.0f) });
+          shader.SetUniformV3(location, data._uniform_v3[location]);
           break;
         case UniformDataType::Vector4:
-          _uniform_v4.insert({ location, v4(1.0f) });
-          SetUniformV4(location, _uniform_v4[location]);
+          data._uniform_v4.insert({ location, v4(1.0f) });
+          shader.SetUniformV4(location, data._uniform_v4[location]);
           break;
         case UniformDataType::Matrix3:
-          _uniform_m3.insert({ location, m3(1.0f) });
-          SetUniformM3(location, _uniform_m3[location]);
+          data._uniform_m3.insert({ location, m3(1.0f) });
+          shader.SetUniformM3(location, data._uniform_m3[location]);
           break;
         case UniformDataType::Matrix4:
-          _uniform_m4.insert({ location, m4(1.0f) });
-          SetUniformM4(location, _uniform_m4[location]);
+          data._uniform_m4.insert({ location, m4(1.0f) });
+          shader.SetUniformM4(location, data._uniform_m4[location]);
           break;
         case UniformDataType::Float:
-          _uniform_f32.insert({ location, 1.0f });
-          SetUniformF32(location, _uniform_f32[location]);
+          data._uniform_f32.insert({ location, 1.0f });
+          shader.SetUniformF32(location, data._uniform_f32[location]);
           break;
         case UniformDataType::Double:
-          _uniform_f64.insert({ location, 1.0 });
+          data._uniform_f64.insert({ location, 1.0 });
           break;
         case UniformDataType::Int:
-          _uniform_i32.insert({ location, 0 });
-          SetUniformI32(location, _uniform_i32[location]);
+          data._uniform_i32.insert({ location, 0 });
+          shader.SetUniformI32(location, data._uniform_i32[location]);
           break;
         case UniformDataType::UInt:
-          _uniform_u32.insert({ location, 0u });
-          SetUniformU32(location, _uniform_u32[location]);
+          data._uniform_u32.insert({ location, 0u });
+          shader.SetUniformU32(location, data._uniform_u32[location]);
           break;
         case UniformDataType::Texture:
         case UniformDataType::TextureArray:
-          std::array<i32, MaxTextures> textures;
+          std::array<i32, MAX_TEXTURE_UNITS> textures;
           std::fill(textures.begin(), textures.end(),-1);
-          _uniform_textures.insert({ location, textures });
+          data._uniform_textures.insert({ location, textures });
 
           for (i32 i = 0; i < (i32)TextureType::Last; ++i)
-            SetUniformTexture((TextureType)i, -1);
+            shader.SetUniformTexture((TextureType)i, -1);
           break;
         case UniformDataType::Last:
           break;
@@ -324,236 +518,69 @@ namespace axl {
     }
   }
 
-  bool Shader::Compile() {
-    if (_program) {
-      log::error("Shader program {} already compiled", _program);
-      return false;
-    }
-
-    _program = glCreateProgram();
-
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_shaders[i] == 0)
-        continue;
-
-      glAttachShader(_program, _shaders[i]);
-    }
-
-    glLinkProgram(_program);
-
-    i32 status;
-    glGetProgramiv(_program, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-      i32 length;
-      glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &length);
-
-      std::string log(length, ' ');
-      glGetProgramInfoLog(_program, length, &length, &log[0]);
-
-      log::error("Shader linking failed\n{}", log);
-      return false;
-    }
-
-    log::debug("Shader program {} compiled successfully", _program);
-
-    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_shaders[i] == 0)
-        continue;
-
-      glDetachShader(_program, _shaders[i]);
-    }
-
-    _uniform_locations.clear();
-    _uniform_locations_reverse.clear();
-    _uniform_data_type.clear();
-
-    _uniform_v2.clear();
-    _uniform_v3.clear();
-    _uniform_v4.clear();
-    _uniform_m3.clear();
-    _uniform_m4.clear();
-    _uniform_f32.clear();
-    _uniform_f64.clear();
-    _uniform_i32.clear();
-    _uniform_u32.clear();
-    _uniform_textures.clear();
-
-    GetUniformData();
-    VerifyUniforms();
-
-    return true;
-  }
-
-  u32 Shader::CompileShader(ShaderType type, const std::string &data) {
-    if (data.empty())
-      return 0;
-
-    u32 shader_id = glCreateShader(ShaderTypeToGL(type));
-
-    const char *cstr = data.c_str();
-    glShaderSource(shader_id, 1, &cstr, nullptr);
-    glCompileShader(shader_id);
-
-    i32 status;
-    glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-      i32 length;
-      glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &length);
-
-      std::string log(length, ' ');
-      glGetShaderInfoLog(shader_id, length, &length, &log[0]);
-
-      log::error("Shader {} compilation failed, type: {}, path \"{}\"\n{}", shader_id, ShaderTypeToString(type), _paths[(i32)type].string(), log);
-
-      std::istringstream stream(data);
-      std::string line;
-      std::stringstream buffer;
-      i32 line_number = 1;
-      while (std::getline(stream, line)) {
-        buffer << std::setw(4) << std::setfill(' ') << line_number << ": " << line << '\n';
-        ++line_number;
-      }
-
-      log::error("Shader data\n{}", buffer.str());
-
-      glDeleteShader(shader_id);
-      return 0;
-    }
-
-    log::debug("Shader {} compiled, type {}", shader_id, ShaderTypeToString(type));
-    return shader_id;
-  }
-
-  bool Shader::Recompile() {
-    if (_program)
-      glDeleteProgram(_program);
-    _program = 0;
-    return Compile();
-  }
-
-  void Shader::Bind() {
-    glUseProgram(_program);
-  }
-
-  void Shader::Unload(ShaderType type) {
-    if (_shaders[(i32)type] == 0)
+  void ShaderStore::UnloadShader(Shader &shader, ShaderType type) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.shaders[(i32)type] == 0) {
+      log::warn("{} shader in program {} not loaded", Shader::ShaderTypeToString(type), shader.shader_id);
       return;
+    }
 
-    glDeleteShader(_shaders[(i32)type]);
-    _shaders[(i32)type] = 0;
-    _paths[(i32)type] = "";
-    _watcher->removeWatch(_watch_ids[(i32)type]);
+    glDeleteShader(data.shaders[(i32)type]);
+    data.shaders[(i32)type] = 0;
+    data.paths[(i32)type] = "";
 
-    log::debug("Unloaded shader, type {}", ShaderTypeToString(type));
+    log::debug("Unloaded {} shader from program {}", Shader::ShaderTypeToString(type), shader.shader_id);
   }
 
-  bool Shader::Reload(ShaderType type) {
-    if (type == ShaderType::Last) {
-      for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-        if (_paths[i].empty())
-          continue;
-        if (!Reload((ShaderType)i))
-          return false;
-      }
-      return true;
-    }
-
-    if (_paths[(i32)type].empty())
-      return false;
-
-    log::debug("Reloading shader program {}, type {}", _program, ShaderTypeToString(type));
-
-    std::string data = Read(_paths[(i32)type], type);
-    if (data.empty())
-      return false;
-
-    u32 shader_id = CompileShader(type, data);
-    if (shader_id == 0) {
+  bool ShaderStore::ReloadShader(Shader &shader, ShaderType type) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.shaders[(i32)type] == 0) {
+      log::warn("{} shader in program {} not loaded", Shader::ShaderTypeToString(type), shader.shader_id);
       return false;
     }
 
-    if (_shaders[(i32)type] != 0)
-      glDeleteShader(_shaders[(i32)type]);
-    _shaders[(i32)type] = shader_id;
+    if (data.paths[(i32)type].empty()) {
+      log::warn("{} shader in program {} has no path", Shader::ShaderTypeToString(type), shader.shader_id);
+      return false;
+    }
+
+    log::debug("Reloading {} shader from program {}", Shader::ShaderTypeToString(type), shader.shader_id);
+
+    std::string source = ReadShader(type, data.paths[(i32)type]);
+    if (source.empty()) {
+      log::error("Failed to read {} shader from {}", Shader::ShaderTypeToString(type), data.paths[(i32)type].string());
+      return false;
+    }
+
+    u32 shader_id = CompileShader(type, source);
+    if (shader_id == 0)
+      return false;
+
+    if (data.shaders[(i32)type] != 0)
+      glDeleteShader(data.shaders[(i32)type]);
+    data.shaders[(i32)type] = shader_id;
 
     return true;
   }
 
-  i32 Shader::GetUniformLocation(const std::string &name) {
-    if (_program == 0) {
-      log::error("Shader program {} not compiled", _program);
-      return -1;
+  bool ShaderStore::ReloadProgram(Shader &shader) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data.gl_id == 0) {
+      log::warn("Program {} not loaded", shader.shader_id);
+      return false;
     }
 
-    if (_uniform_locations.count(name))
-      return _uniform_locations[name];
-
-    i32 location = glGetUniformLocation(_program, name.c_str());
-    if (location == -1)
-      log::error("Shader uniform \"{}\" not found", name);
-    _uniform_locations[name] = location;
-    return location;
-  }
-
-  bool Shader::ShowData() {
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
-    if (ImGui::CollapsingHeader("Shader", flags)) {
-      for (auto itr = _uniform_data_type.cbegin(); itr != _uniform_data_type.cend(); ++itr) {
-        const UniformDataType &type = itr->second;
-        const i32 &location = itr->first;
-        const std::string &name = _uniform_locations_reverse[location];
-
-        switch (type) {
-          case UniformDataType::Vector2:
-            if (axl::ShowData(name, _uniform_v2[location]))
-              SetUniformV2(location, _uniform_v2[location]);
-            break;
-          case UniformDataType::Vector3:
-            if (axl::ShowData(name, _uniform_v3[location]))
-              SetUniformV3(location, _uniform_v3[location]);
-            break;
-          case UniformDataType::Vector4:
-            if (axl::ShowDataColor(name, _uniform_v4[location]))
-              SetUniformV4(location, _uniform_v4[location]);
-            break;
-          case UniformDataType::Matrix3:
-            break;
-          case UniformDataType::Matrix4:
-            break;
-          case UniformDataType::Float:
-            if (axl::ShowData(name, _uniform_f32[location]))
-              SetUniformF32(location, _uniform_f32[location]);
-            break;
-          case UniformDataType::Double:
-            break;
-          case UniformDataType::Int:
-            if (axl::ShowData(name, _uniform_i32[location]))
-              SetUniformI32(location, _uniform_i32[location]);
-            break;
-          case UniformDataType::UInt:
-            if (axl::ShowData(name, _uniform_u32[location]))
-              SetUniformU32(location, _uniform_u32[location]);
-            break;
-          case UniformDataType::Texture:
-          case UniformDataType::TextureArray:
-            if (ImGui::CollapsingHeader(name.c_str())) {
-              for (i32 i = 0; i < MaxTextures; ++i) {
-                if (_uniform_textures[location][i] == -1)
-                  continue;
-                std::string type_name = Texture::TextureTypeToString((TextureType)i);
-                axl::ShowDataTexture(type_name.c_str(), _uniform_textures[location][i]);
-              }
-            }
-            break;
-          case UniformDataType::Last:
-            break;
-        }
-      }
+    bool success = true;
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (data.paths[i].empty())
+        continue;
+      if (!ReloadShader(shader, (ShaderType)i))
+        success = false;
     }
-    return false;
+    return success;
   }
 
-#pragma region Uniforms
+  #pragma region Uniforms
   UniformDataType Shader::GLToUniformDataType(u32 type) {
     switch (type) {
       case GL_FLOAT_VEC2:
@@ -612,63 +639,72 @@ namespace axl {
   }
 
   void Shader::SetUniformV2(u32 location, const v2 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Vector2)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Vector2)
       return;
     glUniform2fv(location, 1, value_ptr(value));
-    _uniform_v2[location] = value;
+    data._uniform_v2[location] = value;
   }
 
   void Shader::SetUniformV3(u32 location, const v3 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Vector3)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Vector3)
       return;
     glUniform3fv(location, 1, value_ptr(value));
-    _uniform_v3[location] = value;
+    data._uniform_v3[location] = value;
   }
 
   void Shader::SetUniformV4(u32 location, const v4 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Vector4)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Vector4)
       return;
     glUniform4fv(location, 1, value_ptr(value));
-    _uniform_v4[location] = value;
+    data._uniform_v4[location] = value;
   }
 
   void Shader::SetUniformM3(u32 location, const m3 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Matrix3)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Matrix3)
       return;
     glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(value));
-    _uniform_m3[location] = value;
+    data._uniform_m3[location] = value;
   }
 
   void Shader::SetUniformM4(u32 location, const m4 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Matrix4)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Matrix4)
       return;
     glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
-    _uniform_m4[location] = value;
+    data._uniform_m4[location] = value;
   }
 
   void Shader::SetUniformF32(u32 location, const f32 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Float)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Float)
       return;
     glUniform1f(location, value);
-    _uniform_f32[location] = value;
+    data._uniform_f32[location] = value;
   }
 
   void Shader::SetUniformI32(u32 location, const i32 &value) {
-    if (_uniform_data_type[location] != UniformDataType::Int)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::Int)
       return;
     glUniform1i(location, value);
-    _uniform_i32[location] = value;
+    data._uniform_i32[location] = value;
   }
 
   void Shader::SetUniformU32(u32 location, const u32 &value) {
-    if (_uniform_data_type[location] != UniformDataType::UInt)
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (data._uniform_data_types[location] != UniformDataType::UInt)
       return;
     glUniform1ui(location, value);
-    _uniform_u32[location] = value;
+    data._uniform_u32[location] = value;
   }
 
   void Shader::SetUniformTexture(TextureType type, i32 unit) {
-    if (type == TextureType::Last || !_uniform_textures.count((i32)UniformLocation::Textures))
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    if (type == TextureType::Last || !data._uniform_textures.count((i32)UniformLocation::Textures))
       return;
     if (unit < 0)
       return;
@@ -683,7 +719,7 @@ namespace axl {
     i32 value;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &value);
 
-    _uniform_textures[(i32)UniformLocation::Textures][(i32)type] = value;
+    data._uniform_textures[(i32)UniformLocation::Textures][(i32)type] = value;
 
     glActiveTexture(active_texture);
   }
@@ -728,34 +764,35 @@ namespace axl {
     SetUniformU32(location, value);
   }
 
-  void Shader::VerifyUniforms() {
-    if (_uniform_data_type.count((i32)UniformLocation::ModelMatrix) &&
-        _uniform_data_type[(i32)UniformLocation::ModelMatrix] != UniformDataType::Matrix4)
+  void ShaderStore::VerifyUniforms(Shader &shader) {
+    ShaderData &data = _shader_data[shader.shader_id];
+    if (data._uniform_data_types.count((i32)UniformLocation::ModelMatrix) &&
+        data._uniform_data_types[(i32)UniformLocation::ModelMatrix] != UniformDataType::Matrix4)
         log::warn("Shader uniform 'ModelMatrix' is not a matrix4");
-    if (_uniform_data_type.count((i32)UniformLocation::ViewMatrix) &&
-        _uniform_data_type[(i32)UniformLocation::ViewMatrix] != UniformDataType::Matrix4)
+    if (data._uniform_data_types.count((i32)UniformLocation::ViewMatrix) &&
+        data._uniform_data_types[(i32)UniformLocation::ViewMatrix] != UniformDataType::Matrix4)
         log::warn("Shader uniform 'ViewMatrix' is not a matrix4");
-    if (_uniform_data_type.count((i32)UniformLocation::ProjectionMatrix) &&
-        _uniform_data_type[(i32)UniformLocation::ProjectionMatrix] != UniformDataType::Matrix4)
+    if (data._uniform_data_types.count((i32)UniformLocation::ProjectionMatrix) &&
+        data._uniform_data_types[(i32)UniformLocation::ProjectionMatrix] != UniformDataType::Matrix4)
         log::warn("Shader uniform 'ProjectionMatrix' is not a matrix4");
-    if (_uniform_data_type.count((i32)UniformLocation::Time) &&
-        _uniform_data_type[(i32)UniformLocation::Time] != UniformDataType::Float)
+    if (data._uniform_data_types.count((i32)UniformLocation::Time) &&
+        data._uniform_data_types[(i32)UniformLocation::Time] != UniformDataType::Float)
         log::warn("Shader uniform 'Time' is not a f32");
-    if (_uniform_data_type.count((i32)UniformLocation::Resolution) &&
-        _uniform_data_type[(i32)UniformLocation::Resolution] != UniformDataType::Vector2)
+    if (data._uniform_data_types.count((i32)UniformLocation::Resolution) &&
+        data._uniform_data_types[(i32)UniformLocation::Resolution] != UniformDataType::Vector2)
         log::warn("Shader uniform 'Resolution' is not a vector2");
-    if (_uniform_data_type.count((i32)UniformLocation::Mouse) &&
-        _uniform_data_type[(i32)UniformLocation::Mouse] != UniformDataType::Vector2)
+    if (data._uniform_data_types.count((i32)UniformLocation::Mouse) &&
+        data._uniform_data_types[(i32)UniformLocation::Mouse] != UniformDataType::Vector2)
         log::warn("Shader uniform 'Mouse' is not a vector2");
 
-    if (_uniform_data_type.count((i32)UniformLocation::Textures) &&
-        _uniform_data_type[(i32)UniformLocation::Textures] != UniformDataType::Texture &&
-        _uniform_data_type[(i32)UniformLocation::Textures] != UniformDataType::TextureArray)
+    if (data._uniform_data_types.count((i32)UniformLocation::Textures) &&
+        data._uniform_data_types[(i32)UniformLocation::Textures] != UniformDataType::Texture &&
+        data._uniform_data_types[(i32)UniformLocation::Textures] != UniformDataType::TextureArray)
     {
         log::warn("Shader uniform 'Textures' is not a texture or texture array");
 
         for (i32 i = 1; i < (i32)TextureType::Last; ++i)
-          if (_uniform_data_type.count((i32)UniformLocation::Textures + i))
+          if (data._uniform_data_types.count((i32)UniformLocation::Textures + i))
             log::warn("Shader uniform at location {} collides with other texture uniforms", (i32)UniformLocation::Textures + i);
     }
   }

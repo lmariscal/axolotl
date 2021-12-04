@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <array>
+#include <queue>
 
 namespace efsw {
 
@@ -17,12 +18,6 @@ namespace efsw {
 } // namespace efsw
 
 namespace axl {
-
-  constexpr static u32 MaxTextures = 32;
-
-  class ShaderWatcher;
-  class Axolotl;
-  class Terminal;
 
   enum class UniformLocation {
     // Vertex
@@ -68,34 +63,85 @@ namespace axl {
     Last
   };
 
-  struct ShaderPaths {
-    std::filesystem::path vertex   = "";
-    std::filesystem::path fragment = "";
-    std::filesystem::path geometry = "";
-    std::filesystem::path compute  = "";
+  struct ShaderData {
+    ShaderData() = default;
+    ShaderData(const std::filesystem::path &vertex_path,
+               const std::filesystem::path &fragment_path,
+               const std::filesystem::path &geometry_path = std::filesystem::path(),
+               const std::filesystem::path &compute_path = std::filesystem::path())
+    {
+      for (i32 i = 0; i < (i32)ShaderType::Last; ++i)
+        paths[i] = std::filesystem::path();
+
+      if (!vertex_path.empty())
+        paths[(i32)ShaderType::Vertex] = vertex_path;
+      if (!fragment_path.empty())
+        paths[(i32)ShaderType::Fragment] = fragment_path;
+      if (!geometry_path.empty())
+        paths[(i32)ShaderType::Geometry] = geometry_path;
+      if (!compute_path.empty())
+        paths[(i32)ShaderType::Compute] = compute_path;
+
+      std::fill(shaders, shaders + (i32)ShaderType::Last, 0);
+    }
+
+    u32 id = 0;
+    u32 instances = 0;
+    u32 gl_id = 0;
+    u32 shaders[(i32)ShaderType::Last] = { 0 };
+    bool loaded = false;
+    std::filesystem::path paths[(i32)ShaderType::Last] = { "" };
+
+   protected:
+    friend class ShaderStore;
+    friend class Shader;
+
+    std::unordered_map<std::string, i32> _uniform_locations;
+    std::unordered_map<i32, std::string> _uniform_locations_reverse;
+    std::unordered_map<std::string, i32> _attribute_locations;
+    std::unordered_map<i32, std::string> _attribute_locations_reverse;
+    std::unordered_map<i32, UniformDataType> _uniform_data_types;
+
+    std::unordered_map<i32, v2> _uniform_v2;
+    std::unordered_map<i32, v3> _uniform_v3;
+    std::unordered_map<i32, v4> _uniform_v4;
+    std::unordered_map<i32, m3> _uniform_m3;
+    std::unordered_map<i32, m4> _uniform_m4;
+    std::unordered_map<i32, f32> _uniform_f32;
+    std::unordered_map<i32, f64> _uniform_f64;
+    std::unordered_map<i32, i32> _uniform_i32;
+    std::unordered_map<i32, u32> _uniform_u32;
+    std::unordered_map<i32, std::array<i32, MAX_TEXTURE_UNITS>> _uniform_textures;
   };
 
-  struct Shader {
+  class Shader {
    public:
-    Shader();
-    Shader(const ShaderPaths &paths);
-    Shader(Shader &other) = delete;
-    Shader(Shader &&other) = delete;
+    Shader(u32 shader_id);
+    Shader(const ShaderData &data);
+    Shader(const Shader &other);
+    Shader(Shader &&other);
     ~Shader();
 
     void Bind();
-    void Unload(ShaderType type);
-    void Load(ShaderType type, const std::filesystem::path &path);
-    void LoadData(ShaderType type, const std::string &data);
-    bool Watch();
-    bool Reload(ShaderType type = ShaderType::Last);
+    void Unbind();
+    void UnloadShader(ShaderType type);
+    void LoadFromPath(ShaderType type, const std::filesystem::path &path);
+    void LoadFromData(ShaderType type, const std::string &data);
+    bool ReloadShader(ShaderType type = ShaderType::Last);
+    bool ReloadProgram();
     bool Compile();
     bool Recompile();
-    i32 GetUniformLocation(const std::string &name);
-    UniformDataType GLToUniformDataType(u32 type);
-    u32 UniformDataTypeToGL(UniformDataType type);
 
-#pragma region Uniforms
+    i32 GetUniformLocation(const std::string &name);
+
+    void ShowComponent();
+
+    static UniformDataType GLToUniformDataType(u32 type);
+    static u32 UniformDataTypeToGL(UniformDataType type);
+    static std::string ShaderTypeToString(ShaderType type);
+    static ShaderType StringToShaderType(const std::string &str);
+
+#pragma region uniforms
     void SetUniformV2(u32 location, const v2 &value);
     void SetUniformV3(u32 location, const v3 &value);
     void SetUniformV4(u32 location, const v4 &value);
@@ -116,51 +162,40 @@ namespace axl {
     void SetUniformU32(const std::string &name, const u32 &value);
 #pragma endregion
 
-    static std::string ShaderTypeToString(ShaderType type);
-    static ShaderType StringToShaderType(const std::string &str);
+    u32 shader_id = 0;
 
-    void Init();
-    bool ShowData();
+    operator u32() const;
+  };
+
+  class ShaderStore {
+   public:
+    static u32 GetShaderFromPath(const ShaderData &data);
+    static u32 GetRendererID(u32 id);
+    static ShaderData & GetData(u32 id);
+    static Shader FromID(u32 id);
+    static void RegisterShader(Shader &shader, const ShaderData &data);
+    static void ProcessQueue();
+    static void DeregisterShader(u32 id);
+    static std::unordered_map<u32, ShaderData> & GetAllShadersData();
 
    protected:
-    friend class Material;
+    friend class Shader;
 
-    friend class ShaderWatcher;
-    friend class Axolotl;
-    friend class Terminal;
+    inline static u32 _id_counter = 0;
+    inline static std::unordered_map<u32, ShaderData> _shader_data;
+    inline static std::queue<Shader> _shader_queue;
 
-    inline static std::vector<Shader *> _shaders_programs;
-
-    void GetUniformData();
-    void VerifyUniforms();
-    std::string Read(const std::filesystem::path &path, ShaderType shade_type);
-    u32 CompileShader(ShaderType type, const std::string &data);
-
-    std::unordered_map<i32, UniformDataType> _uniform_data_type;
-    std::unordered_map<std::string, i32> _uniform_locations;
-    std::unordered_map<i32, std::string> _uniform_locations_reverse;
-
-    // uniform cache
-    std::unordered_map<i32, v2> _uniform_v2;
-    std::unordered_map<i32, v3> _uniform_v3;
-    std::unordered_map<i32, v4> _uniform_v4;
-    std::unordered_map<i32, m3> _uniform_m3;
-    std::unordered_map<i32, m4> _uniform_m4;
-    std::unordered_map<i32, f32> _uniform_f32;
-    std::unordered_map<i32, f64> _uniform_f64;
-    std::unordered_map<i32, i32> _uniform_i32;
-    std::unordered_map<i32, u32> _uniform_u32;
-    std::unordered_map<i32, std::array<i32, MaxTextures>> _uniform_textures;
-    // uniform cache
-
-    u32 _program;
-    u32 _shaders[(i32)ShaderType::Last];
-    std::filesystem::path _paths[(i32)ShaderType::Last];
-
-    bool _need_reload[(i32)ShaderType::Last];
-    efsw::FileWatcher *_watcher;
-    ShaderWatcher *_shader_watcher;
-    efsw::WatchID _watch_ids[(i32)ShaderType::Last];
+    static u32 CompileShader(ShaderType type, const std::string &source);
+    static void GetUniformData(Shader &shader);
+    static void VerifyUniforms(Shader &shader);
+    static void UnloadShader(Shader &shader, ShaderType type);
+    static void LoadFromPath(Shader &shader, ShaderType type, const std::filesystem::path &path);
+    static void LoadFromData(Shader &shader, ShaderType type, const std::string &data);
+    static std::string ReadShader(ShaderType type, const std::filesystem::path &path);
+    static bool ReloadShader(Shader &shader, ShaderType type = ShaderType::Last);
+    static bool ReloadProgram(Shader &shader);
+    static bool CompileProgram(Shader &shader);
+    static bool RecompileProgram(Shader &shader);
   };
 
 } // namespace axl

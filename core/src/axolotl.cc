@@ -45,11 +45,11 @@ namespace axl {
 
   std::vector<Shader *> Axolotl::WatchShaders() {
     std::vector<Shader *> need_recompile;
-    for (Shader *shader : Shader::_shaders_programs) {
-      if (!shader->Watch())
-        continue;
-      need_recompile.push_back(shader);
-    }
+    // for (Shader *shader : Shader::_shaders_programs) {
+    //   if (!shader->Watch())
+    //     continue;
+    //   need_recompile.push_back(shader);
+    // }
     return need_recompile;
   }
 

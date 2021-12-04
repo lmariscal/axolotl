@@ -8,11 +8,12 @@
 #include <assimp/scene.h>
 
 #include <vector>
+#include <array>
 
 namespace axl {
 
   struct Model {
-    Model(Ento ento, std::filesystem::path path = "", ShaderPaths paths = { }, bool root = true);
+    Model(Ento ento, std::filesystem::path path = "", std::array<std::string, (i32)ShaderType::Last> paths = { }, bool root = true);
     ~Model();
 
     void Draw(Material &material);
@@ -29,7 +30,7 @@ namespace axl {
 
     std::shared_ptr<std::vector<Mesh *>> _meshes;
     std::filesystem::path _path;
-    ShaderPaths _shader_paths;
+    std::array<std::string, (i32)ShaderType::Last> _shader_paths;
     u32 _mesh_id;
     bool _root = true;
   };

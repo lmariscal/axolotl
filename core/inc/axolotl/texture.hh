@@ -2,9 +2,12 @@
 
 #include <axolotl/types.hh>
 
-#include <map>
+#include <unordered_map>
+#include <queue>
 
 namespace axl {
+
+  constexpr u32 MAX_TEXTURE_UNITS = 32;
 
   enum class TextureType {
     Diffuse,
@@ -78,17 +81,17 @@ namespace axl {
    public:
     static u32 GetTextureID(const std::filesystem::path &path);
     static std::filesystem::path GetPath(u32 id);
-    static u32 GetRendererTextureID(u32 id);
+    static u32 GetRendererID(u32 id);
     static TextureData & GetData(u32);
     static void RegisterTexture(Texture &texture, const std::filesystem::path &path, TextureType type, const TextureData &data);
     static void ProcessQueue();
     static void DeregisterTexture(u32 id);
 
    protected:
-    inline static u32 _id_count = 0;
-    inline static std::map<u32, TextureData> _data; // renderer_id -> opengl_id
+    inline static u32 _id_counter = 0;
+    inline static std::unordered_map<u32, TextureData> _data; // renderer_id -> opengl_id
     inline static std::map<std::filesystem::path, u32> _path_to_id; // path -> renderer_id
-    inline static std::vector<Texture> _texture_queue;
+    inline static std::queue<Texture> _texture_queue;
 
     static void LoadTexture(const Texture &texture, const std::filesystem::path &path);
     static void CreateTexture(const Texture &texture);

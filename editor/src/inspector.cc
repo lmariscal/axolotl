@@ -86,10 +86,9 @@ namespace axl {
     ShowAddComponent(scene);
 
     if (_add_model) {
-      ShaderPaths shader_paths = {
-        Axolotl::GetDistDir() + "res/shaders/testy.vert",
-        Axolotl::GetDistDir() + "res/shaders/testy.frag"
-      };
+      std::array<std::string, (i32)ShaderType::Last> shader_paths;
+      shader_paths[(i32)ShaderType::Vertex] = Axolotl::GetDistDir() + "res/shaders/testy.vert";
+      shader_paths[(i32)ShaderType::Fragment] = Axolotl::GetDistDir() + "res/shaders/testy.frag";
       log::info("Adding model \"{}\"", _model_path);
       Model &model = _selected_entity.AddComponent<Model>(_selected_entity, _model_path, shader_paths);
       model.Init(_selected_entity);

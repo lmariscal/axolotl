@@ -39,15 +39,16 @@ namespace axl {
 
   void Terminal::ShaderList(argument_type &arg) {
     if (arg.command_line.size() < 3) {
-      for (const auto &s : Shader::_shaders_programs) {
+      for (auto itr = ShaderStore::GetAllShadersData().cbegin(); itr != ShaderStore::GetAllShadersData().cend(); ++itr) {
+        const ShaderData &s = itr->second;
         std::stringstream ss;
-        ss << "  Shader program[" << s->_program << "]:";
+        ss << "  Shader program[" << s.id << "]:";
         arg.term.add_text(ss.str());
 
         std::stringstream ss2;
         ss2 << "    ";
         for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-          if (s->_paths[i].empty())
+          if (s.paths[i].empty())
             continue;
           std::string shader_type_name = Shader::ShaderTypeToString((ShaderType)i);
           if (i != 0)
@@ -61,8 +62,9 @@ namespace axl {
 
     std::string program = arg.command_line[2];
     bool program_found = false;
-    for (const auto &s : Shader::_shaders_programs) {
-      if (std::to_string(s->_program) != program)
+    for (auto itr = ShaderStore::GetAllShadersData().cbegin(); itr != ShaderStore::GetAllShadersData().cend(); ++itr) {
+      const ShaderData &s = itr->second;
+      if (std::to_string(s.id) != program)
         continue;
       program_found = true;
       std::stringstream ss;
@@ -70,11 +72,11 @@ namespace axl {
       arg.term.add_text(ss.str());
 
       for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-        if (s->_paths[i].empty())
+        if (s.paths[i].empty())
           continue;
         std::stringstream ss2;
         std::string shader_type_name = Shader::ShaderTypeToString((ShaderType)i);
-        ss2 << "  " << std::setw(8) << std::right << shader_type_name << ": " << s->_paths[i].string();
+        ss2 << "  " << std::setw(8) << std::right << shader_type_name << ": " << s.paths[i].string();
         arg.term.add_text(ss2.str());
       }
       return;
@@ -92,11 +94,12 @@ namespace axl {
 
     std::string program = arg.command_line[2];
     bool program_found = false;
-    for (const auto &s : Shader::_shaders_programs) {
-      if (std::to_string(s->_program) != program)
+    for (auto itr = ShaderStore::GetAllShadersData().begin(); itr != ShaderStore::GetAllShadersData().end(); ++itr) {
+      ShaderData &s = itr->second;
+      if (std::to_string(s.id) != program)
         continue;
       program_found = true;
-      s->Recompile();
+      ShaderStore::FromID(s.id).Recompile();
       return;
     }
 
@@ -112,13 +115,17 @@ namespace axl {
 
     std::string program = arg.command_line[2];
     bool program_found = false;
-    for (const auto &s : Shader::_shaders_programs) {
-      if (std::to_string(s->_program) != program)
+    for (auto itr = ShaderStore::GetAllShadersData().begin(); itr != ShaderStore::GetAllShadersData().end(); ++itr) {
+      ShaderData &s = itr->second;
+      if (std::to_string(s.id) != program)
         continue;
       program_found = true;
 
+      class Shader shader = ShaderStore::FromID(s.id);
+
       if (arg.command_line.size() < 4) {
-        s->Reload();
+        if (shader.ReloadProgram())
+          shader.Recompile();
         return;
       }
 
@@ -128,7 +135,8 @@ namespace axl {
         arg.term.add_text_err("Invalid shader type");
         return;
       }
-      s->Reload(shader_type);
+      if (shader.ReloadShader(shader_type))
+        shader.Recompile();
       return;
     }
 

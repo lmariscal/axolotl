@@ -6,14 +6,18 @@
 
 namespace axl {
 
-  Material::Material(const ShaderPaths &paths):
-    _shader(std::make_shared<Shader>(paths)),
+  Material::Material(const std::array<std::string, (i32)ShaderType::Last> &paths):
+    _shader(std::make_shared<Shader>(ShaderData(
+      paths[(i32)ShaderType::Vertex],
+      paths[(i32)ShaderType::Fragment],
+      paths[(i32)ShaderType::Geometry],
+      paths[(i32)ShaderType::Compute]
+    ))),
     _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>())
   {
     std::fill(_textures->begin(), _textures->end(), std::vector<Texture *>());
 
-    _shader->Init();
-    _shader->Compile();
+    ShaderStore::ProcessQueue();
   }
 
   Material::~Material() {
@@ -84,7 +88,7 @@ namespace axl {
   }
 
   bool Material::ShowData() {
-    _shader->ShowData();
+    // _shader->ShowData();
     return false;
   }
 

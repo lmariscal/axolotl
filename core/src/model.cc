@@ -11,7 +11,7 @@
 
 namespace axl {
 
-  Model::Model(Ento ento, std::filesystem::path path, ShaderPaths paths, bool root):
+  Model::Model(Ento ento, std::filesystem::path path, std::array<std::string, (i32)ShaderType::Last> paths, bool root):
     _path(path),
     _shader_paths(paths),
     _root(root),

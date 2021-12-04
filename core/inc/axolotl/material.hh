@@ -5,11 +5,12 @@
 #include <axolotl/component.hh>
 #include <axolotl/texture.hh>
 #include <axolotl/shader.hh>
+#include <array>
 
 namespace axl {
 
   struct Material {
-    Material(const ShaderPaths &paths);
+    Material(const std::array<std::string, (i32)ShaderType::Last> &paths);
     ~Material();
 
     virtual json Serialize() const;

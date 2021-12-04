@@ -51,7 +51,7 @@ namespace axl {
 
   void Texture::Bind(u32 unit) {
     glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererTextureID(texture_id));
+    glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererID(texture_id));
   }
 
   u32 TextureStore::GetTextureID(const std::filesystem::path &path) {
@@ -60,7 +60,7 @@ namespace axl {
     return 0;
   }
 
-  u32 TextureStore::GetRendererTextureID(u32 id) {
+  u32 TextureStore::GetRendererID(u32 id) {
     if (_data.count(id))
       return _data[id].gl_id;
     return 0;
@@ -75,15 +75,14 @@ namespace axl {
       return;
     }
 
-    _id_count++;
-    texture.texture_id = _id_count;
+    _id_counter++;
+    texture.texture_id = _id_counter;
     texture.type = type;
     if (!path.empty())
       _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
-    _data.insert(std::pair<u32, TextureData>(_id_count, data));
+    _data.insert(std::pair<u32, TextureData>(_id_counter, data));
     _data[texture.texture_id].instances++;
-    _texture_queue.push_back(texture);
-    return;
+    _texture_queue.emplace(texture);
   }
 
   std::filesystem::path TextureStore::GetPath(u32 id) {
@@ -96,14 +95,14 @@ namespace axl {
 
   void TextureStore::ProcessQueue() {
     while (!_texture_queue.empty()) {
-      Texture t = *(--_texture_queue.end());
+      Texture &t = _texture_queue.front();
       std::filesystem::path path = GetPath(t.texture_id);
       log::debug("Processing texture: {}", path.string());
       if (!path.empty())
         LoadTexture(t, path);
       else
         CreateTexture(t);
-      _texture_queue.pop_back();
+      _texture_queue.pop();
     }
   }
 
@@ -268,7 +267,7 @@ namespace axl {
   }
 
   Texture::operator u32() const {
-    return TextureStore::GetRendererTextureID(texture_id); // renderer_id
+    return TextureStore::GetRendererID(texture_id); // renderer_id
   }
 
 } // namespace axl

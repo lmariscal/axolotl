@@ -19,6 +19,8 @@ namespace efsw {
 
 namespace axl {
 
+  class ShaderWatcher;
+
   enum class UniformLocation {
     // Vertex
     ModelMatrix      = 0,
@@ -112,6 +114,9 @@ namespace axl {
     std::unordered_map<i32, i32> _uniform_i32;
     std::unordered_map<i32, u32> _uniform_u32;
     std::unordered_map<i32, std::array<i32, MAX_TEXTURE_UNITS>> _uniform_textures;
+
+    ShaderWatcher *_watcher = nullptr;
+    std::array<efsw::WatchID, (i32)ShaderType::Last> _watch_ids;
   };
 
   class Shader {
@@ -180,10 +185,13 @@ namespace axl {
 
    protected:
     friend class Shader;
+    friend class ShaderWatcher;
 
     inline static u32 _id_counter = 0;
     inline static std::unordered_map<u32, ShaderData> _shader_data;
     inline static std::queue<Shader> _shader_queue;
+    inline static efsw::FileWatcher *_file_watcher = nullptr;
+    inline static std::queue<std::tuple<u32, ShaderType>> _reload_queue;
 
     static u32 CompileShader(ShaderType type, const std::string &source);
     static void GetUniformData(Shader &shader);

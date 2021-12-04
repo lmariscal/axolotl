@@ -8,6 +8,40 @@
 
 namespace axl {
 
+  class ShaderWatcher : public efsw::FileWatchListener {
+   public:
+    ShaderWatcher(u32 shader): _shader(shader) { }
+    virtual ~ShaderWatcher() { }
+
+    virtual void handleFileAction(efsw::WatchID watchid, const std::string &dir, const std::string &filename,
+                                  efsw::Action action, std::string old_name = "") {
+
+      if (action != efsw::Actions::Modified)
+        return;
+
+      ShaderType type = ShaderType::Last;
+      ShaderData &data = ShaderStore::GetData(_shader);
+      for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+        if (data.paths[i].empty())
+          continue;
+        if (filename != data.paths[i].filename().string())
+          continue;
+        if (dir != data.paths[i].parent_path().string() + "/")
+          continue;
+        type = (ShaderType)i;
+        break;
+      }
+
+      if (type == ShaderType::Last)
+        return;
+
+      ShaderStore::_reload_queue.emplace(std::tuple<u32, ShaderType>(_shader, type));
+    }
+
+   private:
+    u32 _shader;
+  };
+
   Shader::Shader(u32 shader_id):
     shader_id(shader_id)
   {
@@ -192,6 +226,7 @@ namespace axl {
     _shader_queue.emplace(shader);
 
     _shader_data[shader.shader_id].id = shader.shader_id;
+    std::fill(_shader_data[shader.shader_id]._watch_ids.begin(), _shader_data[shader.shader_id]._watch_ids.end(), 0);
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       if (data.paths[i].empty())
@@ -207,6 +242,13 @@ namespace axl {
       ShaderData &data = _shader_data[shader.shader_id];
 
       _shader_queue.pop();
+    }
+    while (!_reload_queue.empty()) {
+      std::tuple<u32, ShaderType>  to_reload = _reload_queue.front();
+      Shader shader = FromID(std::get<0>(to_reload));
+      ReloadShader(shader, std::get<1>(to_reload));
+      RecompileProgram(shader);
+      _reload_queue.pop();
     }
   }
 
@@ -229,7 +271,24 @@ namespace axl {
     }
 
     glDeleteProgram(_shader_data[shader_id].gl_id);
+
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      if (_shader_data[shader_id].paths[i].empty())
+        continue;
+      if (_file_watcher)
+        _file_watcher->removeWatch(_shader_data[shader_id].paths[i]);
+    }
+
+    if (_shader_data[shader_id]._watcher)
+      delete _shader_data[shader_id]._watcher;
+
     _shader_data.erase(shader_id);
+
+    log::debug("Shaders left: {}", _shader_data.size());
+    if (_shader_data.empty() && _file_watcher) {
+      delete _file_watcher;
+      _file_watcher = nullptr;
+    }
   }
 
   void ShaderStore::LoadFromPath(Shader &shader, ShaderType type, const std::filesystem::path &path) {
@@ -243,6 +302,22 @@ namespace axl {
     std::string source = ReadShader(type, path);
 
     data.paths[(i32)type] = path;
+
+    if (!_file_watcher) {
+      _file_watcher = new efsw::FileWatcher();
+      log::info("File watcher created");
+      _file_watcher->watch();
+    }
+    if (!data._watcher) {
+      data._watcher = new ShaderWatcher(shader.shader_id);
+      log::info("Creating file watcher");
+    }
+
+    if (data._watch_ids[(i32)type])
+      _file_watcher->removeWatch(data._watch_ids[(i32)type]);
+    efsw::WatchID watch_id = _file_watcher->addWatch(path.parent_path().string(), data._watcher, false);
+    log::debug("Watching {} with watch_id {}", path.string(), watch_id);
+    data._watch_ids[(i32)type] = watch_id;
 
     LoadFromData(shader, type, source);
   }
@@ -528,6 +603,11 @@ namespace axl {
     glDeleteShader(data.shaders[(i32)type]);
     data.shaders[(i32)type] = 0;
     data.paths[(i32)type] = "";
+
+    if (data._watch_ids[(i32)type]) {
+      _file_watcher->removeWatch(data._watch_ids[(i32)type]);
+      data._watch_ids[(i32)type] = 0;
+    }
 
     log::debug("Unloaded {} shader from program {}", Shader::ShaderTypeToString(type), shader.shader_id);
   }

@@ -35,9 +35,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   while (window.Update() && !terminal_data.quit_requested) {
     if (terminal_data.watch_shaders) {
-      std::vector<Shader *> need_recompile = Axolotl::WatchShaders();
-      for (Shader *shader : need_recompile)
-        shader->Recompile();
+      ShaderStore::ProcessQueue();
     }
 
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);

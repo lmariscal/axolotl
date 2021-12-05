@@ -27,8 +27,8 @@ namespace axl {
     void Deserialize(const json &json);
     bool ShowComponent(Ento &ento);
 
-    void MoveCamera(Ento &ento, CameraDirection direction, f32 delta_time);
-    void RotateCamera(Ento &ento, const v2 &mouse_delta, f32 delta_time); // euler angles
+    void MoveCamera(Ento &ento, CameraDirection direction, f64 delta);
+    void RotateCamera(Ento &ento, const v2 &mouse_delta, f64 delta); // euler angles
     void SetAsActive(Ento ento);
     void SetOrthographic();
     void SetPerspective();

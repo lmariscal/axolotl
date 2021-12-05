@@ -17,10 +17,9 @@ namespace axl {
     camera.AddComponent<Camera>(camera).SetAsActive(camera);
   }
 
-  void TestScene::Update(Window &window) {
+  void TestScene::Update(Window &window, f64 delta) {
     // Execute scene scripting, per entity or an overall script
     IOManager &io = window.GetIOManager();
-    f32 delta = window.GetDeltaTime();
     Camera *camera = Camera::GetActiveCamera();
     if (camera && window.GetLockMouse()) {
       Ento camera_ento = Camera::GetActiveCameraEnto();

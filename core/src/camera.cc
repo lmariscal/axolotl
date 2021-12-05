@@ -27,38 +27,38 @@ namespace axl {
       _active_camera_ento = { };
   }
 
-  void Camera::MoveCamera(Ento &ento, CameraDirection direction, f32 delta) {
+  void Camera::MoveCamera(Ento &ento, CameraDirection direction, f64 delta) {
     Transform &transform = ento.Transform();
     switch (direction) {
       case CameraDirection::Down:
-        transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Up:
-        transform.SetPosition(transform.GetPosition() - _world_up * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _world_up * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Front:
-        transform.SetPosition(transform.GetPosition() + _front * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _front * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Back:
-        transform.SetPosition(transform.GetPosition() - _front * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _front * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Left:
-        transform.SetPosition(transform.GetPosition() - _right * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() - _right * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Right:
-        transform.SetPosition(transform.GetPosition() + _right * _movement_speed * delta);
+        transform.SetPosition(transform.GetPosition() + _right * _movement_speed * (f32)delta);
         break;
     }
   }
 
-  void Camera::RotateCamera(Ento &ento, const v2 &mouse_delta, f32 delta) {
+  void Camera::RotateCamera(Ento &ento, const v2 &mouse_delta, f64 delta) {
     Transform &transform = ento.Transform();
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
 
-    yaw += mouse_delta.x * delta * _mouse_sensitivity * 10.0f;
-    pitch -= mouse_delta.y * delta * _mouse_sensitivity * 10.0f;
+    yaw += mouse_delta.x * (f32)delta * _mouse_sensitivity * 10.0f;
+    pitch -= mouse_delta.y * (f32)delta * _mouse_sensitivity * 10.0f;
 
     if (pitch > 89.0f)
       pitch = 89.0f;

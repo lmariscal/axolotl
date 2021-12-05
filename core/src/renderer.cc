@@ -73,7 +73,7 @@ namespace axl {
 
     if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
       ImGui::Text("  FPS: %u", _fps);
-      ImGui::Text("Delta: %.4fms", _delta_time);
+      ImGui::Text("Delta: %.2fms", _delta_time * 1000.0);
     }
 
     f64 now = _window->GetTime();

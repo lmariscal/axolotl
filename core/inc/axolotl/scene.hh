@@ -14,7 +14,7 @@ namespace axl {
   class Scene {
    public:
     virtual void Init() = 0;
-    virtual void Update(Window &window) = 0;
+    virtual void Update(Window &window, f64 delta) = 0;
     virtual void Focused(Window &window, bool stat) = 0;
 
     Ento CreateEntity(const std::string &name = "");

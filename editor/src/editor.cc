@@ -31,6 +31,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   bool last_fullscreen = false;
 
+  constexpr f64 time_step = 1.0 / 144.0;
+  f64 time_accumulator = 0.0;
+
   scene.Init();
 
   while (window.Update() && !terminal_data.quit_requested) {
@@ -59,8 +62,13 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       dock.Draw(window);
     }
 
-    if (terminal_data.scene_playing && !terminal_data.scene_paused)
-      scene.Update(window);
+    if (terminal_data.scene_playing && !terminal_data.scene_paused) {
+      time_accumulator += window.GetDeltaTime();
+      while (time_accumulator >= time_step) {
+        scene.Update(window, time_step);
+        time_accumulator -= time_step;
+      }
+    }
 
     if (!show_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();

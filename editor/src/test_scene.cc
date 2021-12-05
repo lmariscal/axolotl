@@ -39,10 +39,10 @@ namespace axl {
         camera->MoveCamera(camera_ento, CameraDirection::Down, delta);
     }
 
-    ImGui::Begin("Test Scene");
-    if (ImGui::Button("Serialize"))
-      log::info("Scene:\n{}", Serialize().dump(2));
-    ImGui::End();
+    // ImGui::Begin("Test Scene");
+    // if (ImGui::Button("Serialize"))
+    //   log::info("Scene:\n{}", Serialize().dump(2));
+    // ImGui::End();
   }
 
   void TestScene::Focused(Window &window, bool state) {

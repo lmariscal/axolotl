@@ -21,7 +21,7 @@ namespace axl {
     json Serialize() const;
     void Deserialize(const json &json);
     bool ShowComponent();
-    void Init(Ento &ento);
+    void Init(Ento ento);
 
    protected:
     static void ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene);

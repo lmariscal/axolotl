@@ -125,6 +125,7 @@ namespace axl {
     friend class Scene;
 
     static uuids::uuid_random_generator _uuid_generator;
+    inline static std::mt19937 _random_generator;
 
     inline static bool _first_gen = true;
     inline static std::map<uuid, Ento> _uuid_ento_map;

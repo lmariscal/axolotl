@@ -25,7 +25,7 @@ namespace axl {
       delete mesh;
   }
 
-  void Model::Init(Ento &ento) {
+  void Model::Init(Ento ento) {
     ento.TryAddComponent<Material>(_shader_paths);
 
     if (!_root)
@@ -159,10 +159,11 @@ namespace axl {
       transform.SetScale(v3(scale.x, scale.y, scale.z));
 
       if (model._root) {
-        Transform &p_transform = ento.Transform();
+        Transform &p_transform = ento.GetComponent<Transform>();
         if (std::abs(transform.GetRotation().x + 90.0f) <= 1.0f) {
-          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f)
+          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f) {
             p_transform.SetRotation(v3(0.0f));
+          }
         }
       }
 

@@ -31,7 +31,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   bool last_fullscreen = false;
 
-  constexpr f64 time_step = 1.0 / 144.0;
+  constexpr f64 time_step = 1.0 / 100.0;
   f64 time_accumulator = 0.0;
 
   scene.Init();

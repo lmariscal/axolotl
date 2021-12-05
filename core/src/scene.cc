@@ -35,6 +35,9 @@ namespace axl {
       for (auto &child : e.Children())
         RemoveEntity(child);
 
+    if (e.HasParent())
+      e.Parent().RemoveChild(e);
+
     Ento::_uuid_ento_map.erase(e.id);
     Ento::_handle_ento_map.erase(e.handle);
 

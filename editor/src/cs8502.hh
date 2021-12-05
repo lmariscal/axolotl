@@ -10,7 +10,7 @@ namespace axl {
   class CS8502 : public Scene {
    public:
     void Init() override;
-    void Update(Window &window) override;
+    void Update(Window &window, f64 delta) override;
     void Focused(Window &window, bool state) override;
   };
 

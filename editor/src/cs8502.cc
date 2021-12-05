@@ -6,7 +6,7 @@ namespace axl {
 
   }
 
-  void CS8502::Update(Window &window) {
+  void CS8502::Update(Window &window, f64 delta) {
 
   }
 

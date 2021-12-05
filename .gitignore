@@ -1,5 +1,6 @@
 ### NCLGL ###
 
+imgui.ini
 .vscode/
 debug/
 compile_commands.json

@@ -6,6 +6,7 @@
 #include <axolotl/ento.hh>
 #include <axolotl/axolotl.hh>
 #include <axolotl/model.hh>
+#include <axolotl/light.hh>
 #include <assimp/Importer.hpp>
 #include <IconsFontAwesome5Pro.h>
 #include <imgui.h>
@@ -183,6 +184,14 @@ namespace axl {
       if (ImGui::CollapsingHeader("Model", ImGuiTreeNodeFlags_DefaultOpen)) {
         Model &model = ento.GetComponent<Model>();
         model.ShowComponent();
+      }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+    }
+
+    if (ento.HasComponent<Light>()) {
+      if (ImGui::CollapsingHeader("Light Source", ImGuiTreeNodeFlags_DefaultOpen)) {
+        Light &light = ento.GetComponent<Light>();
+        light.ShowComponent();
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
     }

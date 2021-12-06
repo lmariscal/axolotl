@@ -64,7 +64,7 @@ namespace axl {
       texture_data.format = format;
       texture_data.data_type = type;
 
-      _textures[i] = new Texture("", TextureType::Last, texture_data);
+      _textures[i] = new Texture2D("", TextureType::Last, texture_data);
     }
     TextureStore::ProcessQueue();
 
@@ -100,7 +100,7 @@ namespace axl {
     _height = height;
   }
 
-  Texture FrameBuffer::GetTexture(FrameBufferTexture texture) {
+  Texture2D FrameBuffer::GetTexture(FrameBufferTexture texture) {
     return *_textures[(i32)texture];
   }
 

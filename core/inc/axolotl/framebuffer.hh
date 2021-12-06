@@ -21,13 +21,13 @@ namespace axl {
     void SetSize(u32 width, u32 height);
     void Bind();
     void Unbind();
-    Texture GetTexture(FrameBufferTexture texture);
+    Texture2D GetTexture(FrameBufferTexture texture);
 
    protected:
     u32 _width;
     u32 _height;
     u32 _frame_buffer;
-    Texture *_textures[(u32)FrameBufferTexture::Last];
+    Texture2D *_textures[(u32)FrameBufferTexture::Last];
   };
 
 } // namespace axl

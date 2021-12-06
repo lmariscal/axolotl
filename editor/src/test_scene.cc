@@ -11,7 +11,7 @@
 
 namespace axl {
 
-  void TestScene::Init() {
+  void TestScene::Init(Window &window) {
     Ento camera = CreateEntity();
     camera.Tag().value = "Camera";
     camera.AddComponent<Camera>(camera).SetAsActive(camera);

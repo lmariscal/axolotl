@@ -32,6 +32,8 @@ namespace axl {
 
     // Fragment
     Textures         = 10,
+    Skybox           = 17,
+    Lights           = 18,
     Last
   };
 
@@ -115,6 +117,7 @@ namespace axl {
     std::unordered_map<i32, u32> _uniform_u32;
     std::unordered_map<i32, std::array<i32, MAX_TEXTURE_UNITS>> _uniform_textures;
 
+    efsw::FileWatcher *_file_watcher = nullptr;
     ShaderWatcher *_watcher = nullptr;
     std::array<efsw::WatchID, (i32)ShaderType::Last> _watch_ids;
   };
@@ -147,8 +150,12 @@ namespace axl {
     static ShaderType StringToShaderType(const std::string &str);
 
 #pragma region uniforms
+    u32 GetUniformBlockIndex(const std::string &name);
+    void SetUniformBlockBinding(u32 index, u32 binding);
+
     void SetUniformV2(u32 location, const v2 &value);
     void SetUniformV3(u32 location, const v3 &value);
+    void SetUniformV3V(u32 location, const std::vector<v3> &value);
     void SetUniformV4(u32 location, const v4 &value);
     void SetUniformM3(u32 location, const m3 &value);
     void SetUniformM4(u32 location, const m4 &value);
@@ -159,6 +166,7 @@ namespace axl {
 
     void SetUniformV2(const std::string &name, const v2 &value);
     void SetUniformV3(const std::string &name, const v3 &value);
+    void SetUniformV3V(const std::string &name, const std::vector<v3> &value);
     void SetUniformV4(const std::string &name, const v4 &value);
     void SetUniformM3(const std::string &name, const m3 &value);
     void SetUniformM4(const std::string &name, const m4 &value);
@@ -190,7 +198,6 @@ namespace axl {
     inline static u32 _id_counter = 0;
     inline static std::unordered_map<u32, ShaderData> _shader_data;
     inline static std::queue<Shader> _shader_queue;
-    inline static efsw::FileWatcher *_file_watcher = nullptr;
     inline static std::queue<std::tuple<u32, ShaderType>> _reload_queue;
 
     static u32 CompileShader(ShaderType type, const std::string &source);

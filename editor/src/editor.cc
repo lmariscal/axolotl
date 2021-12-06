@@ -10,7 +10,7 @@
 
 #include "ui.hh"
 #include "dockspace.hh"
-#include "test_scene.hh"
+#include "cs8502.hh"
 
 using namespace axl;
 
@@ -21,7 +21,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
 
-  TestScene scene;
+  CS8502 scene;
   Scene::SetActiveScene(&scene);
 
   FrameEditor frame_editor;
@@ -34,7 +34,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   constexpr f64 time_step = 1.0 / 100.0;
   f64 time_accumulator = 0.0;
 
-  scene.Init();
+  scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
     if (terminal_data.watch_shaders) {
@@ -129,6 +129,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         terminal_data.quit_requested = true;
     }
   }
+
+  terminal.get_terminal_helper()->Terminate();
 }
 
 i32 main() {

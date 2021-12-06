@@ -105,7 +105,7 @@ namespace axl {
 
 #ifdef AXOLOTL_DEBUG
 #define AXL_ASSERT(validate, ...) { \
-  if (!validate) { \
+  if (!(validate)) { \
     log::error("{}:{}:{}", __FILE__, __FUNCTION__, __LINE__); \
     log::error(__VA_ARGS__); \
     raise(SIGTRAP); \

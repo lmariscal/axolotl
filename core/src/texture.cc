@@ -6,29 +6,60 @@
 
 namespace axl {
 
-  Texture::Texture(const std::filesystem::path &path, TextureType type, const  TextureData &data):
+  TextureCube::TextureCube(const std::filesystem::path &path, TextureType type, const  TextureData &data):
     type(type)
   {
     TextureStore::RegisterTexture(*this, path, type, data);
   }
 
-  Texture::Texture(const Texture &other) {
+  TextureCube::TextureCube(const TextureCube &other) {
     TextureStore::GetData(other.texture_id).instances++;
     texture_id = other.texture_id;
     type = other.type;
   }
 
-  Texture::Texture(Texture &&other) {
+  TextureCube::TextureCube(TextureCube &&other) {
     TextureStore::GetData(other.texture_id).instances++;
     texture_id = other.texture_id;
     type = other.type;
   }
 
-  Texture::~Texture() {
+  TextureCube::~TextureCube() {
     TextureStore::DeregisterTexture(texture_id);
   }
 
-  std::string Texture::TextureTypeToString(TextureType type) {
+  void TextureCube::Init() {
+    TextureStore::ProcessQueue();
+  }
+
+  void TextureCube::Bind() {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, TextureStore::GetRendererID(texture_id));
+  }
+
+  Texture2D::Texture2D(const std::filesystem::path &path, TextureType type, const  TextureData &data):
+    type(type)
+  {
+    TextureStore::RegisterTexture(*this, path, type, data);
+  }
+
+  Texture2D::Texture2D(const Texture2D &other) {
+    TextureStore::GetData(other.texture_id).instances++;
+    texture_id = other.texture_id;
+    type = other.type;
+  }
+
+  Texture2D::Texture2D(Texture2D &&other) {
+    TextureStore::GetData(other.texture_id).instances++;
+    texture_id = other.texture_id;
+    type = other.type;
+  }
+
+  Texture2D::~Texture2D() {
+    TextureStore::DeregisterTexture(texture_id);
+  }
+
+  std::string Texture2D::TextureTypeToString(TextureType type) {
     switch (type) {
       case TextureType::Diffuse:
         return "diffuse";
@@ -45,11 +76,11 @@ namespace axl {
     }
   }
 
-  void Texture::Init() {
+  void Texture2D::Init() {
     TextureStore::ProcessQueue();
   }
 
-  void Texture::Bind(u32 unit) {
+  void Texture2D::Bind(u32 unit) {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, TextureStore::GetRendererID(texture_id));
   }
@@ -66,7 +97,7 @@ namespace axl {
     return 0;
   }
 
-  void TextureStore::RegisterTexture(Texture &texture, const std::filesystem::path &path,
+  void TextureStore::RegisterTexture(Texture2D &texture, const std::filesystem::path &path,
                                      TextureType type, const TextureData &data)
   {
     if (!path.empty() && _path_to_id.count(path)) {
@@ -82,7 +113,27 @@ namespace axl {
       _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
     _data.insert(std::pair<u32, TextureData>(_id_counter, data));
     _data[texture.texture_id].instances++;
-    _texture_queue.emplace(texture);
+    _texture_2d_queue.emplace(texture);
+  }
+
+  void TextureStore::RegisterTexture(TextureCube &texture, const std::filesystem::path &path,
+                                     TextureType type, const TextureData &data)
+  {
+    if (!path.empty() && _path_to_id.count(path)) {
+      texture.texture_id = _path_to_id[path];
+      _data[texture.texture_id].instances++;
+      return;
+    }
+
+    _id_counter++;
+    texture.texture_id = _id_counter;
+    texture.type = type;
+    if (!path.empty())
+      _path_to_id.insert(std::pair<std::filesystem::path, u32>(path, texture.texture_id));
+    _data.insert(std::pair<u32, TextureData>(_id_counter, data));
+    _data[texture.texture_id].instances++;
+    _data[texture.texture_id].cubemap = true;
+    _texture_cube_queue.emplace(texture);
   }
 
   std::filesystem::path TextureStore::GetPath(u32 id) {
@@ -94,20 +145,65 @@ namespace axl {
   }
 
   void TextureStore::ProcessQueue() {
-    while (!_texture_queue.empty()) {
-      Texture &t = _texture_queue.front();
+    while (!_texture_2d_queue.empty()) {
+      Texture2D &t = _texture_2d_queue.front();
       std::filesystem::path path = GetPath(t.texture_id);
-      log::debug("Processing texture: {}", path.string());
-      if (!path.empty())
+      log::debug("Processing texture 2d: {}", path.string());
+      if (!path.empty()) {
         LoadTexture(t, path);
-      else
+      } else {
         CreateTexture(t);
-      _texture_queue.pop();
+      }
+      _texture_2d_queue.pop();
+    }
+
+    while (!_texture_cube_queue.empty()) {
+      TextureCube &t = _texture_cube_queue.front();
+      std::filesystem::path path = GetPath(t.texture_id);
+      log::debug("Processing texture cube: {}", path.string());
+      if (!path.empty())
+        LoadCubemap(t, path);
+      _texture_cube_queue.pop();
     }
   }
 
-  void TextureStore::LoadTexture(const Texture &texture, const std::filesystem::path &path) {
-    log::debug("Loading Texture \"{}\", type {}", path.string(), Texture::TextureTypeToString(texture.type));
+  void TextureStore::LoadCubemap(const TextureCube &texture, const std::filesystem::path &path) {
+    std::vector<std::filesystem::path> paths;
+    paths.push_back(std::filesystem::path(path.string() + "_right.jpg"));
+    paths.push_back(std::filesystem::path(path.string() + "_left.jpg"));
+    paths.push_back(std::filesystem::path(path.string() + "_top.jpg"));
+    paths.push_back(std::filesystem::path(path.string() + "_bottom.jpg"));
+    paths.push_back(std::filesystem::path(path.string() + "_back.jpg"));
+    paths.push_back(std::filesystem::path(path.string() + "_front.jpg"));
+
+    glGenTextures(1, &_data[texture.texture_id].gl_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _data[texture.texture_id].gl_id);
+
+    for (u32 i = 0; i < 6; i++) {
+      i32 width, height, channels;
+      u8 *data = stbi_load(paths[i].string().c_str(), &width, &height, &channels, 0);
+      if (!data) {
+        log::error("Failed to load cubemap texture: {}", paths[i].string());
+        continue;
+      }
+
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+      stbi_image_free(data);
+
+      log::debug("Loaded cubemap texture: {}", paths[i].string());
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    _data[texture.texture_id].loaded = true;
+  }
+
+  void TextureStore::LoadTexture(const Texture2D &texture, const std::filesystem::path &path) {
+    log::debug("Loading Texture \"{}\", type {}", path.string(), Texture2D::TextureTypeToString(texture.type));
 
     // Load opengl Texture with stb_image
     i32 width, height, channels;
@@ -136,10 +232,10 @@ namespace axl {
     stbi_image_free(data);
   }
 
-  void TextureStore::CreateTexture(const Texture &texture) {
+  void TextureStore::CreateTexture(const Texture2D &texture) {
     TextureData &data = _data[texture.texture_id];
     if (data.size.x <= 0 || data.size.y <= 0) {
-      log::debug("Texture \"{}\" has invalid data.size {}x{}", Texture::TextureTypeToString(texture.type), data.size.x, data.size.y);
+      log::debug("Texture \"{}\" has invalid data.size {}x{}", Texture2D::TextureTypeToString(texture.type), data.size.x, data.size.y);
       _data[texture.texture_id].loaded = false;
       return;
     }
@@ -261,14 +357,14 @@ namespace axl {
 
     log::debug("Deleting Texture \"{}\"", GetPath(id).string());
 
-    if (_data[id].gl_id)
-      glDeleteTextures(1, &_data[id].instances);
+    if (_data[id].gl_id != 0)
+      glDeleteTextures(1, &_data[id].gl_id);
 
     _data.erase(id);
     _path_to_id.erase(GetPath(id));
   }
 
-  Texture::operator u32() const {
+  Texture2D::operator u32() const {
     return TextureStore::GetRendererID(texture_id); // renderer_id
   }
 

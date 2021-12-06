@@ -15,7 +15,6 @@ namespace axl {
 
     virtual void handleFileAction(efsw::WatchID watchid, const std::string &dir, const std::string &filename,
                                   efsw::Action action, std::string old_name = "") {
-
       if (action != efsw::Actions::Modified)
         return;
 
@@ -24,6 +23,7 @@ namespace axl {
       for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
         if (data.paths[i].empty())
           continue;
+        log::debug("Comparing {} with {}", data.paths[i].string(), filename);
         if (filename != data.paths[i].filename().string())
           continue;
         if (dir != data.paths[i].parent_path().string() + "/")
@@ -35,6 +35,7 @@ namespace axl {
       if (type == ShaderType::Last)
         return;
 
+      // TODO: Put a mutex here, it's not thread safe
       ShaderStore::_reload_queue.emplace(std::tuple<u32, ShaderType>(_shader, type));
     }
 
@@ -275,20 +276,21 @@ namespace axl {
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       if (_shader_data[shader_id].paths[i].empty())
         continue;
-      if (_file_watcher)
-        _file_watcher->removeWatch(_shader_data[shader_id].paths[i]);
+      if (_shader_data[shader_id]._file_watcher)
+        _shader_data[shader_id]._file_watcher->removeWatch(_shader_data[shader_id].paths[i]);
     }
 
     if (_shader_data[shader_id]._watcher)
       delete _shader_data[shader_id]._watcher;
 
+    if (_shader_data[shader_id]._file_watcher) {
+      delete _shader_data[shader_id]._file_watcher;
+      _shader_data[shader_id]._file_watcher = nullptr;
+    }
+
     _shader_data.erase(shader_id);
 
     log::debug("Shaders left: {}", _shader_data.size());
-    if (_shader_data.empty() && _file_watcher) {
-      delete _file_watcher;
-      _file_watcher = nullptr;
-    }
   }
 
   void ShaderStore::LoadFromPath(Shader &shader, ShaderType type, const std::filesystem::path &path) {
@@ -303,10 +305,10 @@ namespace axl {
 
     data.paths[(i32)type] = path;
 
-    if (!_file_watcher) {
-      _file_watcher = new efsw::FileWatcher();
+    if (!data._file_watcher) {
+      data._file_watcher = new efsw::FileWatcher();
       log::info("File watcher created");
-      _file_watcher->watch();
+      data._file_watcher->watch();
     }
     if (!data._watcher) {
       data._watcher = new ShaderWatcher(shader.shader_id);
@@ -314,8 +316,8 @@ namespace axl {
     }
 
     if (data._watch_ids[(i32)type])
-      _file_watcher->removeWatch(data._watch_ids[(i32)type]);
-    efsw::WatchID watch_id = _file_watcher->addWatch(path.parent_path().string(), data._watcher, false);
+      data._file_watcher->removeWatch(data._watch_ids[(i32)type]);
+    efsw::WatchID watch_id = data._file_watcher->addWatch(path.parent_path().string(), data._watcher, false);
     log::debug("Watching {} with watch_id {}", path.string(), watch_id);
     data._watch_ids[(i32)type] = watch_id;
 
@@ -605,7 +607,7 @@ namespace axl {
     data.paths[(i32)type] = "";
 
     if (data._watch_ids[(i32)type]) {
-      _file_watcher->removeWatch(data._watch_ids[(i32)type]);
+      _shader_data[shader.shader_id]._file_watcher->removeWatch(data._watch_ids[(i32)type]);
       data._watch_ids[(i32)type] = 0;
     }
 
@@ -614,10 +616,8 @@ namespace axl {
 
   bool ShaderStore::ReloadShader(Shader &shader, ShaderType type) {
     ShaderData &data = _shader_data[shader.shader_id];
-    if (data.shaders[(i32)type] == 0) {
+    if (data.shaders[(i32)type] == 0)
       log::warn("{} shader in program {} not loaded", Shader::ShaderTypeToString(type), shader.shader_id);
-      return false;
-    }
 
     if (data.paths[(i32)type].empty()) {
       log::warn("{} shader in program {} has no path", Shader::ShaderTypeToString(type), shader.shader_id);
@@ -726,6 +726,11 @@ namespace axl {
     data._uniform_v2[location] = value;
   }
 
+  void Shader::SetUniformV3V(u32 location, const std::vector<v3> &value) {
+    AXL_ASSERT(value.size() > 0, "Trying to set uniform with empty vector")
+    glUniform3fv(location, value.size(), value_ptr(*value.data()));
+  }
+
   void Shader::SetUniformV3(u32 location, const v3 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
     if (data._uniform_data_types[location] != UniformDataType::Vector3)
@@ -804,6 +809,16 @@ namespace axl {
     glActiveTexture(active_texture);
   }
 
+  u32 Shader::GetUniformBlockIndex(const std::string &name) {
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    return glGetUniformBlockIndex(data.gl_id, name.c_str());
+  }
+
+  void Shader::SetUniformBlockBinding(u32 index, u32 binding) {
+    ShaderData &data = ShaderStore::GetData(shader_id);
+    glUniformBlockBinding(data.gl_id, index, binding);
+  }
+
   void Shader::SetUniformV2(const std::string &name, const v2 &value) {
     u32 location = GetUniformLocation(name);
     SetUniformV2(location, value);
@@ -812,6 +827,11 @@ namespace axl {
   void Shader::SetUniformV3(const std::string &name, const v3 &value) {
     u32 location = GetUniformLocation(name);
     SetUniformV3(location, value);
+  }
+
+  void Shader::SetUniformV3V(const std::string &name, const std::vector<v3> &value) {
+    u32 location = GetUniformLocation(name);
+    SetUniformV3V(location, value);
   }
 
   void Shader::SetUniformV4(const std::string &name, const v4 &value) {

@@ -18,6 +18,12 @@ vec4 rgba(vec3 color, float a) {
   return vec4(color / 255.0f, a);
 }
 
+struct Light {
+  vec4 position;
+  vec4 color;
+  float intensity;
+};
+
 // Texture indices
 #define TEXTURE_DIFFUSE   0
 #define TEXTURE_SPECULAR  1
@@ -34,11 +40,17 @@ vec4 rgba(vec3 color, float a) {
 #define UNIFORM_TIME              3
 #define UNIFORM_RESOLUTION        4
 #define UNIFORM_MOUSE             5
+#define UNIFORM_CUSTOM_VERTEX     6
 
 // Fragment uniform locations
-#define UNIFORM_TEXTURES 10
+#define UNIFORM_TEXTURES        10 // 10 - 16
+#define UNIFORM_SKYBOX          17
+#define UNIFORM_LIGHTS          18 // 18 - 49
+#define UNIFORM_CUSTOM_FRAGMENT 50
 
 // Vertex attribute locations
 #define ATTRIB_POSITION 0
 #define ATTRIB_NORMAL   1
 #define ATTRIB_TEXCOORD 2
+
+#define LIGHT_COUNT 32

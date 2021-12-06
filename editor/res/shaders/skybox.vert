@@ -11,16 +11,14 @@ layout(location = 1) uniform mat4 view;
 layout(location = 2) uniform mat4 projection;
 
 layout(location = 0) out Vertex {
-  vec3 position;
-  vec3 normal;
-  vec2 tex_coord;
+  vec3 tex_coord;
 } OUT;
 
 void main() {
   mat4 mvp = projection * view * model;
-  gl_Position = mvp * vec4(position, 1.0);
 
-  OUT.position = vec3(model * vec4(position, 1.0));
-  OUT.normal = mat3(transpose(inverse(model))) * normal;
-  OUT.tex_coord = tex_coord;
+  gl_Position = mvp * vec4(position, 1.0);
+  gl_Position.z = gl_Position.w;
+
+  OUT.tex_coord = position;
 }

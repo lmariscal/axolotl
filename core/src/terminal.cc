@@ -1,3 +1,4 @@
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <axolotl/terminal.hh>
 
 #include <imterm/utils.hpp>
@@ -6,6 +7,7 @@
 #include <axolotl/shader.hh>
 #include <unordered_set>
 #include <sstream>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace axl {
 
@@ -29,7 +31,15 @@ namespace axl {
 
     terminal_->theme() = ImTerm::themes::cherry;
     terminal_->set_autocomplete_pos(ImTerm::position::nowhere);
+    log::default_logger()->sinks().clear();
+    log::default_logger()->sinks().push_back(std::make_shared<log::sinks::stdout_color_sink_st>());
     log::default_logger()->sinks().push_back(terminal_->get_terminal_helper());
+    log::set_pattern("[%R:%S:%e] [%^%l%$]: %v");
+  }
+
+  void Terminal::Terminate() {
+    log::default_logger()->sinks().clear();
+    log::default_logger()->sinks().push_back(std::make_shared<log::sinks::stdout_color_sink_st>());
     log::set_pattern("[%R:%S:%e] [%^%l%$]: %v");
   }
 

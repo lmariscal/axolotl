@@ -9,7 +9,7 @@ namespace axl {
 
   class TestScene : public Scene {
    public:
-    void Init() override;
+    void Init(Window &window) override;
     void Update(Window &window, f64 delta) override;
     void Focused(Window &window, bool state) override;
   };

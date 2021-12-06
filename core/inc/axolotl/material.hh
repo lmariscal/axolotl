@@ -26,7 +26,7 @@ namespace axl {
 
     protected:
      std::shared_ptr<Shader> _shader;
-     std::shared_ptr<std::array<std::vector<Texture *>, (i32)TextureType::Last>> _textures;
+     std::shared_ptr<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>> _textures;
      std::set<std::filesystem::path> _textures_path;
   };
 

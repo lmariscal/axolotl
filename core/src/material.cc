@@ -13,9 +13,9 @@ namespace axl {
       paths[(i32)ShaderType::Geometry],
       paths[(i32)ShaderType::Compute]
     ))),
-    _textures(std::make_shared<std::array<std::vector<Texture *>, (i32)TextureType::Last>>())
+    _textures(std::make_shared<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>>())
   {
-    std::fill(_textures->begin(), _textures->end(), std::vector<Texture *>());
+    std::fill(_textures->begin(), _textures->end(), std::vector<Texture2D *>());
 
     ShaderStore::ProcessQueue();
   }
@@ -28,7 +28,7 @@ namespace axl {
     log::debug("Destroying textures");
 
     for (i32 i = 0; i < (i32)TextureType::Last; ++i)
-      for (Texture *texture : (*_textures)[i])
+      for (Texture2D *texture : (*_textures)[i])
         delete texture;
   }
 
@@ -53,8 +53,8 @@ namespace axl {
       return false;
 
     auto &t = (*_textures)[(i32)type];
-    Texture *texture = t[id];
-    std::string name = Texture::TextureTypeToString(type) + std::to_string(count + 1);
+    Texture2D *texture = t[id];
+    std::string name = Texture2D::TextureTypeToString(type) + std::to_string(count + 1);
     texture->Bind(unit);
     _shader->SetUniformTexture(type, unit);
     return true;
@@ -64,10 +64,10 @@ namespace axl {
     if (_textures_path.count(path))
       return;
 
-    Texture *texture = new Texture(path, type);
+    Texture2D *texture = new Texture2D(path, type);
     (*_textures)[(i32)type].push_back(texture);
     _textures_path.insert(path);
-    log::debug("Added texture {} of type {}", path.string(), Texture::TextureTypeToString(type));
+    log::debug("Added texture {} of type {}", path.string(), Texture2D::TextureTypeToString(type));
   }
 
   void Material::AddTexture(u32 id, TextureType type) {

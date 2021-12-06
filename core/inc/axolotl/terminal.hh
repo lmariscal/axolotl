@@ -34,6 +34,7 @@ namespace axl {
     Terminal();
 
     void Init();
+    void Terminate();
   };
 
 } // namespace axl

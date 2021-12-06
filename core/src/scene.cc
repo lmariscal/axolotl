@@ -60,7 +60,7 @@ namespace axl {
   }
 
   void Scene::Draw(Renderer &renderer, bool show_data) {
-    renderer.Render(*this, show_data);
+    renderer.Render(*this, show_data, focused);
   }
 
   Scene * Scene::GetActiveScene() {

@@ -20,6 +20,7 @@ namespace axl {
     _skybox_texture(nullptr),
     _skybox_mesh(nullptr),
     _skybox_shader(nullptr),
+    _size(1920, 1080),
     ambient_light(LightType::Ambient, v3(0.3f), 0.3f)
   {
     if (gladLoadGL() != GL_TRUE) {
@@ -32,6 +33,11 @@ namespace axl {
     glBindBuffer(GL_UNIFORM_BUFFER, _lights_uniform_buffer);
     glBufferData(GL_UNIFORM_BUFFER, (sizeof(LightData) * LIGHT_COUNT) + 32, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    _post_process_framebuffer = new FrameBuffer(_size.x, _size.y);
+
+    Mesh::CreateQuad(&_quad_mesh);
+    _post_process_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert", Axolotl::GetDistDir() + "res/shaders/post.frag"));
   }
 
   Renderer::~Renderer() {
@@ -40,6 +46,10 @@ namespace axl {
       delete _skybox_mesh;
       delete _skybox_shader;
     }
+
+    delete _quad_mesh;
+    delete _post_process_shader;
+    delete _post_process_framebuffer;
 
     glDeleteBuffers(1, &_lights_uniform_buffer);
   }
@@ -51,7 +61,6 @@ namespace axl {
 
   void Renderer::Resize(u32 width, u32 height) {
     glViewport(0, 0, width, height);
-
     _size = v2i(width, height);
   }
 
@@ -77,7 +86,7 @@ namespace axl {
       ));
   }
 
-  void Renderer::Render(Scene &scene, bool show_data) {
+  void Renderer::Render(Scene &scene, bool show_data, bool focused) {
     m4 view(1.0f);
     m4 projection(1.0f);
 
@@ -126,13 +135,14 @@ namespace axl {
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightData) * lights_data.size() + 32, sizeof(LightData) * (LIGHT_COUNT - lights_data.size()), nullptr);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    // FrameBuffer buffer(_size.x, _size.y);
-    // buffer.Bind();
+    _post_process_framebuffer->Bind();
+
+    ClearScreen(v3(0.3f));
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     auto entities = registry.group<Model, Material>();
     for (auto entity : entities) {
@@ -156,9 +166,8 @@ namespace axl {
       model.Draw(material);
     }
 
-    // glDisable(GL_CULL_FACE);
-
     if (_skybox_texture) {
+      glDisable(GL_CULL_FACE);
       glDepthFunc(GL_LEQUAL);
       _skybox_shader->Bind();
       mat4 skybox_view = mat4(mat3(view));
@@ -169,10 +178,32 @@ namespace axl {
       _skybox_mesh->Draw();
     }
 
-    // glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    // buffer.Unbind();
+    _post_process_framebuffer->Unbind();
+
+    // Post process
+
+    _post_process_shader->Bind();
+    _post_process_shader->SetUniformM4((u32)UniformLocation::ModelMatrix, m4(1.0f));
+    _post_process_shader->SetUniformM4((u32)UniformLocation::ViewMatrix, m4(1.0f));
+    _post_process_shader->SetUniformM4((u32)UniformLocation::ProjectionMatrix, m4(1.0f));
+    _post_process_framebuffer->GetTexture(FrameBufferTexture::Color).Bind(1);
+    glUniform1i(_post_process_shader->GetUniformLocation("tex"), 1);
+    _post_process_framebuffer->GetTexture(FrameBufferTexture::DepthStencil).Bind(2);
+    glUniform1i(_post_process_shader->GetUniformLocation("depth_tex"), 2);
+
+    v2 relative_mouse = v2(0.0f);
+    if (focused)
+      relative_mouse = _window->GetIOManager().GetRelativePosition();
+    glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"), relative_mouse.x, relative_mouse.y);
+
+    v4 viewport_size;
+    glGetFloatv(GL_VIEWPORT, value_ptr(viewport_size));
+    glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"), viewport_size.z, viewport_size.w);
+
+    _quad_mesh->Draw();
 
     if (show_data)
       ShowData();

@@ -23,10 +23,14 @@ namespace axl {
     void Unbind();
     Texture2D GetTexture(FrameBufferTexture texture);
 
+    static void BindDefault();
+
    protected:
     u32 _width;
     u32 _height;
     u32 _frame_buffer;
+    i32 _prev_frame_buffer;
+    v4i _prev_viewport;
     Texture2D *_textures[(u32)FrameBufferTexture::Last];
   };
 

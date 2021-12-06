@@ -72,6 +72,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     if (!show_frame) {
       v2i region_available = window.GetWindowFrameBufferSize();
+      FrameBuffer::BindDefault();
       v3 color(33, 33, 33);
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(region_available.x, region_available.y);

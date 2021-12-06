@@ -87,12 +87,21 @@ namespace axl {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
+  void FrameBuffer::BindDefault() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+
   void FrameBuffer::Bind() {
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_prev_frame_buffer);
+    glGetIntegerv(GL_VIEWPORT, value_ptr(_prev_viewport));
+
     glBindFramebuffer(GL_FRAMEBUFFER, _frame_buffer);
+    glViewport(0, 0, _width, _height);
   }
 
   void FrameBuffer::Unbind() {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, _prev_frame_buffer);
+    glViewport(_prev_viewport[0], _prev_viewport[1], _prev_viewport[2], _prev_viewport[3]);
   }
 
   void FrameBuffer::SetSize(u32 width, u32 height) {

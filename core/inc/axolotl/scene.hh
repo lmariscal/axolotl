@@ -44,6 +44,7 @@ namespace axl {
     }
 
     entt::registry _registry;
+    bool focused = false;
 
     static inline Scene *_active_scene;
   };

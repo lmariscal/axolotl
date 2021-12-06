@@ -53,6 +53,7 @@ namespace axl {
 
   void CS8502::Focused(Window &window, bool state) {
     window.LockMouse(state);
+    focused = state;
   }
 
 } // namespace axl

@@ -312,12 +312,6 @@ namespace axl {
         break;
     }
 
-    u32 error = glGetError();
-    while (error != GL_NO_ERROR) {
-      log::error("Cleaning OpenGL error: {}", error);
-      error = glGetError();
-    }
-
     u32 tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -328,12 +322,6 @@ namespace axl {
     glTexImage2D(GL_TEXTURE_2D, 0, format, data.size.x, data.size.y, 0, internal_format, type, nullptr);
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    error = glGetError();
-    while (error != GL_NO_ERROR) {
-      log::error("OpenGL error: {}", error);
-      error = glGetError();
-    }
 
     _data[texture.texture_id].gl_id = tex;
     _data[texture.texture_id].loaded = true;

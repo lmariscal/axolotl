@@ -15,6 +15,7 @@ namespace axl {
   struct TextureCube;
   struct Mesh;
   struct Shader;
+  struct FrameBuffer;
 
   class Renderer {
    public:
@@ -25,7 +26,7 @@ namespace axl {
     void Resize(u32 width, u32 height);
     void SetSkybox(TextureCube *skybox);
 
-    void Render(Scene &scene, bool show_data);
+    void Render(Scene &scene, bool show_data, bool focused);
     void SetMeshWireframe(bool state);
 
    protected:
@@ -52,6 +53,7 @@ namespace axl {
 
     Mesh *_quad_mesh;
     Shader *_post_process_shader;
+    FrameBuffer *_post_process_framebuffer;
   };
 
 } // namespace axl

@@ -32,7 +32,6 @@ namespace axl {
 
     // Fragment
     Textures         = 10,
-    Skybox           = 17,
     Lights           = 18,
     Last
   };
@@ -41,8 +40,7 @@ namespace axl {
     Position  = 0,
     Normal    = 1,
     Tangent   = 2,
-    Bitangent = 3,
-    TexCoord  = 4,
+    TexCoord  = 3,
     Last
   };
 
@@ -201,6 +199,7 @@ namespace axl {
     inline static std::unordered_map<u32, ShaderData> _shader_data;
     inline static std::queue<Shader> _shader_queue;
     inline static std::queue<std::tuple<u32, ShaderType>> _reload_queue;
+    inline static Texture2D *_white_texture = nullptr;
 
     static u32 CompileShader(ShaderType type, const std::string &source);
     static void GetUniformData(Shader &shader);

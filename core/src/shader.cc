@@ -5,6 +5,8 @@
 #include <glad.h>
 #include <efsw/efsw.hpp>
 #include <iostream>
+#include <axolotl/axolotl.hh>
+#include <axolotl/texture.hh>
 
 namespace axl {
 
@@ -235,6 +237,11 @@ namespace axl {
       LoadFromPath(shader, (ShaderType)i, data.paths[i]);
     }
     CompileProgram(shader);
+
+    if (!_white_texture) {
+      _white_texture = new Texture2D(Axolotl::GetDistDir() + "res/textures/white.png", TextureType::Diffuse);
+      TextureStore::ProcessQueue();
+    }
   }
 
   void ShaderStore::ProcessQueue() {
@@ -290,7 +297,10 @@ namespace axl {
 
     _shader_data.erase(shader_id);
 
-    log::debug("Shaders left: {}", _shader_data.size());
+    if (_shader_data.empty()) {
+      delete _white_texture;
+      _white_texture = nullptr;
+    }
   }
 
   void ShaderStore::LoadFromPath(Shader &shader, ShaderType type, const std::filesystem::path &path) {
@@ -791,8 +801,16 @@ namespace axl {
     ShaderData &data = ShaderStore::GetData(shader_id);
     if (type == TextureType::Last || !data._uniform_textures.count((i32)UniformLocation::Textures))
       return;
-    if (unit < 0)
-      return;
+
+    // log::debug("Setting texture {} to unit {}", Texture2D::TextureTypeToString(type), unit);
+
+    if (unit < 0) {
+      i32 max_unit_count = 0;
+      glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_unit_count);
+      unit = max_unit_count - 1;
+
+      ShaderStore::_white_texture->Bind(unit);
+    }
 
     i32 location = (i32)UniformLocation::Textures + (i32)type;
     glUniform1i(location, unit);

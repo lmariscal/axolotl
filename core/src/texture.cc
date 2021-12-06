@@ -69,8 +69,6 @@ namespace axl {
         return "normal";
       case TextureType::Ambient:
         return "ambient";
-      case TextureType::Height:
-        return "height";
       default:
         return "";
     }
@@ -179,6 +177,7 @@ namespace axl {
     glGenTextures(1, &_data[texture.texture_id].gl_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, _data[texture.texture_id].gl_id);
 
+    stbi_set_flip_vertically_on_load(false);
     for (u32 i = 0; i < 6; i++) {
       i32 width, height, channels;
       u8 *data = stbi_load(paths[i].string().c_str(), &width, &height, &channels, 0);
@@ -192,6 +191,7 @@ namespace axl {
 
       log::debug("Loaded cubemap texture: {}", paths[i].string());
     }
+    stbi_set_flip_vertically_on_load(true);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

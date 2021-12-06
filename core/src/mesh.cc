@@ -10,7 +10,7 @@ namespace axl {
     _num_indices(0),
     _single_mesh(true)
   {
-    _num_vertices = vertices.size() / 14;
+    _num_vertices = vertices.size() / 11;
     _num_indices = indices.size();
 
     LoadBuffers(vertices, indices);
@@ -37,19 +37,16 @@ namespace axl {
 
     // positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)0);
     // normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(3 * sizeof(f32)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(3 * sizeof(f32)));
     // tangents
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(6 * sizeof(f32)));
-    // bitangents
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(9 * sizeof(f32)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(6 * sizeof(f32)));
     // texture coords
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(12 * sizeof(f32)));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(9 * sizeof(f32)));
 
     glBindVertexArray(0);
 
@@ -82,78 +79,78 @@ namespace axl {
     glBindVertexArray(0);
   }
 
-  Mesh Mesh::CreateCube() {
+  void Mesh::CreateCube(Mesh **mesh) {
     std::vector<f32> cube_mesh = {
-      // positions          // normals           // texcoords
-      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-       1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-      -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      // positions          // normals           // tangents        // texcoords
+      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
 
-      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-       1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-      -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
 
-      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-      -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 
-       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 
-      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-      -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 
-      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
+      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
     };
 
-    return Mesh(cube_mesh);
+    *mesh = new Mesh(cube_mesh);
   }
 
-  Mesh Mesh::CreateQuad() {
+  void Mesh::CreateQuad(Mesh **mesh) {
     std::vector<f32> quad_mesh = {
-      // positions         // normals           // texcoords
-      // -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-      // -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+      // positions         // normals         // tangents        // texcoords
+      -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 
-      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-      //  1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-      // -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f
+       1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
     };
 
-    return Mesh(quad_mesh);
+    *mesh = new Mesh(quad_mesh);
   }
 
-  Mesh Mesh::CreateTriangle() {
+  void Mesh::CreateTriangle(Mesh **mesh) {
     std::vector<f32> triangle_mesh = {
       // positions         // normals           // texcoords
       // -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
       //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
       //  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.5f, 1.0f
     };
-    return Mesh(triangle_mesh);
+    *mesh = new Mesh(triangle_mesh);
   }
 
 } // namespace axl

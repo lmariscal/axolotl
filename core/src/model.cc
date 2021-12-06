@@ -73,7 +73,7 @@ namespace axl {
         type = TextureType::Ambient;
         break;
       case aiTextureType_HEIGHT:
-        type = TextureType::Height;
+        type = TextureType::Normal;
         break;
       default:
         break;
@@ -102,13 +102,15 @@ namespace axl {
       buffer_data.push_back(mesh->mNormals[i].y);
       buffer_data.push_back(mesh->mNormals[i].z);
 
-      buffer_data.push_back(mesh->mTangents[i].x);
-      buffer_data.push_back(mesh->mTangents[i].y);
-      buffer_data.push_back(mesh->mTangents[i].z);
-
-      buffer_data.push_back(mesh->mBitangents[i].x);
-      buffer_data.push_back(mesh->mBitangents[i].y);
-      buffer_data.push_back(mesh->mBitangents[i].z);
+      if (mesh->HasTangentsAndBitangents()) {
+        buffer_data.push_back(mesh->mTangents[i].x);
+        buffer_data.push_back(mesh->mTangents[i].y);
+        buffer_data.push_back(mesh->mTangents[i].z);
+      } else {
+        buffer_data.push_back(0.0f);
+        buffer_data.push_back(0.0f);
+        buffer_data.push_back(0.0f);
+      }
 
       if (mesh->mTextureCoords[0]) {
         buffer_data.push_back(mesh->mTextureCoords[0][i].x);
@@ -201,8 +203,8 @@ namespace axl {
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
-        i32 unit_count = 0;
-        for (i32 i = 0; i < (i32)TextureType::Last; ++i) {
+        i32 unit_count = 1;
+        for (i32 i = 1; i < (i32)TextureType::Last; ++i) {
           if (material.Bind(material_id, unit_count, 0, (TextureType)i))
             unit_count++;
         }

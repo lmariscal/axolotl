@@ -9,6 +9,7 @@
 #include <axolotl/texture.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/axolotl.hh>
+#include <axolotl/framebuffer.hh>
 
 #include <glad.h>
 
@@ -50,6 +51,8 @@ namespace axl {
 
   void Renderer::Resize(u32 width, u32 height) {
     glViewport(0, 0, width, height);
+
+    _size = v2i(width, height);
   }
 
   void Renderer::SetSkybox(TextureCube *skybox) {
@@ -67,7 +70,7 @@ namespace axl {
       return;
 
     _skybox_texture = skybox;
-    _skybox_mesh = new Mesh(Mesh::CreateCube());
+    Mesh::CreateCube(&_skybox_mesh);
     _skybox_shader = new Shader(ShaderData(
         Axolotl::GetDistDir() + "res/shaders/skybox.vert",
         Axolotl::GetDistDir() + "res/shaders/skybox.frag"
@@ -84,9 +87,6 @@ namespace axl {
       view = camera->GetViewMatrix(camera_ento);
       projection = camera->GetProjectionMatrix(*_window);
     }
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
 
     entt::registry &registry = scene.GetRegistry();
 
@@ -126,6 +126,14 @@ namespace axl {
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightData) * lights_data.size() + 32, sizeof(LightData) * (LIGHT_COUNT - lights_data.size()), nullptr);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    // FrameBuffer buffer(_size.x, _size.y);
+    // buffer.Bind();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+
     auto entities = registry.group<Model, Material>();
     for (auto entity : entities) {
       Ento ento = scene.FromHandle(entity);
@@ -148,6 +156,8 @@ namespace axl {
       model.Draw(material);
     }
 
+    // glDisable(GL_CULL_FACE);
+
     if (_skybox_texture) {
       glDepthFunc(GL_LEQUAL);
       _skybox_shader->Bind();
@@ -158,6 +168,11 @@ namespace axl {
       _skybox_texture->Bind();
       _skybox_mesh->Draw();
     }
+
+    // glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    // buffer.Unbind();
 
     if (show_data)
       ShowData();

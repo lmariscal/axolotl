@@ -33,6 +33,7 @@ namespace axl {
 
     void ShowData();
 
+    v2i _size;
     f64 _delta_time;
     f64 _delta_time_accum;
     f64 _last_time;
@@ -48,6 +49,9 @@ namespace axl {
     TextureCube *_skybox_texture;
     Mesh *_skybox_mesh;
     Shader *_skybox_shader;
+
+    Mesh *_quad_mesh;
+    Shader *_post_process_shader;
   };
 
 } // namespace axl

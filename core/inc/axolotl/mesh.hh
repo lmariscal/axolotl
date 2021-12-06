@@ -22,9 +22,9 @@ namespace axl {
     void SetMaterialID(u32 id);
     u32 GetMaterialID() const;
 
-    static Mesh CreateQuad();
-    static Mesh CreateTriangle();
-    static Mesh CreateCube();
+    static void CreateQuad(Mesh **mesh);
+    static void CreateTriangle(Mesh **mesh);
+    static void CreateCube(Mesh **mesh);
 
    protected:
     friend class Model;

@@ -25,13 +25,13 @@ struct Light {
 };
 
 // Texture indices
-#define TEXTURE_DIFFUSE   0
-#define TEXTURE_SPECULAR  1
-#define TEXTURE_NORMAL    2
-#define TEXTURE_AMBIENT   3
-#define TEXTURE_HEIGHT    4
+#define TEXTURE_SKYBOX    0 // Do not use as is
+#define TEXTURE_DIFFUSE   1
+#define TEXTURE_SPECULAR  2
+#define TEXTURE_NORMAL    3
+#define TEXTURE_AMBIENT   4
 #define TEXTURE_BUFFER    5
-#define TEXTURE_COUNT     6
+#define TEXTURE_COUNT     7
 
 // Vertex uniform locations
 #define UNIFORM_MODEL_MATRIX      0
@@ -43,8 +43,8 @@ struct Light {
 #define UNIFORM_CUSTOM_VERTEX     6
 
 // Fragment uniform locations
-#define UNIFORM_TEXTURES        10 // 10 - 16
-#define UNIFORM_SKYBOX          17
+#define UNIFORM_SKYBOX          10 // Do not use as is
+#define UNIFORM_TEXTURES        10 // 10 - 17
 #define UNIFORM_LIGHTS          18 // 18 - 49
 #define UNIFORM_CUSTOM_FRAGMENT 50
 
@@ -52,7 +52,6 @@ struct Light {
 #define ATTRIB_POSITION  0
 #define ATTRIB_NORMAL    1
 #define ATTRIB_TANGENT   2
-#define ATTRIB_BITANGENT 3
-#define ATTRIB_TEXCOORD  4
+#define ATTRIB_TEXCOORD  3
 
 #define LIGHT_COUNT 32

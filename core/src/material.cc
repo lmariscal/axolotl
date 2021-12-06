@@ -38,23 +38,31 @@ namespace axl {
     u32 counter[(i32)TextureType::Last];
     std::fill(counter, counter + (i32)TextureType::Last, 0);
 
-    u32 unit_count = 0;
-    for (i32 i = 0; i < (i32)TextureType::Last; ++i) {
-      for (i32 j = 0; j < _textures->size(); ++j) {
+    u32 unit_count = 1;
+    for (i32 i = 1; i < (i32)TextureType::Last; ++i) {
+      std::vector<Texture2D *> &textures = (*_textures)[i];
+      for (i32 j = 0; j < textures.size(); ++j) {
         u32 count = counter[i]++;
         if (Bind(j, unit_count, count, (TextureType)i))
           unit_count++;
       }
+
+      if (textures.empty())
+        _shader->SetUniformTexture((TextureType)i, -1);
     }
   }
 
   bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
-    if (type == TextureType::Last || (*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size())
+    if (type == TextureType::Last)
       return false;
+
+    if ((*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size()) {
+      _shader->SetUniformTexture(type, -1);
+      return false;
+    }
 
     auto &t = (*_textures)[(i32)type];
     Texture2D *texture = t[id];
-    std::string name = Texture2D::TextureTypeToString(type) + std::to_string(count + 1);
     texture->Bind(unit);
     _shader->SetUniformTexture(type, unit);
     return true;

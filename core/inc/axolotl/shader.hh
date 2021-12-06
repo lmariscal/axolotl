@@ -38,9 +38,11 @@ namespace axl {
   };
 
   enum class AttributeLocation {
-    Position = 0,
-    Normal   = 1,
-    TexCoord = 2,
+    Position  = 0,
+    Normal    = 1,
+    Tangent   = 2,
+    Bitangent = 3,
+    TexCoord  = 4,
     Last
   };
 

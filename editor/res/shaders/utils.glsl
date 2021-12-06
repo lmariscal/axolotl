@@ -49,8 +49,10 @@ struct Light {
 #define UNIFORM_CUSTOM_FRAGMENT 50
 
 // Vertex attribute locations
-#define ATTRIB_POSITION 0
-#define ATTRIB_NORMAL   1
-#define ATTRIB_TEXCOORD 2
+#define ATTRIB_POSITION  0
+#define ATTRIB_NORMAL    1
+#define ATTRIB_TANGENT   2
+#define ATTRIB_BITANGENT 3
+#define ATTRIB_TEXCOORD  4
 
 #define LIGHT_COUNT 32

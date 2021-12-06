@@ -102,6 +102,14 @@ namespace axl {
       buffer_data.push_back(mesh->mNormals[i].y);
       buffer_data.push_back(mesh->mNormals[i].z);
 
+      buffer_data.push_back(mesh->mTangents[i].x);
+      buffer_data.push_back(mesh->mTangents[i].y);
+      buffer_data.push_back(mesh->mTangents[i].z);
+
+      buffer_data.push_back(mesh->mBitangents[i].x);
+      buffer_data.push_back(mesh->mBitangents[i].y);
+      buffer_data.push_back(mesh->mBitangents[i].z);
+
       if (mesh->mTextureCoords[0]) {
         buffer_data.push_back(mesh->mTextureCoords[0][i].x);
         buffer_data.push_back(mesh->mTextureCoords[0][i].y);

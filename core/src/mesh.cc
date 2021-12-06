@@ -10,7 +10,7 @@ namespace axl {
     _num_indices(0),
     _single_mesh(true)
   {
-    _num_vertices = vertices.size() / 8;
+    _num_vertices = vertices.size() / 14;
     _num_indices = indices.size();
 
     LoadBuffers(vertices, indices);
@@ -37,13 +37,19 @@ namespace axl {
 
     // positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(f32), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)0);
     // normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(f32), (void*)(3 * sizeof(f32)));
-    // texcoords
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(3 * sizeof(f32)));
+    // tangents
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(f32), (void*)(6 * sizeof(f32)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(6 * sizeof(f32)));
+    // bitangents
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(9 * sizeof(f32)));
+    // texture coords
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(f32), (void*)(12 * sizeof(f32)));
 
     glBindVertexArray(0);
 
@@ -79,47 +85,47 @@ namespace axl {
   Mesh Mesh::CreateCube() {
     std::vector<f32> cube_mesh = {
       // positions          // normals           // texcoords
-      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-       1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-      -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
 
-      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-      -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
 
-      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-      -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 
-       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 
-      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-       1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-      -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 
-      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-       1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+       1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
     };
 
     return Mesh(cube_mesh);
@@ -128,13 +134,13 @@ namespace axl {
   Mesh Mesh::CreateQuad() {
     std::vector<f32> quad_mesh = {
       // positions         // normals           // texcoords
-      -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-      -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+      // -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+      // -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
 
-       1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-       1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-      -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f
+      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+      //  1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+      // -1.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f
     };
 
     return Mesh(quad_mesh);
@@ -143,9 +149,9 @@ namespace axl {
   Mesh Mesh::CreateTriangle() {
     std::vector<f32> triangle_mesh = {
       // positions         // normals           // texcoords
-      -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-       0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.5f, 1.0f
+      // -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+      //  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.5f, 1.0f
     };
     return Mesh(triangle_mesh);
   }

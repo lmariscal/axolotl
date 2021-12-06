@@ -35,7 +35,7 @@ void main () {
     Light light = lights.data[i];
     vec3 light_direction = normalize(light.position.xyz - position);
     float light_intensity = dot(normal, light_direction);
-    light_intensity = clamp(light_intensity, 0.0, 1.0);
+    light_intensity = clamp(light_intensity, 0.0, 1.0) * light.intensity;
     diffuse_light_color += light.color * light_intensity;
 
     vec3 half_direction = normalize(light_direction + view_position);
@@ -46,8 +46,8 @@ void main () {
   vec4 ambient_color = texture(textures[TEXTURE_AMBIENT], IN.tex_coord) * ambient_light_color;
   vec4 diffuse_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord) * diffuse_light_color;
   vec4 specular_color = texture(textures[TEXTURE_SPECULAR], IN.tex_coord) * specular_light_color;
-  specular_color = specular_color * 0.3f;
+  specular_color = specular_color * 0.03f;
 
-  frag_color = diffuse_color + specular_color + ambient_color;
+  frag_color = diffuse_color + ambient_color + specular_color;
   // frag_color = vec4(normal, 1.0);
 }

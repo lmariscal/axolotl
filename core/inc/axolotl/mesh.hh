@@ -26,6 +26,8 @@ namespace axl {
     static void CreateTriangle(Mesh **mesh);
     static void CreateCube(Mesh **mesh);
 
+    bool two_sided;
+
    protected:
     friend class Model;
 

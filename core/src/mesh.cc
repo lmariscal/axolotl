@@ -145,10 +145,10 @@ namespace axl {
 
   void Mesh::CreateTriangle(Mesh **mesh) {
     std::vector<f32> triangle_mesh = {
-      // positions         // normals           // texcoords
-      // -1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-      //  1.0f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-      //  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.5f, 1.0f
+      // positions         // normals         // tangents        // texcoords
+      -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+       1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+       0.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.5f, 1.0f
     };
     *mesh = new Mesh(triangle_mesh);
   }

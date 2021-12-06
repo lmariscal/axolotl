@@ -12,8 +12,16 @@
 #include <axolotl/framebuffer.hh>
 
 #include <glad.h>
+#include <algorithm>
 
 namespace axl {
+
+  struct Renderable {
+    Ento ento;
+    Model *model;
+    Material *material;
+    Transform *transform;
+  };
 
   Renderer::Renderer(Window *window):
     _window(window),
@@ -21,7 +29,7 @@ namespace axl {
     _skybox_mesh(nullptr),
     _skybox_shader(nullptr),
     _size(1920, 1080),
-    ambient_light(LightType::Ambient, v3(0.3f), 0.3f)
+    ambient_light(LightType::Ambient, v3(0.6f), 0.3f)
   {
     if (gladLoadGL() != GL_TRUE) {
       log::error("Failed to load OpenGL");
@@ -98,6 +106,26 @@ namespace axl {
     }
 
     entt::registry &registry = scene.GetRegistry();
+    std::vector<Renderable> renderables;
+
+    auto entities = registry.group<Model, Material>();
+    for (auto entity : entities) {
+      Ento ento = scene.FromHandle(entity);
+      Model &model = ento.GetComponent<Model>();
+      Material &material = ento.GetComponent<Material>();
+      Transform &transform = ento.GetComponent<Transform>();
+
+      Renderable renderable;
+      renderable.ento = ento;
+      renderable.model = &model;
+      renderable.material = &material;
+      renderable.transform = &transform;
+      renderables.push_back(renderable);
+    }
+
+    std::sort(renderables.begin(), renderables.end(), [](const Renderable &a, const Renderable &b) {
+      return a.transform->GetPosition().z < b.transform->GetPosition().z;
+    });
 
     std::vector<LightData> lights_data;
 
@@ -141,29 +169,22 @@ namespace axl {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    auto entities = registry.group<Model, Material>();
-    for (auto entity : entities) {
-      Ento ento = scene.FromHandle(entity);
-      Model &model = ento.GetComponent<Model>();
-      Material &material = ento.GetComponent<Material>();
+    for (auto entity : renderables) {
+      m4 model_mat = entity.transform->GetModelMatrix(entity.ento);
 
-      m4 model_mat(1.0f);
-      if (ento.HasComponent<Transform>())
-        model_mat = ento.GetComponent<Transform>().GetModelMatrix(ento);
-
-      material.GetShader().Bind();
-      u32 block_index = material.GetShader().GetUniformBlockIndex("Lights");
-      material.GetShader().SetUniformBlockBinding(block_index, 0);
+      entity.material->GetShader().Bind();
+      u32 block_index = entity.material->GetShader().GetUniformBlockIndex("Lights");
+      entity.material->GetShader().SetUniformBlockBinding(block_index, 0);
       glBindBufferBase(GL_UNIFORM_BUFFER, 0, _lights_uniform_buffer);
 
-      material.GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
-      material.GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
-      material.GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
+      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
+      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
+      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
 
-      model.Draw(material);
+      entity.model->Draw(*entity.material);
     }
 
     if (_skybox_texture) {

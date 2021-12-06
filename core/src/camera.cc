@@ -79,7 +79,7 @@ namespace axl {
     if (_is_orthographic)
       return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
     else
-      return perspective(radians(_fov), aspect_ratio, 0.1f, 100.0f);
+      return perspective(radians(_fov), aspect_ratio, 0.1f, 10000.0f);
   }
 
   void Camera::UpdateVectors(Ento &ento) {

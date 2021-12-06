@@ -23,6 +23,8 @@ namespace axl {
     bool ShowComponent();
     void Init(Ento ento);
 
+    bool two_sided;
+
    protected:
     static void ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene);
     static Mesh * ProcessMesh(Ento ento, Model &model, aiMesh *mesh, const aiScene *scene);

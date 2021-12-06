@@ -9,6 +9,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include <glad.h>
+
 namespace axl {
 
   Model::Model(Ento ento, std::filesystem::path path, std::array<std::string, (i32)ShaderType::Last> paths, bool root):
@@ -135,7 +137,9 @@ namespace axl {
     ProcessMaterialTextures(ento, model, material, aiTextureType_NORMALS);
     ProcessMaterialTextures(ento, model, material, aiTextureType_HEIGHT);
 
-    return new Mesh(buffer_data, indices);
+    Mesh *result = new Mesh(buffer_data, indices);
+
+    return result;
   }
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
@@ -200,6 +204,10 @@ namespace axl {
   }
 
   void Model::Draw(Material &material) {
+    u8 culling_state;
+    if (two_sided)
+      glDisable(GL_CULL_FACE);
+
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
@@ -213,6 +221,9 @@ namespace axl {
       }
       mesh->Draw();
     }
+
+    if (two_sided)
+      glEnable(GL_CULL_FACE);
   }
 
   json Model::Serialize() const {

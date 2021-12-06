@@ -14,7 +14,7 @@ layout(location = 0) out vec4 frag_color;
 void main () {
   frag_color = texture(tex, IN.tex_coord);
 
-  frag_color.rgb = pow(frag_color.rgb, vec3(2.1));
+  frag_color.rgb = pow(frag_color.rgb, vec3(1.8));
 
   // vignette
   float dist = length(gl_FragCoord.xy / viewport_size - vec2(0.5));

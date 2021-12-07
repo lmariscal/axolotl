@@ -1,15 +1,13 @@
 #pragma once
 
-#include <axolotl/types.hh>
-
-#include <uuid.h>
 #include <array>
-#include <random>
-#include <vector>
-
 #include <axolotl/component.hh>
-#include <axolotl/transform.hh>
 #include <axolotl/scene.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/types.hh>
+#include <random>
+#include <uuid.h>
+#include <vector>
 
 namespace axl {
 
@@ -24,7 +22,7 @@ namespace axl {
     std::string value;
 
     Tag(const std::string &value): value(value) { }
-    Tag(): value(DefaultTag) {  }
+    Tag(): value(DefaultTag) { }
   };
 
   struct Ento {
@@ -49,36 +47,35 @@ namespace axl {
     }
 
     template<typename T, typename... Args>
-    T& AddComponent(Args&&... args) {
-      AXL_ASSERT(!HasComponent<T>(), "Entity already has component");
+    T &AddComponent(Args &&...args) {
+      AXL_ASSERT_MESSAGE(!HasComponent<T>(), "Entity already has component");
 
       return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
     }
 
     template<typename T, typename... Args>
-    T& TryAddComponent(Args&&... args) {
-      if (HasComponent<T>())
-        return GetComponent<T>();
+    T &TryAddComponent(Args &&...args) {
+      if (HasComponent<T>()) return GetComponent<T>();
       return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
     }
 
     template<typename T>
-    T& GetComponent() {
-      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
+    T &GetComponent() {
+      AXL_ASSERT_MESSAGE(HasComponent<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
-    const T& GetComponent() const {
-      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
+    const T &GetComponent() const {
+      AXL_ASSERT_MESSAGE(HasComponent<T>(), "Entity does not have component");
 
       return scene->_registry.get<T>(handle);
     }
 
     template<typename T>
     void RemoveComponent() {
-      AXL_ASSERT(HasComponent<T>(), "Entity does not have component");
+      AXL_ASSERT_MESSAGE(HasComponent<T>(), "Entity does not have component");
 
       scene->_registry.remove<T>(handle);
     }
@@ -103,11 +100,11 @@ namespace axl {
       return handle != other.handle;
     }
 
-    Transform & Transform();
-    const struct Transform & Transform() const;
+    Transform &Transform();
+    const struct Transform &Transform() const;
 
-    Tag & Tag();
-    const struct Tag & Tag() const;
+    Tag &Tag();
+    const struct Tag &Tag() const;
 
     bool HasParent() const;
     bool HasChildren() const;

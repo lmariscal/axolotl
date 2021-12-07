@@ -37,3 +37,6 @@
 [submodule "third/nativefiledialog"]
 	path = third/nativefiledialog
 	url = https://github.com/mlabbe/nativefiledialog.git
+[submodule "third/ergo"]
+	path = third/ergo
+	url = https://github.com/lmariscal/ergo.git

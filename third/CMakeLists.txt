@@ -1,4 +1,8 @@
-# # ASSIMP
+# Ergo
+
+add_subdirectory(ergo)
+
+# ASSIMP
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
@@ -129,5 +133,6 @@ add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 
 # stduuid
+
 set(UUID_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(stduuid)

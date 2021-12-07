@@ -8,7 +8,7 @@ namespace axl {
 
   struct DockSpaceData {
     TerminalData *terminal;
-    bool fullscreen = false;
+    bool fullscreen = true;
     bool ratio_locked = false;
 
     bool show_world_editor = true;

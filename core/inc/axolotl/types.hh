@@ -3,37 +3,22 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <ergo/assert.hh>
+#include <ergo/types.hh>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <string>
-#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <cstdint>
-#include <signal.h>
+#include <spdlog/spdlog.h>
 #include <uuid.h>
 
 namespace axl {
 
   using namespace glm;
-
-  using i8  = std::int8_t;
-  using i16 = std::int16_t;
-  using i32 = std::int32_t;
-  using i64 = std::int64_t;
-
-  using u8  = std::uint8_t;
-  using u16 = std::uint16_t;
-  using u32 = std::uint32_t;
-  using u64 = std::uint64_t;
-
-  using f32 = float ;
-  using f64 = double;
-
-  using uchar = unsigned char;
+  using namespace ergo;
 
   using v2 = vec2;
   using v3 = vec3;
@@ -53,64 +38,30 @@ namespace axl {
   using json = nlohmann::json;
   using uuid = uuids::uuid;
 
-#ifndef M_PI
-  constexpr f32 M_PI = 3.14159265358979323846;
-#endif
-
   namespace log {
     using namespace spdlog;
   }
 
-  inline quat RotationBetweenVectors(vec3 start, vec3 dest){
-    start = normalize(start);
-    dest = normalize(dest);
+} // namespace axl
 
-    float cosTheta = dot(start, dest);
-    vec3 rotationAxis;
-
-    if (cosTheta < -1 + 0.001f){
-      // special case when vectors in opposite directions:
-      // there is no "ideal" rotation axis
-      // So guess one; any will do as long as it's perpendicular to start
-      rotationAxis = cross(vec3(0.0f, 0.0f, 1.0f), start);
-      if (length2(rotationAxis) < 0.01 ) // bad luck, they were parallel, try again!
-        rotationAxis = cross(vec3(1.0f, 0.0f, 0.0f), start);
-
-      rotationAxis = normalize(rotationAxis);
-      return angleAxis(glm::radians(180.0f), rotationAxis);
-    }
-
-    rotationAxis = cross(start, dest);
-
-    float s = sqrt( (1+cosTheta)*2 );
-    float invs = 1 / s;
-
-    return quat(
-      s * 0.5f,
-      rotationAxis.x * invs,
-      rotationAxis.y * invs,
-      rotationAxis.z * invs
-    );
-
+#define IM_VEC2_CLASS_EXTRA  \
+  ImVec2(const axl::v2 &f) { \
+    x = f.x;                 \
+    y = f.y;                 \
+  }                          \
+  operator axl::v2() const { \
+    return axl::v2(x, y);    \
+  }
+#define IM_VEC4_CLASS_EXTRA     \
+  ImVec4(const axl::v4 &f) {    \
+    x = f.x;                    \
+    y = f.y;                    \
+    z = f.z;                    \
+    w = f.w;                    \
+  }                             \
+  operator axl::v4() const {    \
+    return axl::v4(x, y, z, w); \
   }
 
-}
-
-#define IM_VEC2_CLASS_EXTRA                                                 \
-        ImVec2(const axl::v2& f) { x = f.x; y = f.y; }                       \
-        operator axl::v2() const { return axl::v2(x,y); }
-#define IM_VEC4_CLASS_EXTRA                                                 \
-        ImVec4(const axl::v4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
-        operator axl::v4() const { return axl::v4(x,y,z,w); }
-
-#ifdef AXOLOTL_DEBUG
-#define AXL_ASSERT(validate, ...) { \
-  if (!(validate)) { \
-    log::error("{}:{}:{}", __FILE__, __FUNCTION__, __LINE__); \
-    log::error(__VA_ARGS__); \
-    raise(SIGTRAP); \
-  } \
-}
-#else
-#define AXL_ASSERT(validate, ...)
-#endif
+#define AXL_ASSERT_MESSAGE(validate, ...) ERGO_ASSERT_MESSAGE(validate, __VA_ARGS__)
+#define AXL_ASSERT(validate)              ERGO_ASSERT(validate)

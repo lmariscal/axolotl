@@ -1,9 +1,8 @@
-#include <axolotl/scene.hh>
-
-#include <axolotl/shader.hh>
-#include <axolotl/renderer.hh>
-#include <axolotl/mesh.hh>
 #include <axolotl/ento.hh>
+#include <axolotl/mesh.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/shader.hh>
 #include <axolotl/transform.hh>
 
 namespace axl {
@@ -29,14 +28,16 @@ namespace axl {
   }
 
   void Scene::RemoveEntity(Ento e) {
-    AXL_ASSERT(_registry.valid(e.handle), "Trying to remove invalid entity {}->{}", e.handle, uuids::to_string(e.id));
+    AXL_ASSERT_MESSAGE(_registry.valid(e.handle),
+                       "Trying to remove invalid entity {}->{}",
+                       e.handle,
+                       uuids::to_string(e.id));
 
     if (e.HasChildren())
       for (auto &child : e.Children())
         RemoveEntity(child);
 
-    if (e.HasParent())
-      e.Parent().RemoveChild(e);
+    if (e.HasParent()) e.Parent().RemoveChild(e);
 
     Ento::_uuid_ento_map.erase(e.id);
     Ento::_handle_ento_map.erase(e.handle);
@@ -46,15 +47,13 @@ namespace axl {
   }
 
   Ento Scene::FromID(uuid id) {
-    if (!Ento::_uuid_ento_map.count(id))
-      return { };
+    if (!Ento::_uuid_ento_map.count(id)) return {};
 
     return Ento::_uuid_ento_map[id];
   }
 
   Ento Scene::FromHandle(entt::entity handle) {
-    if (!Ento::_handle_ento_map.count(handle))
-      return { };
+    if (!Ento::_handle_ento_map.count(handle)) return {};
 
     return Ento::_handle_ento_map[handle];
   }
@@ -63,11 +62,11 @@ namespace axl {
     renderer.Render(*this, show_data, focused);
   }
 
-  Scene * Scene::GetActiveScene() {
+  Scene *Scene::GetActiveScene() {
     return _active_scene;
   }
 
-  entt::registry & Scene::GetRegistry() {
+  entt::registry &Scene::GetRegistry() {
     return _registry;
   }
 
@@ -79,4 +78,4 @@ namespace axl {
     return j;
   }
 
-}
+} // namespace axl

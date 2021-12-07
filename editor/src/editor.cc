@@ -1,16 +1,15 @@
-#include <iostream>
+#include "dockspace.hh"
+#include "test_scene.hh"
+#include "ui.hh"
 
 #include <axolotl/axolotl.hh>
-#include <axolotl/window.hh>
-#include <axolotl/shader.hh>
-#include <axolotl/renderer.hh>
 #include <axolotl/gui.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/shader.hh>
 #include <axolotl/transform.hh>
+#include <axolotl/window.hh>
 #include <imgui.h>
-
-#include "ui.hh"
-#include "dockspace.hh"
-#include "cs8502.hh"
+#include <iostream>
 
 using namespace axl;
 
@@ -21,7 +20,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
 
-  CS8502 scene;
+  TestScene scene;
   Scene::SetActiveScene(&scene);
 
   FrameEditor frame_editor;
@@ -37,15 +36,11 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
-    if (terminal_data.watch_shaders) {
-      ShaderStore::ProcessQueue();
-    }
+    if (terminal_data.watch_shaders) { ShaderStore::ProcessQueue(); }
 
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);
-    if (frame_editor.focused && io.KeyTriggered(Key::Escape))
-      frame_editor.focused = false;
-    if (io.KeyTriggered(Key::F11))
-      dock.data.fullscreen = !dock.data.fullscreen;
+    if (frame_editor.focused && io.KeyTriggered(Key::Escape)) frame_editor.focused = false;
+    if (io.KeyTriggered(Key::F11)) dock.data.fullscreen = !dock.data.fullscreen;
 
     if (!show_frame != last_fullscreen) {
       if (show_frame) {
@@ -78,38 +73,31 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
 
-      if (terminal_data.display_terminal)
-        terminal.show();
+      if (terminal_data.display_terminal) terminal.show();
 
       if (!frame_editor.focused && io.ButtonTriggered(MouseButton::Left) && !ImGui::GetIO().WantCaptureMouse) {
         frame_editor.focused = true;
       }
     } else {
       v2i region_available = frame_editor.GetRegionAvailable();
-      if (region_available.x > 0 && region_available.y > 0)
-        window.SetFrameBufferSize(region_available);
+      if (region_available.x > 0 && region_available.y > 0) window.SetFrameBufferSize(region_available);
 
-      if (dock.data.show_terminal)
-        terminal.show();
+      if (dock.data.show_terminal) terminal.show();
       frame_editor.Bind(window);
       v3 color(33, 33, 33);
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
-    if (dock.data.show_world_editor)
-      scene.Draw(renderer, dock.data.show_renderer && show_frame);
+    if (dock.data.show_world_editor) scene.Draw(renderer, dock.data.show_renderer && show_frame);
 
     if (show_frame) {
       frame_editor.Unbind(window);
 
       renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
-      if (dock.data.show_world_editor)
-        frame_editor.Draw(window, dock);
-      if (dock.data.show_hierarchy)
-        frame_editor.DrawEntityList(scene, dock);
-      if (dock.data.show_inspector)
-        frame_editor.DrawInspector(scene, dock);
+      if (dock.data.show_world_editor) frame_editor.Draw(window, dock);
+      if (dock.data.show_hierarchy) frame_editor.DrawEntityList(scene, dock);
+      if (dock.data.show_inspector) frame_editor.DrawInspector(scene, dock);
     }
 
     scene.Focused(window, frame_editor.focused);
@@ -126,8 +114,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       }
     }
     if (io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl)) {
-      if (io.KeyDown(Key::Q))
-        terminal_data.quit_requested = true;
+      if (io.KeyDown(Key::Q)) terminal_data.quit_requested = true;
     }
   }
 

@@ -34,7 +34,7 @@ void main () {
   for (int i = 1; i < lights.count; i++) {
     Light light = lights.data[i];
     vec3 light_direction = normalize(light.position.xyz - position);
-    float light_intensity = dot(normal, light_direction);
+    float light_intensity = max(dot(normal, light_direction), 0.0);
     light_intensity = clamp(light_intensity, 0.0, 1.0) * light.intensity;
     diffuse_light_color += light.color * light_intensity;
 
@@ -49,5 +49,6 @@ void main () {
   specular_color = specular_color * 0.03f;
 
   frag_color = diffuse_color + ambient_color + specular_color;
+
   // frag_color = vec4(normal, 1.0);
 }

@@ -11,7 +11,7 @@ namespace axl {
   struct TerminalData {
     bool quit_requested = false;
     bool watch_shaders = true;
-    bool scene_playing = false;
+    bool scene_playing = true;
     bool scene_paused = false;
     bool display_terminal = false;
   };

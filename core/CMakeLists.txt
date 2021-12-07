@@ -4,6 +4,7 @@ file(GLOB_RECURSE AXOLOTL_SOURCES
 )
 
 set(PUBLIC_LIBS
+  ergo
   glm
   spdlog
   imgui

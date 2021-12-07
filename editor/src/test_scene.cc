@@ -1,12 +1,12 @@
 #include "test_scene.hh"
 
-#include <axolotl/material.hh>
-#include <axolotl/model.hh>
 #include <axolotl/axolotl.hh>
 #include <axolotl/camera.hh>
-#include <axolotl/window.hh>
-#include <axolotl/texture.hh>
 #include <axolotl/ento.hh>
+#include <axolotl/material.hh>
+#include <axolotl/model.hh>
+#include <axolotl/texture.hh>
+#include <axolotl/window.hh>
 #include <imgui.h>
 
 namespace axl {
@@ -25,18 +25,12 @@ namespace axl {
       Ento camera_ento = Camera::GetActiveCameraEnto();
       camera->RotateCamera(camera_ento, io.GetRelativePosition(), delta);
 
-      if (io.KeyDown(Key::W))
-        camera->MoveCamera(camera_ento, CameraDirection::Front, delta);
-      if (io.KeyDown(Key::S))
-        camera->MoveCamera(camera_ento, CameraDirection::Back, delta);
-      if (io.KeyDown(Key::A))
-        camera->MoveCamera(camera_ento, CameraDirection::Left, delta);
-      if (io.KeyDown(Key::D))
-        camera->MoveCamera(camera_ento, CameraDirection::Right, delta);
-      if (io.KeyDown(Key::Q))
-        camera->MoveCamera(camera_ento, CameraDirection::Up, delta);
-      if (io.KeyDown(Key::E))
-        camera->MoveCamera(camera_ento, CameraDirection::Down, delta);
+      if (io.KeyDown(Key::W)) camera->MoveCamera(camera_ento, CameraDirection::Front, delta);
+      if (io.KeyDown(Key::S)) camera->MoveCamera(camera_ento, CameraDirection::Back, delta);
+      if (io.KeyDown(Key::A)) camera->MoveCamera(camera_ento, CameraDirection::Left, delta);
+      if (io.KeyDown(Key::D)) camera->MoveCamera(camera_ento, CameraDirection::Right, delta);
+      if (io.KeyDown(Key::Q)) camera->MoveCamera(camera_ento, CameraDirection::Up, delta);
+      if (io.KeyDown(Key::E)) camera->MoveCamera(camera_ento, CameraDirection::Down, delta);
     }
 
     // ImGui::Begin("Test Scene");

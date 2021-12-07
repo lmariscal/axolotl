@@ -1,18 +1,15 @@
-#include <axolotl/renderer.hh>
-
-#include <axolotl/window.hh>
-#include <axolotl/model.hh>
-#include <axolotl/material.hh>
-#include <axolotl/window.hh>
-#include <axolotl/camera.hh>
-#include <axolotl/transform.hh>
-#include <axolotl/texture.hh>
-#include <axolotl/ento.hh>
-#include <axolotl/axolotl.hh>
-#include <axolotl/framebuffer.hh>
-
-#include <glad.h>
 #include <algorithm>
+#include <axolotl/axolotl.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/framebuffer.hh>
+#include <axolotl/material.hh>
+#include <axolotl/model.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/texture.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/window.hh>
+#include <glad.h>
 
 namespace axl {
 
@@ -29,8 +26,7 @@ namespace axl {
     _skybox_mesh(nullptr),
     _skybox_shader(nullptr),
     _size(1920, 1080),
-    ambient_light(LightType::Ambient, v3(0.6f), 0.3f)
-  {
+    ambient_light(LightType::Ambient, v3(0.6f), 0.3f) {
     if (gladLoadGL() != GL_TRUE) {
       log::error("Failed to load OpenGL");
       exit(-1);
@@ -39,13 +35,17 @@ namespace axl {
 
     glGenBuffers(1, &_lights_uniform_buffer);
     glBindBuffer(GL_UNIFORM_BUFFER, _lights_uniform_buffer);
-    glBufferData(GL_UNIFORM_BUFFER, (sizeof(LightData) * LIGHT_COUNT) + 32, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER,
+                 (sizeof(LightData) * LIGHT_COUNT) + 32,
+                 nullptr,
+                 GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     _post_process_framebuffer = new FrameBuffer(_size.x, _size.y);
 
     Mesh::CreateQuad(&_quad_mesh);
-    _post_process_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert", Axolotl::GetDistDir() + "res/shaders/post.frag"));
+    _post_process_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert",
+                                                 Axolotl::GetDistDir() + "res/shaders/post.frag"));
   }
 
   Renderer::~Renderer() {
@@ -83,15 +83,12 @@ namespace axl {
       _skybox_shader = nullptr;
     }
 
-    if (!skybox)
-      return;
+    if (!skybox) return;
 
     _skybox_texture = skybox;
     Mesh::CreateCube(&_skybox_mesh);
-    _skybox_shader = new Shader(ShaderData(
-        Axolotl::GetDistDir() + "res/shaders/skybox.vert",
-        Axolotl::GetDistDir() + "res/shaders/skybox.frag"
-      ));
+    _skybox_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert",
+                                           Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
   }
 
   void Renderer::Render(Scene &scene, bool show_data, bool focused) {
@@ -136,7 +133,7 @@ namespace axl {
     lights_data.push_back(ambient_light_data);
 
     auto lights = registry.view<Light>();
-    for (auto entity: lights) {
+    for (auto entity : lights) {
       Transform &transform = registry.get<Transform>(entity);
       Light &light = registry.get<Light>(entity);
 
@@ -159,8 +156,14 @@ namespace axl {
       glBufferSubData(GL_UNIFORM_BUFFER, 16, sizeof(v3), value_ptr(transform.GetPosition()));
     }
 
-    glBufferSubData(GL_UNIFORM_BUFFER, 32, sizeof(LightData) * lights_data.size(), lights_data.data());
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightData) * lights_data.size() + 32, sizeof(LightData) * (LIGHT_COUNT - lights_data.size()), nullptr);
+    glBufferSubData(GL_UNIFORM_BUFFER,
+                    32,
+                    sizeof(LightData) * lights_data.size(),
+                    lights_data.data());
+    glBufferSubData(GL_UNIFORM_BUFFER,
+                    sizeof(LightData) * lights_data.size() + 32,
+                    sizeof(LightData) * (LIGHT_COUNT - lights_data.size()),
+                    nullptr);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     _post_process_framebuffer->Bind();
@@ -216,18 +219,20 @@ namespace axl {
     glUniform1i(_post_process_shader->GetUniformLocation("depth_tex"), 2);
 
     v2 relative_mouse = v2(0.0f);
-    if (focused)
-      relative_mouse = _window->GetIOManager().GetRelativePosition();
-    glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"), relative_mouse.x, relative_mouse.y);
+    if (focused) relative_mouse = _window->GetIOManager().GetRelativePosition();
+    glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"),
+                relative_mouse.x,
+                relative_mouse.y);
 
     v4 viewport_size;
     glGetFloatv(GL_VIEWPORT, value_ptr(viewport_size));
-    glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"), viewport_size.z, viewport_size.w);
+    glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"),
+                viewport_size.z,
+                viewport_size.w);
 
     _quad_mesh->Draw();
 
-    if (show_data)
-      ShowData();
+    if (show_data) ShowData();
   }
 
   void Renderer::ShowData() {

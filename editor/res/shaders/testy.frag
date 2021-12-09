@@ -8,17 +8,19 @@ layout(std140) uniform Lights {
   int count;
   vec4 camera_position;
   Light data[LIGHT_COUNT];
-} lights;
+}
+lights;
 
 layout(location = 0) in Vertex {
   vec3 position;
   vec2 tex_coord;
   mat3 tangent_matrix;
-} IN;
+}
+IN;
 
 layout(location = 0) out vec4 frag_color;
 
-void main () {
+void main() {
   vec4 ambient_light_color = lights.data[0].color * lights.data[0].intensity;
 
   // vec3 normal = normalize(IN.tangent_matrix * vec3(0.0, 0.0, 1.0)); // TODO: Replace with normal map
@@ -31,7 +33,17 @@ void main () {
 
   vec4 diffuse_light_color = vec4(0.0);
   vec4 specular_light_color = vec4(0.0);
-  for (int i = 1; i < lights.count; i++) {
+
+  Light directional_light = lights.data[1];
+  vec3 light_direction = normalize(directional_light.position.xyz);
+  float light_distance = length(position - light_direction);
+  float light_intensity = max(0.0, dot(normal, light_direction));
+  diffuse_light_color += directional_light.color * light_intensity;
+  specular_light_color +=
+    directional_light.color *
+    pow(max(0.0, dot(normalize(view_position - position), reflect(-light_direction, normal))), 32.0);
+
+  for (int i = 2; i < lights.count; i++) {
     Light light = lights.data[i];
     vec3 light_direction = normalize(light.position.xyz - position);
     float light_intensity = max(dot(normal, light_direction), 0.0);

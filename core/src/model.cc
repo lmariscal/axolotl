@@ -1,14 +1,11 @@
-#include <axolotl/model.hh>
-
-#include <axolotl/material.hh>
-#include <axolotl/scene.hh>
-#include <axolotl/mesh.hh>
-#include <axolotl/transform.hh>
-#include <axolotl/ento.hh>
-
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-
+#include <axolotl/ento.hh>
+#include <axolotl/material.hh>
+#include <axolotl/mesh.hh>
+#include <axolotl/model.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/transform.hh>
 #include <glad.h>
 
 namespace axl {
@@ -17,12 +14,10 @@ namespace axl {
     _path(path),
     _shader_paths(paths),
     _root(root),
-    _meshes(std::make_shared<std::vector<Mesh *>>())
-  { }
+    _meshes(std::make_shared<std::vector<Mesh *>>()) { }
 
   Model::~Model() {
-    if (_meshes.use_count() > 1)
-      return;
+    if (_meshes.use_count() > 1) return;
     for (Mesh *mesh : *_meshes)
       delete mesh;
   }
@@ -30,15 +25,13 @@ namespace axl {
   void Model::Init(Ento ento) {
     ento.TryAddComponent<Material>(_shader_paths);
 
-    if (!_root)
-      return;
+    if (!_root) return;
 
     log::debug("Loading model from {}", _path.string());
     Assimp::Importer importer;
 
     u32 flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs;
-    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb")
-      flags &= ~aiProcess_FlipUVs;
+    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb") flags &= ~aiProcess_FlipUVs;
     const aiScene *scene = importer.ReadFile(_path.string(), flags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -91,7 +84,7 @@ namespace axl {
     }
   }
 
-  Mesh * Model::ProcessMesh(Ento ento, Model &model, aiMesh *mesh, const aiScene *scene) {
+  Mesh *Model::ProcessMesh(Ento ento, Model &model, aiMesh *mesh, const aiScene *scene) {
     std::vector<f32> buffer_data;
     std::vector<u32> indices;
 
@@ -143,15 +136,13 @@ namespace axl {
   }
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
-    if (ento.Tag().value == Tag::DefaultTag)
-      ento.Tag().value = node->mName.C_Str();
+    if (ento.Tag().value == Tag::DefaultTag) ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
       Mesh *m = ProcessMesh(ento, model, mesh, scene);
 
-      if (node->mNumMeshes > 1)
-        m->_single_mesh = false;
+      if (node->mNumMeshes > 1) m->_single_mesh = false;
 
       model._meshes->push_back(m);
       m->SetMaterialID(mesh->mMaterialIndex);
@@ -175,9 +166,7 @@ namespace axl {
       if (model._root) {
         Transform &p_transform = ento.GetComponent<Transform>();
         if (std::abs(transform.GetRotation().x + 90.0f) <= 1.0f) {
-          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f) {
-            p_transform.SetRotation(v3(0.0f));
-          }
+          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f) { p_transform.SetRotation(v3(0.0f)); }
         }
       }
 
@@ -191,8 +180,7 @@ namespace axl {
           }
 
           Transform &p_transform = p.GetComponent<Transform>();
-          if (p_transform.GetScale().x < 1.0f)
-            break;
+          if (p_transform.GetScale().x < 1.0f) break;
 
           p_transform.SetScale(p_transform.GetScale() / 100.0f);
         }
@@ -205,16 +193,14 @@ namespace axl {
 
   void Model::Draw(Material &material) {
     u8 culling_state;
-    if (two_sided)
-      glDisable(GL_CULL_FACE);
+    if (two_sided) glDisable(GL_CULL_FACE);
 
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
         i32 unit_count = 1;
         for (i32 i = 1; i < (i32)TextureType::Last; ++i) {
-          if (material.Bind(material_id, unit_count, 0, (TextureType)i))
-            unit_count++;
+          if (material.Bind(material_id, unit_count, 0, (TextureType)i)) unit_count++;
         }
       } else {
         material.BindAll();
@@ -222,8 +208,7 @@ namespace axl {
       mesh->Draw();
     }
 
-    if (two_sided)
-      glEnable(GL_CULL_FACE);
+    if (two_sided) glEnable(GL_CULL_FACE);
   }
 
   json Model::Serialize() const {
@@ -238,8 +223,7 @@ namespace axl {
     return j;
   }
 
-  void Model::Deserialize(const json &j) {
-  }
+  void Model::Deserialize(const json &j) { }
 
   bool Model::ShowComponent() {
     bool modified = false;

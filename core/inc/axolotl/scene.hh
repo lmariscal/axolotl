@@ -1,7 +1,6 @@
 #pragma once
 
 #include <axolotl/types.hh>
-
 #include <entt/entt.hpp>
 
 namespace axl {
@@ -21,25 +20,25 @@ namespace axl {
     void RemoveEntity(Ento ento);
     Ento FromID(uuid id);
     Ento FromHandle(entt::entity handle);
-    entt::registry & GetRegistry();
+    entt::registry &GetRegistry();
 
     void Draw(Renderer &renderer, bool show_data = false);
     json Serialize();
 
     static void SetActiveScene(Scene *scene);
-    static Scene * GetActiveScene();
+    static Scene *GetActiveScene();
 
    protected:
     friend class Ento;
     friend class FrameEditor;
 
     template<typename T>
-    T & GetComponent(entt::entity handle) {
+    T &GetComponent(entt::entity handle) {
       return _registry.get<T>(handle);
     }
 
     template<typename T>
-    T & GetComponent(entt::entity handle) const {
+    T &GetComponent(entt::entity handle) const {
       return _registry.get<T>(handle);
     }
 

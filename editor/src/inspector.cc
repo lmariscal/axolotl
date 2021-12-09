@@ -1,21 +1,20 @@
 #include "inspector.hh"
 
-#include <axolotl/scene.hh>
-#include <axolotl/camera.hh>
-#include <axolotl/transform.hh>
-#include <axolotl/ento.hh>
-#include <axolotl/axolotl.hh>
-#include <axolotl/model.hh>
-#include <axolotl/light.hh>
-#include <assimp/Importer.hpp>
 #include <IconsFontAwesome5Pro.h>
+#include <assimp/Importer.hpp>
+#include <axolotl/axolotl.hh>
+#include <axolotl/camera.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/light.hh>
+#include <axolotl/model.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/transform.hh>
 #include <imgui.h>
 #include <nfd.h>
 
 namespace axl {
 
-  Inspector::Inspector() {
-  }
+  Inspector::Inspector() { }
 
   void Inspector::Draw(Scene &scene, DockSpace &dock) {
     ImGui::Begin("Inspector", &dock.data.show_inspector);
@@ -35,10 +34,8 @@ namespace axl {
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - id_text_size.x - ImGui::GetStyle().FramePadding.x) / 2.0f);
 
     ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(_selected_entity.id).c_str());
-    if (ImGui::IsItemHovered())
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-    if (ImGui::IsItemClicked())
-      ImGui::SetClipboardText(uuids::to_string(_selected_entity.id).c_str());
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemClicked()) ImGui::SetClipboardText(uuids::to_string(_selected_entity.id).c_str());
 
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().ItemSpacing.y);
@@ -49,7 +46,10 @@ namespace axl {
       std::array<char, 128> name_buffer;
       std::fill(name_buffer.begin(), name_buffer.end(), 0);
       std::copy(tag.value.begin(), tag.value.end(), name_buffer.begin());
-      if (ImGui::InputText("##entity_name", name_buffer.data(), name_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue)) {
+      if (ImGui::InputText("##entity_name",
+                           name_buffer.data(),
+                           name_buffer.size(),
+                           ImGuiInputTextFlags_EnterReturnsTrue)) {
         tag.value = name_buffer.data();
       }
       if (_edit_name_first) {
@@ -63,8 +63,7 @@ namespace axl {
     } else {
       ImGui::SetWindowFontScale(1.1f);
       ImGui::Text("%s", _selected_entity.Tag().value.c_str());
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
+      if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
       if (ImGui::IsItemClicked()) {
         _edit_name = true;
         _edit_name_first = true;
@@ -74,10 +73,8 @@ namespace axl {
 
     ImGui::SameLine();
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - 60.0f);
-    if (ImGui::Button(ICON_FA_LAYER_PLUS " Add", v2(60, 0)))
-      ImGui::OpenPopup("ComponentAddPopUp");
-    if (ImGui::IsItemHovered())
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::Button(ICON_FA_LAYER_PLUS " Add", v2(60, 0))) ImGui::OpenPopup("ComponentAddPopUp");
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.0f);
@@ -97,8 +94,7 @@ namespace axl {
       _model_path = "";
     }
 
-    if (_want_model)
-      ImGui::OpenPopup("Load Model");
+    if (_want_model) ImGui::OpenPopup("Load Model");
     if (ImGui::BeginPopupModal("Load Model", &_want_model, ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::Text("Path:");
 
@@ -123,8 +119,7 @@ namespace axl {
       std::array<char, 256> buffer;
       std::fill(buffer.begin(), buffer.end(), 0);
       std::strncpy(buffer.begin(), _model_path.c_str(), _model_path.size());
-      if (ImGui::InputText("##model_path", buffer.data(), buffer.size()))
-        _model_path = std::string(buffer.data());
+      if (ImGui::InputText("##model_path", buffer.data(), buffer.size())) _model_path = std::string(buffer.data());
 
       ImGui::SameLine();
       if (ImGui::Button(ICON_FA_FILE_UPLOAD " Load")) {
@@ -142,7 +137,8 @@ namespace axl {
   void Inspector::ShowAddComponent(Scene &scene) {
     if (ImGui::BeginPopup("ComponentAddPopUp")) {
       if (ImGui::MenuItem("Camera")) {
-        _selected_entity.TryAddComponent<Camera>(_selected_entity);
+        Camera &camera = _selected_entity.TryAddComponent<Camera>();
+        camera.Init();
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Transform")) {
@@ -164,9 +160,7 @@ namespace axl {
         Transform &transform = ento.GetComponent<Transform>();
         if (transform.ShowComponent()) {
 
-          if (_selected_entity.HasComponent<Camera>())
-            _selected_entity.GetComponent<Camera>().UpdateVectors(_selected_entity);
-
+          if (_selected_entity.HasComponent<Camera>()) _selected_entity.GetComponent<Camera>().UpdateVectors();
         }
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);

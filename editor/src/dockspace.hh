@@ -1,14 +1,14 @@
 #pragma once
 
+#include <axolotl/terminal.hh>
 #include <axolotl/types.hh>
 #include <axolotl/window.hh>
-#include <axolotl/terminal.hh>
 
 namespace axl {
 
   struct DockSpaceData {
     TerminalData *terminal;
-    bool fullscreen = true;
+    bool fullscreen = false;
     bool ratio_locked = false;
 
     bool show_world_editor = true;

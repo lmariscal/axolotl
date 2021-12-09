@@ -15,7 +15,8 @@ layout(location = 0) out Vertex {
   vec3 position;
   vec2 tex_coord;
   mat3 tangent_matrix;
-} OUT;
+}
+OUT;
 
 void main() {
   mat4 mvp = projection * view * model;

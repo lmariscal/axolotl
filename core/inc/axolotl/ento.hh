@@ -80,6 +80,14 @@ namespace axl {
       scene->_registry.remove<T>(handle);
     }
 
+    template<typename T>
+    static Ento FromComponent(T &component) {
+      Scene *scene = Scene::GetActiveScene();
+      if (!scene) return Ento();
+      entt::entity e = entt::to_entity(scene->GetRegistry(), component);
+      return _handle_ento_map[e];
+    }
+
     operator bool() const {
       return handle != entt::null;
     }

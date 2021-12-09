@@ -1,23 +1,17 @@
-#include <axolotl/framebuffer.hh>
-
-#include <axolotl/types.hh>
-#include <axolotl/renderer.hh>
-#include <axolotl/ento.hh>
-#include <entt/entt.hpp>
-
 #include "inspector.hh"
+
+#include <axolotl/ento.hh>
+#include <axolotl/framebuffer.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/types.hh>
+#include <entt/entt.hpp>
 
 namespace axl {
 
   class Scene;
   class DockSpace;
 
-  enum class EditorAction {
-    Select,
-    Move,
-    Rotate,
-    Scale
-  };
+  enum class EditorAction { Select, Move, Rotate, Scale };
 
   class FrameEditor {
    public:
@@ -29,7 +23,7 @@ namespace axl {
     void Draw(Window &window, DockSpace &dock);
     void DrawEntityList(Scene &scene, DockSpace &dock);
     void DrawInspector(Scene &scene, DockSpace &dock);
-    const v2 & GetRegionAvailable() const;
+    const v2 &GetRegionAvailable() const;
 
     bool focused;
     EditorAction action;

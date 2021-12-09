@@ -1,9 +1,7 @@
-#include <axolotl/window.hh>
-
-#include <axolotl/renderer.hh>
-#include <axolotl/gui.hh>
-
 #include <GLFW/glfw3.h>
+#include <axolotl/gui.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/window.hh>
 
 namespace axl {
 
@@ -14,8 +12,7 @@ namespace axl {
     _window(nullptr),
     _renderer(nullptr),
     _io_manager(new IOManager(*this)),
-    _lock_mouse(false)
-  {
+    _lock_mouse(false) {
     glfwInit();
     // This is a renderer used for in-house testing, so we'll use latest OpenGL
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -39,7 +36,6 @@ namespace axl {
     glfwGetCursorPos(_window, &mouse_pos.x, &mouse_pos.y);
     _io_manager->MouseEvent(mouse_pos.x, mouse_pos.y);
     _io_manager->UpdateRelativePositions();
-
   }
 
   Window::~Window() {
@@ -51,7 +47,7 @@ namespace axl {
     delete _io_manager;
   }
 
-  IOManager & Window::GetIOManager() const {
+  IOManager &Window::GetIOManager() const {
     return *_io_manager;
   }
 
@@ -75,15 +71,15 @@ namespace axl {
     glfwSwapBuffers(_window);
   }
 
-  Renderer & Window::GetRenderer() const {
+  Renderer &Window::GetRenderer() const {
     return *_renderer;
   }
 
-  GUI & Window::GetGUI() const {
+  GUI &Window::GetGUI() const {
     return *_gui;
   }
 
-  GLFWwindow * Window::GetGLFWWindow() const {
+  GLFWwindow *Window::GetGLFWWindow() const {
     return _window;
   }
 
@@ -121,13 +117,11 @@ namespace axl {
     glfwSetFramebufferSizeCallback(_window, FrameSizeEvent);
   }
 
-
   // Static Input Events
 
   void Window::KeyEvent(GLFWwindow *glfw_window, i32 key, i32 scancode, i32 action, i32 mods) {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
-    if (action != GLFW_REPEAT)
-      window->_io_manager->KeyEvent(key, action != GLFW_RELEASE);
+    if (action != GLFW_REPEAT) window->_io_manager->KeyEvent(key, action != GLFW_RELEASE);
 
     // if (window->lockMouse)
     //   return;
@@ -162,8 +156,7 @@ namespace axl {
   }
 
   void Window::MouseEvent(GLFWwindow *glfw_window, f64 x, f64 y) {
-    if (!glfwGetWindowAttrib(glfw_window, GLFW_HOVERED))
-      return;
+    if (!glfwGetWindowAttrib(glfw_window, GLFW_HOVERED)) return;
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
     window->_io_manager->MouseEvent(x, y);
   }
@@ -197,7 +190,7 @@ namespace axl {
     return result;
   }
 
-  const v2i & Window::GetFrameBufferSize() const {
+  const v2i &Window::GetFrameBufferSize() const {
     return _frame_buffer_size;
   }
 
@@ -216,4 +209,4 @@ namespace axl {
     return _lock_mouse;
   }
 
-} // namespace axolotl
+} // namespace axl

@@ -12,7 +12,8 @@ layout(location = 2) uniform mat4 projection;
 
 layout(location = 0) out Vertex {
   vec3 tex_coord;
-} OUT;
+}
+OUT;
 
 void main() {
   mat4 mvp = projection * view * model;

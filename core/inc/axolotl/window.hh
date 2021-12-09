@@ -1,7 +1,7 @@
 #pragma once
 
-#include <axolotl/types.hh>
 #include <axolotl/iomanager.hh>
+#include <axolotl/types.hh>
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -26,14 +26,14 @@ namespace axl {
     void SetFrameBufferSize(const v2i &size);
     v2i GetSize() const;
     v2i GetWindowFrameBufferSize() const;
-    const v2i & GetFrameBufferSize() const;
+    const v2i &GetFrameBufferSize() const;
     // Returns Delta time in milliseconds
     f64 GetDeltaTime() const;
     f64 GetTime() const;
-    Renderer & GetRenderer() const;
-    IOManager & GetIOManager() const;
-    GUI & GetGUI() const;
-    GLFWwindow * GetGLFWWindow() const;
+    Renderer &GetRenderer() const;
+    IOManager &GetIOManager() const;
+    GUI &GetGUI() const;
+    GLFWwindow *GetGLFWWindow() const;
 
    protected:
     friend class Renderer;
@@ -61,4 +61,4 @@ namespace axl {
     bool _lock_mouse;
   };
 
-} // namespace axolotl
+} // namespace axl

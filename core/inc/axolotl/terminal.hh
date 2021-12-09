@@ -1,7 +1,6 @@
 #pragma once
 
 #include <axolotl/types.hh>
-
 #include <imterm/terminal.hpp>
 #include <imterm/terminal_helpers.hpp>
 #include <mutex>
@@ -11,12 +10,12 @@ namespace axl {
   struct TerminalData {
     bool quit_requested = false;
     bool watch_shaders = true;
-    bool scene_playing = true;
+    bool scene_playing = false;
     bool scene_paused = false;
     bool display_terminal = false;
   };
 
-  class Terminal : public ImTerm::basic_spdlog_terminal_helper<Terminal, TerminalData, std::mutex> {
+  class Terminal: public ImTerm::basic_spdlog_terminal_helper<Terminal, TerminalData, std::mutex> {
    public:
     static std::vector<std::string> NoCompletition(argument_type &arg);
 

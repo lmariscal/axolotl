@@ -26,7 +26,10 @@ namespace axl {
     _skybox_mesh(nullptr),
     _skybox_shader(nullptr),
     _size(1920, 1080),
-    ambient_light(LightType::Ambient, v3(0.6f), 0.3f) {
+    _ambient_light(LightType::Ambient, v3(0.6f), 0.4f),
+    _directional_light(LightType::Directional, v3(1.0f), 0.4f),
+    _directional_light_direction(v3(0.3f, 0.2f, 0.3f)) {
+
     if (gladLoadGL() != GL_TRUE) {
       log::error("Failed to load OpenGL");
       exit(-1);
@@ -35,17 +38,14 @@ namespace axl {
 
     glGenBuffers(1, &_lights_uniform_buffer);
     glBindBuffer(GL_UNIFORM_BUFFER, _lights_uniform_buffer);
-    glBufferData(GL_UNIFORM_BUFFER,
-                 (sizeof(LightData) * LIGHT_COUNT) + 32,
-                 nullptr,
-                 GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, (sizeof(LightData) * LIGHT_COUNT) + 32, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     _post_process_framebuffer = new FrameBuffer(_size.x, _size.y);
 
     Mesh::CreateQuad(&_quad_mesh);
-    _post_process_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert",
-                                                 Axolotl::GetDistDir() + "res/shaders/post.frag"));
+    _post_process_shader = new Shader(
+      ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert", Axolotl::GetDistDir() + "res/shaders/post.frag"));
   }
 
   Renderer::~Renderer() {
@@ -87,8 +87,8 @@ namespace axl {
 
     _skybox_texture = skybox;
     Mesh::CreateCube(&_skybox_mesh);
-    _skybox_shader = new Shader(ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert",
-                                           Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
+    _skybox_shader = new Shader(
+      ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert", Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
   }
 
   void Renderer::Render(Scene &scene, bool show_data, bool focused) {
@@ -98,7 +98,7 @@ namespace axl {
     Camera *camera = Camera::GetActiveCamera();
     if (camera) {
       Ento camera_ento = Camera::GetActiveCameraEnto();
-      view = camera->GetViewMatrix(camera_ento);
+      view = camera->GetViewMatrix();
       projection = camera->GetProjectionMatrix(*_window);
     }
 
@@ -128,9 +128,15 @@ namespace axl {
 
     LightData ambient_light_data;
     ambient_light_data.position = v4(1.0f);
-    ambient_light_data.color = v4(ambient_light.color);
-    ambient_light_data.intensity = ambient_light.intensity;
+    ambient_light_data.color = v4(_ambient_light.color);
+    ambient_light_data.intensity = _ambient_light.intensity;
     lights_data.push_back(ambient_light_data);
+
+    LightData directional_light_data;
+    directional_light_data.position = v4(_directional_light_direction, 0.0f);
+    directional_light_data.color = v4(_directional_light.color);
+    directional_light_data.intensity = _directional_light.intensity;
+    lights_data.push_back(directional_light_data);
 
     auto lights = registry.view<Light>();
     for (auto entity : lights) {
@@ -142,6 +148,10 @@ namespace axl {
       light_data.color = light.color;
       light_data.intensity = light.intensity;
 
+      if (lights.size() >= LIGHT_COUNT) {
+        log::warn("Too many lights");
+        break;
+      }
       lights_data.push_back(light_data);
     }
 
@@ -156,10 +166,7 @@ namespace axl {
       glBufferSubData(GL_UNIFORM_BUFFER, 16, sizeof(v3), value_ptr(transform.GetPosition()));
     }
 
-    glBufferSubData(GL_UNIFORM_BUFFER,
-                    32,
-                    sizeof(LightData) * lights_data.size(),
-                    lights_data.data());
+    glBufferSubData(GL_UNIFORM_BUFFER, 32, sizeof(LightData) * lights_data.size(), lights_data.data());
     glBufferSubData(GL_UNIFORM_BUFFER,
                     sizeof(LightData) * lights_data.size() + 32,
                     sizeof(LightData) * (LIGHT_COUNT - lights_data.size()),
@@ -220,15 +227,11 @@ namespace axl {
 
     v2 relative_mouse = v2(0.0f);
     if (focused) relative_mouse = _window->GetIOManager().GetRelativePosition();
-    glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"),
-                relative_mouse.x,
-                relative_mouse.y);
+    glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"), relative_mouse.x, relative_mouse.y);
 
     v4 viewport_size;
     glGetFloatv(GL_VIEWPORT, value_ptr(viewport_size));
-    glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"),
-                viewport_size.z,
-                viewport_size.w);
+    glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"), viewport_size.z, viewport_size.w);
 
     _quad_mesh->Draw();
 
@@ -244,8 +247,12 @@ namespace axl {
     }
 
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ShowDataColor("Ambient Light", ambient_light.color);
-      axl::ShowData("Ambient Light Intensity", ambient_light.intensity);
+      ShowDataColor("Ambient Light", _ambient_light.color);
+      axl::ShowData("Ambient Light Intensity", _ambient_light.intensity);
+
+      ShowDataColor("Directional Light", _directional_light.color);
+      axl::ShowData("Directional Light Intensity", _directional_light.intensity);
+      axl::ShowData("Directional Light Angle", _directional_light_direction);
     }
 
     f64 now = _window->GetTime();

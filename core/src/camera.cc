@@ -1,34 +1,33 @@
+#include <algorithm>
 #include <axolotl/camera.hh>
-
-#include <axolotl/window.hh>
+#include <axolotl/ento.hh>
 #include <axolotl/iomanager.hh>
 #include <axolotl/scene.hh>
-#include <axolotl/ento.hh>
-#include <algorithm>
+#include <axolotl/window.hh>
 
 namespace axl {
 
-  Camera::Camera(Ento &ento):
+  Camera::Camera():
     _is_orthographic(false),
     _world_up({ 0.0f, 1.0f, 0.0f }),
     _movement_speed(30.0f),
     _mouse_sensitivity(2.0f),
     _fov(60.0f),
-    _is_active_camera(false)
-  {
-    Transform &transform = ento.Transform();
-    transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-    transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
-    UpdateVectors(ento);
-  }
+    _is_active_camera(false) { }
 
   Camera::~Camera() {
-    if (_is_active_camera)
-      _active_camera_ento = { };
+    if (_is_active_camera) _active_camera_ento = {};
   }
 
-  void Camera::MoveCamera(Ento &ento, CameraDirection direction, f64 delta) {
-    Transform &transform = ento.Transform();
+  void Camera::Init() {
+    Transform &transform = Ento::FromComponent(*this).Transform();
+    transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+    transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
+    UpdateVectors();
+  }
+
+  void Camera::MoveCamera(CameraDirection direction, f64 delta) {
+    Transform &transform = Ento::FromComponent(*this).Transform();
     switch (direction) {
       case CameraDirection::Down:
         transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * (f32)delta);
@@ -51,8 +50,9 @@ namespace axl {
     }
   }
 
-  void Camera::RotateCamera(Ento &ento, const v2 &mouse_delta, f64 delta) {
-    Transform &transform = ento.Transform();
+  void Camera::RotateCamera(const v2 &mouse_delta, f64 delta) {
+    Transform &transform = Ento::FromComponent(*this).Transform();
+
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -60,30 +60,27 @@ namespace axl {
     yaw += mouse_delta.x * (f32)delta * _mouse_sensitivity * 10.0f;
     pitch -= mouse_delta.y * (f32)delta * _mouse_sensitivity * 10.0f;
 
-    if (pitch > 89.0f)
-      pitch = 89.0f;
-    if (pitch < -89.0f)
-      pitch = -89.0f;
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
 
     std::min(yaw, 360.0f);
     std::max(yaw, 0.0f);
 
     transform.SetRotation(euler);
 
-    UpdateVectors(ento);
+    UpdateVectors();
   }
 
   m4 Camera::GetProjectionMatrix(Window &window) {
     v2 window_size = window.GetFrameBufferSize();
     f32 aspect_ratio = window_size.x / window_size.y;
-    if (_is_orthographic)
-      return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
+    if (_is_orthographic) return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
     else
       return perspective(radians(_fov), aspect_ratio, 0.1f, 10000.0f);
   }
 
-  void Camera::UpdateVectors(Ento &ento) {
-    Transform &transform = ento.Transform();
+  void Camera::UpdateVectors() {
+    Transform &transform = Ento::FromComponent(*this).Transform();
     v3 euler = transform.GetRotation();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
@@ -97,21 +94,20 @@ namespace axl {
     _up = normalize(cross(_right, _front));
   }
 
-  m4 Camera::GetViewMatrix(Ento &ento) {
-    Transform &transform = ento.Transform();
+  m4 Camera::GetViewMatrix() {
+    Transform &transform = Ento::FromComponent(*this).Transform();
     return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
   }
 
-  void Camera::SetAsActive(Ento ento) {
-    if (_active_camera_ento)
-      _active_camera_ento.GetComponent<Camera>()._is_active_camera = false;
+  void Camera::SetAsActive() {
+    Ento ento = Ento::FromComponent(*this);
+    if (_active_camera_ento) _active_camera_ento.GetComponent<Camera>()._is_active_camera = false;
     _active_camera_ento = ento;
     _is_active_camera = true;
   }
 
-  Camera * Camera::GetActiveCamera() {
-    if (!_active_camera_ento)
-      return nullptr;
+  Camera *Camera::GetActiveCamera() {
+    if (!_active_camera_ento) return nullptr;
     return &_active_camera_ento.GetComponent<Camera>();
   }
 
@@ -136,12 +132,9 @@ namespace axl {
   }
 
   void Camera::Deserialize(const json &j) {
-    if (j.find("is_orthographic") != j.end())
-      _is_orthographic = j["is_orthographic"];
-    if (j.find("movement_speed") != j.end())
-      _movement_speed = j["movement_speed"];
-    if (j.find("mouse_sensitivity") != j.end())
-      _mouse_sensitivity = j["mouse_sensitivity"];
+    if (j.find("is_orthographic") != j.end()) _is_orthographic = j["is_orthographic"];
+    if (j.find("movement_speed") != j.end()) _movement_speed = j["movement_speed"];
+    if (j.find("mouse_sensitivity") != j.end()) _mouse_sensitivity = j["mouse_sensitivity"];
   }
 
   bool Camera::ShowComponent(Ento &ento) {
@@ -150,22 +143,17 @@ namespace axl {
     bool active = _is_active_camera;
     if (ShowData("Active", active)) {
       if (active) {
-        SetAsActive(ento);
+        SetAsActive();
       } else {
-        if (GetActiveCameraEnto() == ento)
-          SetAsActive({ });
+        if (GetActiveCameraEnto() == ento) _active_camera_ento = {};
         _is_active_camera = false;
       }
       modified = true;
     }
-    if (ShowData("Orthographic", _is_orthographic))
-      modified = true;
-    if (ShowData("Speed", _movement_speed))
-      modified = true;
-    if (ShowData("Sensitivity", _mouse_sensitivity))
-      modified = true;
-    if (ShowData("FOV", _fov))
-      modified = true;
+    if (ShowData("Orthographic", _is_orthographic)) modified = true;
+    if (ShowData("Speed", _movement_speed)) modified = true;
+    if (ShowData("Sensitivity", _mouse_sensitivity)) modified = true;
+    if (ShowData("FOV", _fov)) modified = true;
 
     return modified;
   }

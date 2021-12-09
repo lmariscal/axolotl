@@ -1,8 +1,7 @@
-#include <axolotl/iomanager.hh>
-
-#include <axolotl/window.hh>
 #include <GLFW/glfw3.h>
 #include <algorithm>
+#include <axolotl/iomanager.hh>
+#include <axolotl/window.hh>
 
 namespace axl {
 

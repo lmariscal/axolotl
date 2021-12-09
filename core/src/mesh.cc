@@ -1,5 +1,4 @@
 #include <axolotl/mesh.hh>
-
 #include <glad.h>
 
 namespace axl {
@@ -8,8 +7,7 @@ namespace axl {
     _vao(0),
     _num_vertices(0),
     _num_indices(0),
-    _single_mesh(true)
-  {
+    _single_mesh(true) {
     _num_vertices = vertices.size() / 11;
     _num_indices = indices.size();
 
@@ -37,16 +35,16 @@ namespace axl {
 
     // positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void *)0);
     // normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(3 * sizeof(f32)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void *)(3 * sizeof(f32)));
     // tangents
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(6 * sizeof(f32)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void *)(6 * sizeof(f32)));
     // texture coords
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void*)(9 * sizeof(f32)));
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(f32), (void *)(9 * sizeof(f32)));
 
     glBindVertexArray(0);
 
@@ -54,8 +52,7 @@ namespace axl {
   }
 
   Mesh::~Mesh() {
-    if ( 1)
-      return;
+    if (1) return;
     log::debug("Deleting mesh {}", _vao);
     for (auto &buffer : _buffers)
       glDeleteBuffers(1, &buffer.vbo);
@@ -72,8 +69,7 @@ namespace axl {
 
   void Mesh::Draw() {
     glBindVertexArray(_vao);
-    if (_num_indices > 0)
-      glDrawElements(GL_TRIANGLES, _num_indices, GL_UNSIGNED_INT, 0);
+    if (_num_indices > 0) glDrawElements(GL_TRIANGLES, _num_indices, GL_UNSIGNED_INT, 0);
     else
       glDrawArrays(GL_TRIANGLES, 0, _num_vertices);
     glBindVertexArray(0);
@@ -81,6 +77,7 @@ namespace axl {
 
   void Mesh::CreateCube(Mesh **mesh) {
     std::vector<f32> cube_mesh = {
+      // clang-format off
       // positions          // normals           // tangents        // texcoords
       -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
        1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
@@ -123,6 +120,7 @@ namespace axl {
        1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
       -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
       -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
+      // clang-format on
     };
 
     *mesh = new Mesh(cube_mesh);
@@ -130,6 +128,7 @@ namespace axl {
 
   void Mesh::CreateQuad(Mesh **mesh) {
     std::vector<f32> quad_mesh = {
+      // clang-format off
       // positions         // normals         // tangents        // texcoords
       -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
       -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
@@ -138,6 +137,7 @@ namespace axl {
        1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
        1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 1.0f,
       -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 1.0f
+      // clang-format on
     };
 
     *mesh = new Mesh(quad_mesh);
@@ -145,10 +145,12 @@ namespace axl {
 
   void Mesh::CreateTriangle(Mesh **mesh) {
     std::vector<f32> triangle_mesh = {
+      // clang-format off
       // positions         // normals         // tangents        // texcoords
       -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
        1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  1.0f, 0.0f,
        0.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.5f, 1.0f
+      // clang-format on
     };
     *mesh = new Mesh(triangle_mesh);
   }

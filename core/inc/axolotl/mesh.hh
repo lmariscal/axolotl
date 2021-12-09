@@ -1,10 +1,9 @@
 #pragma once
 
 #include <axolotl/types.hh>
-
-#include <vector>
-#include <memory>
 #include <map>
+#include <memory>
+#include <vector>
 
 namespace axl {
 
@@ -15,7 +14,7 @@ namespace axl {
 
   struct Mesh {
    public:
-    Mesh(const std::vector<f32> &vertices, const std::vector<u32> &indices = { });
+    Mesh(const std::vector<f32> &vertices, const std::vector<u32> &indices = {});
     ~Mesh();
 
     void Draw();

@@ -1,11 +1,9 @@
 #pragma once
 
-#include <axolotl/types.hh>
-
-#include <entt/entt.hpp>
-
-#include <axolotl/scene.hh>
 #include <axolotl/light.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/types.hh>
+#include <entt/entt.hpp>
 
 namespace axl {
 
@@ -43,7 +41,9 @@ namespace axl {
 
     u32 _lights_uniform_buffer;
 
-    Light ambient_light;
+    Light _ambient_light;
+    Light _directional_light;
+    v3 _directional_light_direction;
 
     Window *_window;
 

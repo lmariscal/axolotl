@@ -1,7 +1,5 @@
 #include <axolotl/component.hh>
-
 #include <axolotl/scene.hh>
-
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -11,7 +9,7 @@ namespace axl {
     i32 column_width = 100;
     bool modified = false;
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     auto bold_font = io.Fonts->Fonts[1];
 
     ImGui::PushID(label.c_str());
@@ -23,7 +21,7 @@ namespace axl {
     ImGui::NextColumn();
 
     ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2 { 0, 0 });
 
     f32 lineHeight = 20.0f + 1.0f * 2.0f;
     v2 buttonSize = { lineHeight + 3.0f, lineHeight };
@@ -43,8 +41,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, min, max, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, min, max, "%.3f")) modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -63,8 +60,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, min, max, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, min, max, "%.3f")) modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -83,8 +79,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, min, max, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, min, max, "%.3f")) modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -99,7 +94,7 @@ namespace axl {
     i32 column_width = 100;
     bool modified = false;
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     auto bold_font = io.Fonts->Fonts[1];
 
     ImGui::PushID(label.c_str());
@@ -111,7 +106,7 @@ namespace axl {
     ImGui::NextColumn();
 
     ImGui::PushMultiItemsWidths(2, (2 * ImGui::CalcItemWidth() / 3) - 1);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2 { 0, 0 });
 
     f32 lineHeight = 20.0f + 1.0f * 2.0f;
     v2 buttonSize = { lineHeight + 3.0f, lineHeight };
@@ -131,8 +126,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -151,8 +145,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -167,7 +160,7 @@ namespace axl {
     i32 column_width = 100;
     bool modified = false;
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     auto bold_font = io.Fonts->Fonts[1];
 
     ImGui::PushID(label.c_str());
@@ -179,7 +172,7 @@ namespace axl {
     ImGui::NextColumn();
 
     ImGui::PushMultiItemsWidths(4, (4 * ImGui::CalcItemWidth() / 3) - 1);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2 { 0, 0 });
 
     f32 lineHeight = 20.0f + 1.0f * 2.0f;
     v2 buttonSize = { lineHeight + 3.0f, lineHeight };
@@ -199,8 +192,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -219,8 +211,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
 
     ImGui::SetCursorPosX(100.0f + 7.5f);
@@ -239,8 +230,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -259,8 +249,7 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -274,8 +263,7 @@ namespace axl {
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values) {
     v3 original = degrees(eulerAngles(v));
     v3 euler = original;
-    if (!ShowData(label, euler, reset_values))
-      return false;
+    if (!ShowData(label, euler, reset_values)) return false;
     quat offset = quat(radians(euler - original));
     v *= offset;
     return true;
@@ -295,8 +283,7 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragFloat("##v", &v, 0.1f, min, max, "%.3f"))
-      modified = true;
+    if (ImGui::DragFloat("##v", &v, 0.1f, min, max, "%.3f")) modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -314,8 +301,7 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::Checkbox("##v", &v))
-      modified = true;
+    if (ImGui::Checkbox("##v", &v)) modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -333,8 +319,7 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragInt("##v", &v, 0.1f, min, max))
-      modified = true;
+    if (ImGui::DragInt("##v", &v, 0.1f, min, max)) modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -382,7 +367,7 @@ namespace axl {
     i32 column_width = 100;
     bool modified = false;
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     auto bold_font = io.Fonts->Fonts[1];
 
     ImGui::PushID(label.c_str());
@@ -394,12 +379,11 @@ namespace axl {
     ImGui::NextColumn();
 
     ImGui::PushItemWidth(ImGui::CalcItemWidth());
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2{ 0, 0 });
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2 { 0, 0 });
 
     ImGui::PushFont(bold_font);
     // imgui button position on the left
-    if (ImGui::ColorEdit4("##color", value_ptr(v)))
-      modified = true;
+    if (ImGui::ColorEdit4("##color", value_ptr(v))) modified = true;
     ImGui::PopFont();
 
     ImGui::PopItemWidth();

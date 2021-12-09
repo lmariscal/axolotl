@@ -1,25 +1,20 @@
 #include "ui.hh"
 
-#include <imgui.h>
-#include <axolotl/window.hh>
-#include <axolotl/transform.hh>
-#include <axolotl/camera.hh>
-#include <axolotl/iomanager.hh>
-#include <axolotl/ento.hh>
-#include <axolotl/scene.hh>
-#include <axolotl/terminal.hh>
-
 #include "dockspace.hh"
 
 #include <IconsFontAwesome5Pro.h>
+#include <axolotl/camera.hh>
+#include <axolotl/ento.hh>
+#include <axolotl/iomanager.hh>
+#include <axolotl/scene.hh>
+#include <axolotl/terminal.hh>
+#include <axolotl/transform.hh>
+#include <axolotl/window.hh>
+#include <imgui.h>
 
 namespace axl {
 
-  FrameEditor::FrameEditor():
-    _frame(1280, 720),
-    _region_available({ 0, 0 }),
-    action(EditorAction::Select)
-  { }
+  FrameEditor::FrameEditor(): _frame(1280, 720), _region_available({ 0, 0 }), action(EditorAction::Select) { }
 
   FrameEditor::~FrameEditor() { }
 
@@ -49,7 +44,7 @@ namespace axl {
         buffer_size.x = cra.y * 16.0f / 9.0f;
         buffer_size.y = cra.y;
       } else {
-        buffer_size.y = cra.x * 9.0f / 16.0f ;
+        buffer_size.y = cra.x * 9.0f / 16.0f;
         buffer_size.x = cra.x;
       }
     }
@@ -68,8 +63,7 @@ namespace axl {
 
     if (one_camera_active) {
       ImGui::Image((ImTextureID)(size_t)_frame.GetTexture(FrameBufferTexture::Color), buffer_size, uv0, uv1);
-      if (dock.data.terminal->scene_playing && ImGui::IsItemClicked())
-        focused = true;
+      if (dock.data.terminal->scene_playing && ImGui::IsItemClicked()) focused = true;
     }
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
@@ -87,8 +81,7 @@ namespace axl {
     }
     if (ImGui::Button(dock.data.terminal->scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
       dock.data.terminal->scene_playing = !dock.data.terminal->scene_playing;
-      if (dock.data.terminal->scene_playing)
-        focused = true;
+      if (dock.data.terminal->scene_playing) focused = true;
       if (!dock.data.terminal->scene_playing && dock.data.terminal->scene_paused)
         dock.data.terminal->scene_paused = false;
     }
@@ -104,16 +97,13 @@ namespace axl {
 
     ImGui::SameLine(0.0f, 5.0f);
     bool paused = dock.data.terminal->scene_paused;
-    if (paused)
-      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
-    if (ImGui::Button(ICON_FA_PAUSE, v2(33, 24)))
-      dock.data.terminal->scene_paused = !dock.data.terminal->scene_paused;
+    if (paused) ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    if (ImGui::Button(ICON_FA_PAUSE, v2(33, 24))) dock.data.terminal->scene_paused = !dock.data.terminal->scene_paused;
     if (ImGui::IsItemHovered()) {
       ImGui::SetTooltip("Pause Scene");
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     }
-    if (paused)
-      ImGui::PopStyleColor();
+    if (paused) ImGui::PopStyleColor();
     ImGui::SameLine();
 
     if (one_camera_active) {
@@ -140,46 +130,34 @@ namespace axl {
       if (original_action == EditorAction::Select)
         ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
       ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30)))
-        action = EditorAction::Select;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30))) action = EditorAction::Select;
+      if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
       cursor_pos.x += 30;
-      if (original_action == EditorAction::Select)
-        ImGui::PopStyleColor();
+      if (original_action == EditorAction::Select) ImGui::PopStyleColor();
 
       if (original_action == EditorAction::Move)
         ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
       ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30)))
-        action = EditorAction::Move;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30))) action = EditorAction::Move;
+      if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
       cursor_pos.x += 30;
-      if (original_action == EditorAction::Move)
-        ImGui::PopStyleColor();
+      if (original_action == EditorAction::Move) ImGui::PopStyleColor();
 
       if (original_action == EditorAction::Rotate)
         ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
       ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30)))
-        action = EditorAction::Rotate;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30))) action = EditorAction::Rotate;
+      if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
       cursor_pos.x += 30;
-      if (original_action == EditorAction::Rotate)
-        ImGui::PopStyleColor();
+      if (original_action == EditorAction::Rotate) ImGui::PopStyleColor();
 
       if (original_action == EditorAction::Scale)
         ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
       ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30)))
-        action = EditorAction::Scale;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30))) action = EditorAction::Scale;
+      if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
       cursor_pos.x += 30;
-      if (original_action == EditorAction::Scale)
-        ImGui::PopStyleColor();
+      if (original_action == EditorAction::Scale) ImGui::PopStyleColor();
 
       ImGui::SetWindowFontScale(1.0f);
       ImGui::PopStyleColor(3);
@@ -209,20 +187,17 @@ namespace axl {
     label << ICON_FA_CIRCLE_NOTCH << " ";
     label << (ento.Tag().value.empty() ? uuids::to_string(ento.id) : ento.Tag().value);
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
-    if (!ento.HasChildren())
-      flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (_inspector._selected_entity == ento)
-      flags |= ImGuiTreeNodeFlags_Selected;
+    ImGuiTreeNodeFlags flags =
+      ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
+    if (!ento.HasChildren()) flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (_inspector._selected_entity == ento) flags |= ImGuiTreeNodeFlags_Selected;
 
     // ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(4.0f, 4.0f));
     // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (depth * 18.0f));
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
-    if (ImGui::IsItemHovered())
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-    if (ImGui::IsItemClicked())
-      _inspector._selected_entity = ento;
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemClicked()) _inspector._selected_entity = ento;
     ImGui::PopStyleVar(1);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
@@ -243,8 +218,7 @@ namespace axl {
       ImGui::TreePop();
     }
 
-    if (marked_for_deletion)
-      scene.RemoveEntity(ento);
+    if (marked_for_deletion) scene.RemoveEntity(ento);
 
     return;
   }
@@ -259,8 +233,7 @@ namespace axl {
       scene.CreateEntity();
       ImGui::CloseCurrentPopup();
     }
-    if (ImGui::IsItemHovered())
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
     if (!ento) {
       ImGui::PopStyleVar();
@@ -270,11 +243,10 @@ namespace axl {
     bool marked_for_deletion = false;
     if (ImGui::Button(ICON_FA_TRASH_ALT " Delete", button_size)) {
       marked_for_deletion = true;
-      _inspector._selected_entity = { };
+      _inspector._selected_entity = {};
       ImGui::CloseCurrentPopup();
     }
-    if (ImGui::IsItemHovered())
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
     ImGui::PopStyleVar();
     return marked_for_deletion;
@@ -293,7 +265,11 @@ namespace axl {
     std::strcpy(buffer.data(), _search_string.c_str());
 
     ImGui::PushItemWidth(width);
-    if (ImGui::InputTextWithHint("##search", ICON_FA_SEARCH " Search", buffer.data(), buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue))
+    if (ImGui::InputTextWithHint("##search",
+                                 ICON_FA_SEARCH " Search",
+                                 buffer.data(),
+                                 buffer.size(),
+                                 ImGuiInputTextFlags_EnterReturnsTrue))
       _search_string = buffer.data();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 9.0f);
 
@@ -303,17 +279,15 @@ namespace axl {
 
     scene._registry.each([&](auto entity) {
       Ento ento = scene.FromHandle(entity);
-      if (!ento || ento.HasParent())
-        return;
+      if (!ento || ento.HasParent()) return;
       ShowTreeEnto(ento, 0, scene);
     });
 
-    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
-      _inspector._selected_entity = { };
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) _inspector._selected_entity = {};
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {
-      ShowEntityPopUp({ }, scene);
+      ShowEntityPopUp({}, scene);
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar();
@@ -326,8 +300,8 @@ namespace axl {
     _inspector.Draw(scene, dock);
   }
 
-  const v2 & FrameEditor::GetRegionAvailable() const {
+  const v2 &FrameEditor::GetRegionAvailable() const {
     return _region_available;
   }
 
-} // namespace
+} // namespace axl

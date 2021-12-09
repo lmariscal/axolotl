@@ -7,11 +7,12 @@ layout(location = 42) uniform vec2 viewport_size;
 
 layout(location = 0) in Vertex {
   vec2 tex_coord;
-} IN;
+}
+IN;
 
 layout(location = 0) out vec4 frag_color;
 
-void main () {
+void main() {
   frag_color = texture(tex, IN.tex_coord);
 
   frag_color.rgb = pow(frag_color.rgb, vec3(1.8));

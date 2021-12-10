@@ -11,10 +11,7 @@
 namespace axl {
 
   struct Model {
-    Model(Ento ento,
-          std::filesystem::path path = "",
-          std::array<std::string, (i32)ShaderType::Last> paths = {},
-          bool root = true);
+    Model(std::filesystem::path path = "", std::array<std::string, (i32)ShaderType::Last> paths = {}, bool root = true);
     ~Model();
 
     void Draw(Material &material);
@@ -22,7 +19,7 @@ namespace axl {
     json Serialize() const;
     void Deserialize(const json &json);
     bool ShowComponent();
-    void Init(Ento ento);
+    void Init();
 
     bool two_sided;
 

@@ -42,6 +42,86 @@ namespace axl {
     using namespace spdlog;
   }
 
+  struct Color {
+    v4 rgba;
+
+    Color(): rgba(1.0f) { }
+    Color(f32 r, f32 g, f32 b): rgba(r, g, b, 1.0f) { }
+    Color(f32 r, f32 g, f32 b, f32 a): rgba(r, g, b, a) { }
+    Color(const v3 &rgb): rgba(v4(rgb, 1.0f)) { }
+    Color(const v4 &rgba): rgba(rgba) { }
+
+    operator v3() const {
+      return rgba;
+    }
+
+    operator v4() const {
+      return rgba;
+    }
+
+    v4 normalized() const {
+      return normalize(v4(v3(rgba), rgba.a));
+    }
+
+    Color &operator=(const v3 &rgb) {
+      rgba = v4(rgb, 1.0f);
+      return *this;
+    }
+
+    Color &operator=(const v4 &rgba) {
+      this->rgba = rgba;
+      return *this;
+    }
+
+    Color &operator+=(const Color &other) {
+      rgba += other.rgba;
+      return *this;
+    }
+
+    Color &operator-=(const Color &other) {
+      rgba -= other.rgba;
+      return *this;
+    }
+
+    Color &operator*=(f32 s) {
+      rgba *= s;
+      return *this;
+    }
+
+    Color &operator/=(f32 s) {
+      rgba /= s;
+      return *this;
+    }
+
+    Color operator+(const Color &other) const {
+      return Color(rgba + other.rgba);
+    }
+
+    Color operator-(const Color &other) const {
+      return Color(rgba - other.rgba);
+    }
+
+    Color operator*(f32 s) const {
+      return Color(rgba * s);
+    }
+
+    Color operator/(f32 s) const {
+      return Color(rgba / s);
+    }
+
+    Color operator-() const {
+      return Color(-rgba);
+    }
+
+    bool operator==(const Color &other) const {
+      return rgba == other.rgba;
+    }
+
+    bool operator!=(const Color &other) const {
+      return rgba != other.rgba;
+    }
+  };
+
 } // namespace axl
 
 #define IM_VEC2_CLASS_EXTRA  \

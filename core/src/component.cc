@@ -5,8 +5,9 @@
 
 namespace axl {
 
+  constexpr i32 column_width = 120;
+
   bool ShowData(const std::string &label, v3 &v, const v3 &reset_value, f32 min, f32 max) {
-    i32 column_width = 100;
     bool modified = false;
 
     ImGuiIO &io = ImGui::GetIO();
@@ -14,9 +15,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width * 3 && label_size < column_width) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -91,7 +97,6 @@ namespace axl {
   }
 
   bool ShowData(const std::string &label, v2 &v, const v2 &reset_value) {
-    i32 column_width = 100;
     bool modified = false;
 
     ImGuiIO &io = ImGui::GetIO();
@@ -99,9 +104,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width * 2 && label_size < column_width) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -157,7 +167,6 @@ namespace axl {
   }
 
   bool ShowData(const std::string &label, v4 &v, const v4 &reset_value) {
-    i32 column_width = 100;
     bool modified = false;
 
     ImGuiIO &io = ImGui::GetIO();
@@ -165,9 +174,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width * 4 && label_size < column_width) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -277,9 +291,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width && label_size < column_width * 3) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -295,9 +314,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width && label_size < column_width) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -313,9 +337,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width && label_size < column_width * 3) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -346,9 +375,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width && label_size < column_width * 3) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
@@ -364,7 +398,6 @@ namespace axl {
   }
 
   bool ShowDataColor(const std::string &label, v4 &v) {
-    i32 column_width = 100;
     bool modified = false;
 
     ImGuiIO &io = ImGui::GetIO();
@@ -372,9 +405,14 @@ namespace axl {
 
     ImGui::PushID(label.c_str());
 
-    ImGui::Columns(2);
     f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
-    ImGui::SetColumnWidth(0, label_size > 100 ? label_size : 100);
+    if (ImGui::GetWindowWidth() > column_width * 4 && label_size < column_width) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 

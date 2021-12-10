@@ -88,8 +88,8 @@ namespace axl {
       shader_paths[(i32)ShaderType::Vertex] = Axolotl::GetDistDir() + "res/shaders/testy.vert";
       shader_paths[(i32)ShaderType::Fragment] = Axolotl::GetDistDir() + "res/shaders/testy.frag";
       log::info("Adding model \"{}\"", _model_path);
-      Model &model = _selected_entity.AddComponent<Model>(_selected_entity, _model_path, shader_paths);
-      model.Init(_selected_entity);
+      Model &model = _selected_entity.AddComponent<Model>(_model_path, shader_paths);
+      model.Init();
       _add_model = false;
       _model_path = "";
     }

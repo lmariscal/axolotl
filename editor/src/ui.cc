@@ -3,6 +3,7 @@
 #include "dockspace.hh"
 
 #include <IconsFontAwesome5Pro.h>
+#include <ImGuizmo.h>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/iomanager.hh>
@@ -10,6 +11,7 @@
 #include <axolotl/terminal.hh>
 #include <axolotl/transform.hh>
 #include <axolotl/window.hh>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <imgui.h>
 
 namespace axl {
@@ -17,6 +19,78 @@ namespace axl {
   FrameEditor::FrameEditor(): _frame(1280, 720), _region_available({ 0, 0 }), action(EditorAction::Select) { }
 
   FrameEditor::~FrameEditor() { }
+
+  void FrameEditor::DrawGuizmo(Window &window) {
+    Camera *camera = Camera::GetActiveCamera();
+    if (!camera) return;
+
+    if (!_inspector._selected_entity) return;
+    if (action == EditorAction::Select) return;
+
+    v2 window_pos = ImGui::GetWindowPos();
+    window_pos += _region_cursor;
+    ImGuizmo::SetRect(window_pos.x, window_pos.y, _region_available.x, _region_available.y);
+
+    m4 view = camera->GetViewMatrix();
+    m4 proj = camera->GetProjectionMatrix(window);
+
+    IOManager &io = window.GetIOManager();
+
+    ImGuizmo::SetOrthographic(false);
+    ImGuizmo::SetDrawlist();
+
+    ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+    if (action == EditorAction::Rotate) operation = ImGuizmo::ROTATE;
+    else if (action == EditorAction::Scale)
+      operation = ImGuizmo::SCALE;
+
+    Transform &transform = _inspector._selected_entity.Transform();
+    m4 model = transform.GetModelMatrix(_inspector._selected_entity);
+
+    v3 snap(action == EditorAction::Rotate ? 45.0f : 0.5f);
+    bool snap_enabled = io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift);
+    bool bounds_enabled = io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl);
+
+    std::array<f32, 6> bounds = { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
+    std::array<f32, 6> bounds_snap;
+    std::fill(bounds_snap.begin(), bounds_snap.end(), snap.x);
+
+    ImGuizmo::Manipulate(value_ptr(view),
+                         value_ptr(proj),
+                         operation,
+                         ImGuizmo::LOCAL,
+                         value_ptr(model),
+                         nullptr,
+                         snap_enabled ? value_ptr(snap) : nullptr,
+                         bounds_enabled ? &bounds[0] : nullptr,
+                         snap_enabled ? value_ptr(snap) : nullptr);
+
+    m4 identity(1.0f);
+    ImGuizmo::DrawGrid(value_ptr(view), value_ptr(proj), value_ptr(identity), 100);
+
+    if (!ImGuizmo::IsUsing()) return;
+
+    v3 skew;
+    v4 perspective;
+
+    quat rotation;
+    v3 scale;
+    v3 translation;
+
+    decompose(model, scale, rotation, translation, skew, perspective);
+
+    if (!std::isnan(rotation.x) && !std::isnan(rotation.y) && !std::isnan(rotation.z) && !std::isnan(rotation.w))
+      transform.SetRotation(rotation);
+    else
+      transform.SetRotation(quat());
+    if (!std::isnan(translation.x) && !std::isnan(translation.y) && !std::isnan(translation.z))
+      transform.SetPosition(translation);
+    else
+      transform.SetPosition(v3());
+    if (!std::isnan(scale.x) && !std::isnan(scale.y) && !std::isnan(scale.z)) transform.SetScale(scale);
+    else
+      transform.SetScale(v3(1.0f));
+  }
 
   void FrameEditor::Bind(Window &window) {
     _frame.Bind();
@@ -55,15 +129,16 @@ namespace axl {
     v2 cursor_pos = ImGui::GetCursorPos();
 
     buffer_size.y -= 30 + (cursor_pos.y * 0.1f);
-    v2 texture_pos = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
-    texture_pos.y += 30 + (cursor_pos.y * 0.1f);
-    ImGui::SetCursorPos(texture_pos);
+    _region_cursor = (v2(ImGui::GetWindowSize()) - buffer_size) * 0.5f;
+    _region_cursor.y += 30 + (cursor_pos.y * 0.1f);
+    ImGui::SetCursorPos(_region_cursor);
 
     bool one_camera_active = Camera::GetActiveCamera() != nullptr;
 
     if (one_camera_active) {
       ImGui::Image((ImTextureID)(size_t)_frame.GetTexture(FrameBufferTexture::Color), buffer_size, uv0, uv1);
-      if (dock.data.terminal->scene_playing && ImGui::IsItemClicked()) focused = true;
+      if (!focused && dock.data.terminal->scene_playing && ImGui::IsItemClicked() && !ImGuizmo::IsOver())
+        focused = true;
     }
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
@@ -159,6 +234,17 @@ namespace axl {
       cursor_pos.x += 30;
       if (original_action == EditorAction::Scale) ImGui::PopStyleColor();
 
+      if (!focused) {
+        IOManager &io = window.GetIOManager();
+        if (io.KeyTriggered(Key::Q)) action = EditorAction::Select;
+        else if (io.KeyTriggered(Key::W))
+          action = EditorAction::Move;
+        else if (io.KeyTriggered(Key::E))
+          action = EditorAction::Rotate;
+        else if (io.KeyTriggered(Key::R))
+          action = EditorAction::Scale;
+      }
+
       ImGui::SetWindowFontScale(1.0f);
       ImGui::PopStyleColor(3);
     }
@@ -170,6 +256,8 @@ namespace axl {
       ImGui::SetCursorPos(v2(window_size.x - text_size.x, window_size.y) / 2.0f);
       ImGui::TextColored(v4(v3(1.0f), 0.6f), "%s", text.c_str());
     }
+
+    DrawGuizmo(window);
 
     ImGui::End();
     ImGui::PopStyleVar();

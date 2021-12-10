@@ -16,6 +16,7 @@ namespace axl {
     bool show_inspector = true;
     bool show_hierarchy = true;
     bool show_renderer = true;
+    bool show_guizmos = true;
     bool show_imgui_demo = false;
   };
 

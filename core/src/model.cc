@@ -10,7 +10,7 @@
 
 namespace axl {
 
-  Model::Model(Ento ento, std::filesystem::path path, std::array<std::string, (i32)ShaderType::Last> paths, bool root):
+  Model::Model(std::filesystem::path path, std::array<std::string, (i32)ShaderType::Last> paths, bool root):
     _path(path),
     _shader_paths(paths),
     _root(root),
@@ -22,7 +22,8 @@ namespace axl {
       delete mesh;
   }
 
-  void Model::Init(Ento ento) {
+  void Model::Init() {
+    Ento ento = Ento::FromComponent(*this);
     ento.TryAddComponent<Material>(_shader_paths);
 
     if (!_root) return;
@@ -150,8 +151,8 @@ namespace axl {
 
     for (u32 i = 0; i < node->mNumChildren; i++) {
       Ento child = Scene::GetActiveScene()->CreateEntity();
-      Model &child_model = child.AddComponent<Model>(child, model._path, model._shader_paths, false);
-      child_model.Init(child);
+      Model &child_model = child.AddComponent<Model>(model._path, model._shader_paths, false);
+      child_model.Init();
       child_model._mesh_id = i;
       ento.AddChild(child);
 

@@ -23,6 +23,7 @@ namespace axl {
     void Draw(Window &window, DockSpace &dock);
     void DrawEntityList(Scene &scene, DockSpace &dock);
     void DrawInspector(Scene &scene, DockSpace &dock);
+    void DrawGuizmo(Window &window);
     const v2 &GetRegionAvailable() const;
 
     bool focused;
@@ -37,6 +38,7 @@ namespace axl {
 
     std::string _search_string;
     v2 _region_available;
+    v2 _region_cursor;
   };
 
 } // namespace axl

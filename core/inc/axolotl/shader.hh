@@ -1,14 +1,13 @@
 #pragma once
 
-#include <axolotl/types.hh>
+#include <array>
 #include <axolotl/component.hh>
 #include <axolotl/texture.hh>
-
+#include <axolotl/types.hh>
 #include <filesystem>
+#include <queue>
 #include <unordered_map>
 #include <vector>
-#include <array>
-#include <queue>
 
 namespace efsw {
 
@@ -23,26 +22,20 @@ namespace axl {
 
   enum class UniformLocation {
     // Vertex
-    ModelMatrix      = 0,
-    ViewMatrix       = 1,
+    ModelMatrix = 0,
+    ViewMatrix = 1,
     ProjectionMatrix = 2,
-    Time             = 3,
-    Resolution       = 4,
-    Mouse            = 5,
+    Time = 3,
+    Resolution = 4,
+    Mouse = 5,
 
     // Fragment
-    Textures         = 10,
-    Lights           = 18,
+    Textures = 10,
+    Lights = 18,
     Last
   };
 
-  enum class AttributeLocation {
-    Position  = 0,
-    Normal    = 1,
-    Tangent   = 2,
-    TexCoord  = 3,
-    Last
-  };
+  enum class AttributeLocation { Position = 0, Normal = 1, Tangent = 2, TexCoord = 3, Last };
 
   enum class UniformDataType {
     Vector2,
@@ -59,32 +52,21 @@ namespace axl {
     Last
   };
 
-  enum class ShaderType {
-    Vertex,
-    Fragment,
-    Geometry,
-    Compute,
-    Last
-  };
+  enum class ShaderType { Vertex, Fragment, Geometry, Compute, Last };
 
   struct ShaderData {
     ShaderData() = default;
     ShaderData(const std::filesystem::path &vertex_path,
                const std::filesystem::path &fragment_path,
                const std::filesystem::path &geometry_path = std::filesystem::path(),
-               const std::filesystem::path &compute_path = std::filesystem::path())
-    {
+               const std::filesystem::path &compute_path = std::filesystem::path()) {
       for (i32 i = 0; i < (i32)ShaderType::Last; ++i)
         paths[i] = std::filesystem::path();
 
-      if (!vertex_path.empty())
-        paths[(i32)ShaderType::Vertex] = vertex_path;
-      if (!fragment_path.empty())
-        paths[(i32)ShaderType::Fragment] = fragment_path;
-      if (!geometry_path.empty())
-        paths[(i32)ShaderType::Geometry] = geometry_path;
-      if (!compute_path.empty())
-        paths[(i32)ShaderType::Compute] = compute_path;
+      if (!vertex_path.empty()) paths[(i32)ShaderType::Vertex] = vertex_path;
+      if (!fragment_path.empty()) paths[(i32)ShaderType::Fragment] = fragment_path;
+      if (!geometry_path.empty()) paths[(i32)ShaderType::Geometry] = geometry_path;
+      if (!compute_path.empty()) paths[(i32)ShaderType::Compute] = compute_path;
 
       std::fill(shaders, shaders + (i32)ShaderType::Last, 0);
     }
@@ -184,12 +166,12 @@ namespace axl {
    public:
     static u32 GetShaderFromPath(const ShaderData &data);
     static u32 GetRendererID(u32 id);
-    static ShaderData & GetData(u32 id);
+    static ShaderData &GetData(u32 id);
     static Shader FromID(u32 id);
     static void RegisterShader(Shader &shader, const ShaderData &data);
     static void ProcessQueue();
     static void DeregisterShader(u32 id);
-    static std::unordered_map<u32, ShaderData> & GetAllShadersData();
+    static std::unordered_map<u32, ShaderData> &GetAllShadersData();
 
    protected:
     friend class Shader;

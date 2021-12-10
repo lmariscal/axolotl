@@ -1,15 +1,14 @@
-#include <axolotl/gui.hh>
-
-#include <axolotl/axolotl.hh>
-#include <axolotl/window.hh>
-
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_glfw.h>
-
+// clang-format off
 #include <GLFW/glfw3.h>
-
 #include <IconsFontAwesome5Pro.h>
+#include <axolotl/axolotl.hh>
+#include <axolotl/gui.hh>
+#include <axolotl/window.hh>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <ImGuizmo.h>
+// clang-format on
 
 namespace axl {
 
@@ -19,9 +18,7 @@ namespace axl {
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
     ImFont *font = io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), size, &icons_config, icons_ranges);
-    if (!font) {
-      log::error("Failed to load font \"{}\"", font_awesome_path);
-    }
+    if (!font) { log::error("Failed to load font \"{}\"", font_awesome_path); }
   }
 
   void ImGuiFonts() {
@@ -55,7 +52,7 @@ namespace axl {
 
   void YADarkTheme() {
     ImGuiStyle &style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
+    ImVec4 *colors = style.Colors;
 
     style.ColorButtonPosition = ImGuiDir_Left;
     style.ScrollbarSize = 12.0f;
@@ -119,68 +116,68 @@ namespace axl {
   }
 
   void CherryTheme() {
-    #define HI(v)   v4(0.502f, 0.075f, 0.256f, v)
-    #define MED(v)  v4(0.455f, 0.198f, 0.301f, v)
-    #define LOW(v)  v4(0.232f, 0.201f, 0.271f, v)
-    // backgrounds (@todo: complete with BG_MED, BG_LOW)
-    #define BG(v)   v4(0.200f, 0.220f, 0.270f, v)
-    // text
-    #define TEXT(v) v4(0.860f, 0.930f, 0.890f, v)
+#define HI(v)  v4(0.502f, 0.075f, 0.256f, v)
+#define MED(v) v4(0.455f, 0.198f, 0.301f, v)
+#define LOW(v) v4(0.232f, 0.201f, 0.271f, v)
+// backgrounds (@todo: complete with BG_MED, BG_LOW)
+#define BG(v) v4(0.200f, 0.220f, 0.270f, v)
+// text
+#define TEXT(v) v4(0.860f, 0.930f, 0.890f, v)
 
     auto &style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_Text]                  = TEXT(0.78f);
-    style.Colors[ImGuiCol_TextDisabled]          = TEXT(0.28f);
-    style.Colors[ImGuiCol_WindowBg]              = v4(0.13f, 0.14f, 0.17f, 1.00f);
-    style.Colors[ImGuiCol_PopupBg]               = BG( 0.9f);
-    style.Colors[ImGuiCol_Border]                = v4(0.31f, 0.31f, 1.00f, 0.00f);
-    style.Colors[ImGuiCol_BorderShadow]          = v4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_FrameBg]               = BG( 1.00f);
-    style.Colors[ImGuiCol_FrameBgHovered]        = MED( 0.78f);
-    style.Colors[ImGuiCol_FrameBgActive]         = MED( 1.00f);
-    style.Colors[ImGuiCol_TitleBg]               = LOW( 1.00f);
-    style.Colors[ImGuiCol_TitleBgActive]         = HI( 1.00f);
-    style.Colors[ImGuiCol_TitleBgCollapsed]      = BG( 0.75f);
-    style.Colors[ImGuiCol_MenuBarBg]             = BG( 0.47f);
-    style.Colors[ImGuiCol_ScrollbarBg]           = BG( 1.00f);
-    style.Colors[ImGuiCol_ScrollbarGrab]         = v4(0.09f, 0.15f, 0.16f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered]  = MED( 0.78f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive]   = MED( 1.00f);
-    style.Colors[ImGuiCol_CheckMark]             = v4(0.71f, 0.22f, 0.27f, 1.00f);
-    style.Colors[ImGuiCol_SliderGrab]            = v4(0.47f, 0.77f, 0.83f, 0.14f);
-    style.Colors[ImGuiCol_SliderGrabActive]      = v4(0.71f, 0.22f, 0.27f, 1.00f);
-    style.Colors[ImGuiCol_Button]                = v4(0.47f, 0.77f, 0.83f, 0.14f);
-    style.Colors[ImGuiCol_ButtonHovered]         = MED( 0.86f);
-    style.Colors[ImGuiCol_ButtonActive]          = MED( 1.00f);
-    style.Colors[ImGuiCol_Header]                = MED( 0.76f);
-    style.Colors[ImGuiCol_HeaderHovered]         = MED( 0.86f);
-    style.Colors[ImGuiCol_HeaderActive]          = HI( 1.00f);
-    style.Colors[ImGuiCol_ResizeGrip]            = v4(0.47f, 0.77f, 0.83f, 0.04f);
-    style.Colors[ImGuiCol_ResizeGripHovered]     = MED( 0.78f);
-    style.Colors[ImGuiCol_ResizeGripActive]      = MED( 1.00f);
-    style.Colors[ImGuiCol_PlotLines]             = TEXT(0.63f);
-    style.Colors[ImGuiCol_PlotLinesHovered]      = MED( 1.00f);
-    style.Colors[ImGuiCol_PlotHistogram]         = TEXT(0.63f);
-    style.Colors[ImGuiCol_PlotHistogramHovered]  = MED( 1.00f);
-    style.Colors[ImGuiCol_TextSelectedBg]        = MED( 0.43f);
+    style.Colors[ImGuiCol_Text] = TEXT(0.78f);
+    style.Colors[ImGuiCol_TextDisabled] = TEXT(0.28f);
+    style.Colors[ImGuiCol_WindowBg] = v4(0.13f, 0.14f, 0.17f, 1.00f);
+    style.Colors[ImGuiCol_PopupBg] = BG(0.9f);
+    style.Colors[ImGuiCol_Border] = v4(0.31f, 0.31f, 1.00f, 0.00f);
+    style.Colors[ImGuiCol_BorderShadow] = v4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_FrameBg] = BG(1.00f);
+    style.Colors[ImGuiCol_FrameBgHovered] = MED(0.78f);
+    style.Colors[ImGuiCol_FrameBgActive] = MED(1.00f);
+    style.Colors[ImGuiCol_TitleBg] = LOW(1.00f);
+    style.Colors[ImGuiCol_TitleBgActive] = HI(1.00f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = BG(0.75f);
+    style.Colors[ImGuiCol_MenuBarBg] = BG(0.47f);
+    style.Colors[ImGuiCol_ScrollbarBg] = BG(1.00f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = v4(0.09f, 0.15f, 0.16f, 1.00f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = MED(0.78f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = MED(1.00f);
+    style.Colors[ImGuiCol_CheckMark] = v4(0.71f, 0.22f, 0.27f, 1.00f);
+    style.Colors[ImGuiCol_SliderGrab] = v4(0.47f, 0.77f, 0.83f, 0.14f);
+    style.Colors[ImGuiCol_SliderGrabActive] = v4(0.71f, 0.22f, 0.27f, 1.00f);
+    style.Colors[ImGuiCol_Button] = v4(0.47f, 0.77f, 0.83f, 0.14f);
+    style.Colors[ImGuiCol_ButtonHovered] = MED(0.86f);
+    style.Colors[ImGuiCol_ButtonActive] = MED(1.00f);
+    style.Colors[ImGuiCol_Header] = MED(0.76f);
+    style.Colors[ImGuiCol_HeaderHovered] = MED(0.86f);
+    style.Colors[ImGuiCol_HeaderActive] = HI(1.00f);
+    style.Colors[ImGuiCol_ResizeGrip] = v4(0.47f, 0.77f, 0.83f, 0.04f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = MED(0.78f);
+    style.Colors[ImGuiCol_ResizeGripActive] = MED(1.00f);
+    style.Colors[ImGuiCol_PlotLines] = TEXT(0.63f);
+    style.Colors[ImGuiCol_PlotLinesHovered] = MED(1.00f);
+    style.Colors[ImGuiCol_PlotHistogram] = TEXT(0.63f);
+    style.Colors[ImGuiCol_PlotHistogramHovered] = MED(1.00f);
+    style.Colors[ImGuiCol_TextSelectedBg] = MED(0.43f);
 
-    style.Colors[ImGuiCol_Tab]                = MED( 0.43f);
-    style.Colors[ImGuiCol_TabHovered]         = MED( 0.73f);
-    style.Colors[ImGuiCol_TabUnfocused]       = MED( 0.23f);
-    style.Colors[ImGuiCol_TabUnfocusedActive] = HI( 0.23f);
-    style.Colors[ImGuiCol_TabActive]          = HI( 0.43f);
+    style.Colors[ImGuiCol_Tab] = MED(0.43f);
+    style.Colors[ImGuiCol_TabHovered] = MED(0.73f);
+    style.Colors[ImGuiCol_TabUnfocused] = MED(0.23f);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = HI(0.23f);
+    style.Colors[ImGuiCol_TabActive] = HI(0.43f);
 
-    style.WindowPadding            = v2(6, 4);
-    style.WindowRounding           = 0.0f;
-    style.FramePadding             = v2(5, 2);
-    style.FrameRounding            = 3.0f;
-    style.ItemSpacing              = v2(7, 1);
-    style.ItemInnerSpacing         = v2(1, 1);
-    style.TouchExtraPadding        = v2(0, 0);
-    style.IndentSpacing            = 6.0f;
-    style.ScrollbarSize            = 12.0f;
-    style.ScrollbarRounding        = 16.0f;
-    style.GrabMinSize              = 20.0f;
-    style.GrabRounding             = 2.0f;
+    style.WindowPadding = v2(6, 4);
+    style.WindowRounding = 0.0f;
+    style.FramePadding = v2(5, 2);
+    style.FrameRounding = 3.0f;
+    style.ItemSpacing = v2(7, 1);
+    style.ItemInnerSpacing = v2(1, 1);
+    style.TouchExtraPadding = v2(0, 0);
+    style.IndentSpacing = 6.0f;
+    style.ScrollbarSize = 12.0f;
+    style.ScrollbarRounding = 16.0f;
+    style.GrabMinSize = 20.0f;
+    style.GrabRounding = 2.0f;
 
     style.WindowTitleAlign.x = 0.50f;
 
@@ -189,12 +186,11 @@ namespace axl {
     style.WindowBorderSize = 1.0f;
   }
 
-  GUI::GUI(Window *window):
-    _lock_mouse(false)
-  {
+  GUI::GUI(Window *window): _lock_mouse(false) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -221,6 +217,7 @@ namespace axl {
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
   }
 
   void GUI::Draw() {
@@ -235,31 +232,31 @@ namespace axl {
     }
   }
 
-  void GUI::WindowFocusCallback(GLFWwindow* window, i32 focused) {
+  void GUI::WindowFocusCallback(GLFWwindow *window, i32 focused) {
     ImGui_ImplGlfw_WindowFocusCallback(window, focused);
   }
 
-  void GUI::CursorEnterCallback(GLFWwindow* window, i32 entered) {
+  void GUI::CursorEnterCallback(GLFWwindow *window, i32 entered) {
     ImGui_ImplGlfw_CursorEnterCallback(window, entered);
   }
 
-  void GUI::MouseButtonCallback(GLFWwindow* window, i32 button, i32 action, i32 mods) {
+  void GUI::MouseButtonCallback(GLFWwindow *window, i32 button, i32 action, i32 mods) {
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
   }
 
-  void GUI::ScrollCallback(GLFWwindow* window, f64 x_offset, f64 y_offset) {
+  void GUI::ScrollCallback(GLFWwindow *window, f64 x_offset, f64 y_offset) {
     ImGui_ImplGlfw_ScrollCallback(window, x_offset, y_offset);
   }
 
-  void GUI::KeyCallback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
+  void GUI::KeyCallback(GLFWwindow *window, i32 key, i32 scancode, i32 action, i32 mods) {
     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
   }
 
-  void GUI::CharCallback(GLFWwindow* window, u32 character) {
+  void GUI::CharCallback(GLFWwindow *window, u32 character) {
     ImGui_ImplGlfw_CharCallback(window, character);
   }
 
-  void GUI::MonitorCallback(GLFWmonitor* monitor, i32 event) {
+  void GUI::MonitorCallback(GLFWmonitor *monitor, i32 event) {
     ImGui_ImplGlfw_MonitorCallback(monitor, event);
   }
 
@@ -282,9 +279,10 @@ namespace axl {
     // Remove if statement via binary operations and state
 
     // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouse) | (state ? ImGuiConfigFlags_NoMouse : 0);
-    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouseCursorChange) | (state ? ImGuiConfigFlags_NoMouseCursorChange : 0);
-    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableKeyboard) | (state ? ImGuiConfigFlags_NavEnableKeyboard : 0);
-    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableGamepad) | (state ? ImGuiConfigFlags_NavEnableGamepad : 0);
+    // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouseCursorChange) | (state ?
+    // ImGuiConfigFlags_NoMouseCursorChange : 0); io.ConfigFlags = (io.ConfigFlags &
+    // ~ImGuiConfigFlags_NavEnableKeyboard) | (state ? ImGuiConfigFlags_NavEnableKeyboard : 0); io.ConfigFlags =
+    // (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableGamepad) | (state ? ImGuiConfigFlags_NavEnableGamepad : 0);
 
     io.WantCaptureKeyboard = state;
     io.WantCaptureMouse = state;

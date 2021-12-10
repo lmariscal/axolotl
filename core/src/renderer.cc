@@ -3,6 +3,7 @@
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/framebuffer.hh>
+#include <axolotl/grid.hh>
 #include <axolotl/material.hh>
 #include <axolotl/model.hh>
 #include <axolotl/renderer.hh>
@@ -174,6 +175,8 @@ namespace axl {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     _post_process_framebuffer->Bind();
+
+    Grid::Draw(view, projection, 100);
 
     ClearScreen(v3(0.3f));
 

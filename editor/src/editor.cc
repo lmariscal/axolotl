@@ -2,6 +2,7 @@
 #include "test_scene.hh"
 #include "ui.hh"
 
+#include <ImGuizmo.h>
 #include <axolotl/axolotl.hh>
 #include <axolotl/gui.hh>
 #include <axolotl/renderer.hh>
@@ -74,10 +75,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       window.SetFrameBufferSize(region_available);
 
       if (terminal_data.display_terminal) terminal.show();
-
-      if (!frame_editor.focused && io.ButtonTriggered(MouseButton::Left) && !ImGui::GetIO().WantCaptureMouse) {
-        frame_editor.focused = true;
-      }
     } else {
       v2i region_available = frame_editor.GetRegionAvailable();
       if (region_available.x > 0 && region_available.y > 0) window.SetFrameBufferSize(region_available);

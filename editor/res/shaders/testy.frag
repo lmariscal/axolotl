@@ -61,6 +61,7 @@ void main() {
   specular_color = specular_color * 0.03f;
 
   frag_color = diffuse_color + ambient_color + specular_color;
+  // frag_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord);
 
   // frag_color = vec4(normal, 1.0);
 }

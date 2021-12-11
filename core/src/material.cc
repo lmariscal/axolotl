@@ -1,5 +1,4 @@
 #include <axolotl/material.hh>
-
 #include <axolotl/scene.hh>
 #include <axolotl/shader.hh>
 #include <axolotl/texture.hh>
@@ -7,14 +6,11 @@
 namespace axl {
 
   Material::Material(const std::array<std::string, (i32)ShaderType::Last> &paths):
-    _shader(std::make_shared<Shader>(ShaderData(
-      paths[(i32)ShaderType::Vertex],
-      paths[(i32)ShaderType::Fragment],
-      paths[(i32)ShaderType::Geometry],
-      paths[(i32)ShaderType::Compute]
-    ))),
-    _textures(std::make_shared<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>>())
-  {
+    _shader(std::make_shared<Shader>(ShaderData(paths[(i32)ShaderType::Vertex],
+                                                paths[(i32)ShaderType::Fragment],
+                                                paths[(i32)ShaderType::Geometry],
+                                                paths[(i32)ShaderType::Compute]))),
+    _textures(std::make_shared<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>>()) {
     std::fill(_textures->begin(), _textures->end(), std::vector<Texture2D *>());
 
     ShaderStore::ProcessQueue();
@@ -22,8 +18,7 @@ namespace axl {
 
   Material::~Material() {
     log::debug("Material destroyed, texture use cound is {}", _textures.use_count());
-    if (_textures.use_count() > 1)
-      return;
+    if (_textures.use_count() > 1) return;
 
     log::debug("Destroying textures");
 
@@ -43,18 +38,15 @@ namespace axl {
       std::vector<Texture2D *> &textures = (*_textures)[i];
       for (i32 j = 0; j < textures.size(); ++j) {
         u32 count = counter[i]++;
-        if (Bind(j, unit_count, count, (TextureType)i))
-          unit_count++;
+        if (Bind(j, unit_count, count, (TextureType)i)) unit_count++;
       }
 
-      if (textures.empty())
-        _shader->SetUniformTexture((TextureType)i, -1);
+      if (textures.empty()) _shader->SetUniformTexture((TextureType)i, -1);
     }
   }
 
   bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
-    if (type == TextureType::Last)
-      return false;
+    if (type == TextureType::Last) return false;
 
     if ((*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size()) {
       _shader->SetUniformTexture(type, -1);
@@ -69,8 +61,7 @@ namespace axl {
   }
 
   void Material::AddTexture(const std::filesystem::path &path, TextureType type) {
-    if (_textures_path.count(path))
-      return;
+    if (_textures_path.count(path)) return;
 
     Texture2D *texture = new Texture2D(path, type);
     (*_textures)[(i32)type].push_back(texture);
@@ -83,7 +74,7 @@ namespace axl {
     AddTexture(path, type);
   }
 
-  Shader & Material::GetShader() {
+  Shader &Material::GetShader() {
     return *_shader;
   }
 
@@ -92,8 +83,7 @@ namespace axl {
     return j;
   }
 
-  void Material::Deserialize(const json &j) {
-  }
+  void Material::Deserialize(const json &j) { }
 
   bool Material::ShowData() {
     // _shader->ShowData();

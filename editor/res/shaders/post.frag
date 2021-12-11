@@ -18,6 +18,6 @@ void main() {
   frag_color.rgb = pow(frag_color.rgb, vec3(1.8));
 
   // vignette
-  float dist = length(gl_FragCoord.xy / viewport_size - vec2(0.5));
-  frag_color.rgb *= smoothstep(0.8, 0.5, dist);
+  // float dist = length(gl_FragCoord.xy / viewport_size - vec2(0.5));
+  // frag_color.rgb *= smoothstep(0.8, 0.5, dist);
 }

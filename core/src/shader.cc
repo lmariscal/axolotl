@@ -225,10 +225,14 @@ namespace axl {
     }
     CompileProgram(shader);
 
-    if (!_white_texture) {
+    if (!_white_texture)
       _white_texture = new Texture2D(Axolotl::GetDistDir() + "res/textures/white.png", TextureType::Diffuse);
-      TextureStore::ProcessQueue();
-    }
+    if (!_black_texture)
+      _black_texture = new Texture2D(Axolotl::GetDistDir() + "res/textures/black.png", TextureType::Diffuse);
+    if (!_default_normal)
+      _default_normal = new Texture2D(Axolotl::GetDistDir() + "res/textures/normal.png", TextureType::Normal);
+
+    TextureStore::ProcessQueue();
   }
 
   void ShaderStore::ProcessQueue() {
@@ -282,7 +286,11 @@ namespace axl {
 
     if (_shader_data.empty()) {
       delete _white_texture;
+      delete _black_texture;
+      delete _default_normal;
       _white_texture = nullptr;
+      _black_texture = nullptr;
+      _default_normal = nullptr;
     }
   }
 
@@ -786,9 +794,13 @@ namespace axl {
     if (unit < 0) {
       i32 max_unit_count = 0;
       glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_unit_count);
-      unit = max_unit_count - 1;
+      unit = max_unit_count - 1 - (i32)type;
 
-      ShaderStore::_white_texture->Bind(unit);
+      if (type == TextureType::Specular) ShaderStore::_black_texture->Bind(unit);
+      else if (type == TextureType::Normal)
+        ShaderStore::_default_normal->Bind(unit);
+      else
+        ShaderStore::_white_texture->Bind(unit);
     }
 
     i32 location = (i32)UniformLocation::Textures + (i32)type;

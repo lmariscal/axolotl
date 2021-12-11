@@ -182,6 +182,8 @@ namespace axl {
     inline static std::queue<Shader> _shader_queue;
     inline static std::queue<std::tuple<u32, ShaderType>> _reload_queue;
     inline static Texture2D *_white_texture = nullptr;
+    inline static Texture2D *_black_texture = nullptr;
+    inline static Texture2D *_default_normal = nullptr;
 
     static u32 CompileShader(ShaderType type, const std::string &source);
     static void GetUniformData(Shader &shader);

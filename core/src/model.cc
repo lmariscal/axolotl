@@ -62,6 +62,9 @@ namespace axl {
       case aiTextureType_SPECULAR:
         type = TextureType::Specular;
         break;
+      case aiTextureType_EMISSIVE:
+        type = TextureType::Specular; // Make it emissive
+        break;
       case aiTextureType_NORMALS:
         type = TextureType::Normal;
         break;
@@ -126,6 +129,7 @@ namespace axl {
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
     ProcessMaterialTextures(ento, model, material, aiTextureType_DIFFUSE);
+    ProcessMaterialTextures(ento, model, material, aiTextureType_EMISSIVE);
     ProcessMaterialTextures(ento, model, material, aiTextureType_SPECULAR);
     ProcessMaterialTextures(ento, model, material, aiTextureType_AMBIENT);
     ProcessMaterialTextures(ento, model, material, aiTextureType_NORMALS);

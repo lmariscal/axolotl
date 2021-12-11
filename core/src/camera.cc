@@ -10,7 +10,7 @@ namespace axl {
   Camera::Camera():
     _is_orthographic(false),
     _world_up({ 0.0f, 1.0f, 0.0f }),
-    _movement_speed(30.0f),
+    _movement_speed(6.0f),
     _mouse_sensitivity(2.0f),
     _fov(60.0f),
     _is_active_camera(false) { }

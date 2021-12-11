@@ -23,7 +23,6 @@ layout(location = 0) out vec4 frag_color;
 void main() {
   vec4 ambient_light_color = lights.data[0].color * lights.data[0].intensity;
 
-  // vec3 normal = normalize(IN.tangent_matrix * vec3(0.0, 0.0, 1.0)); // TODO: Replace with normal map
   vec3 normal = texture(textures[TEXTURE_NORMAL], IN.tex_coord).rgb;
   normal = normal * 2.0 - 1.0;
   normal = normalize(IN.tangent_matrix * normal);
@@ -37,7 +36,7 @@ void main() {
   Light directional_light = lights.data[1];
   vec3 light_direction = normalize(directional_light.position.xyz);
   float light_distance = length(position - light_direction);
-  float light_intensity = max(0.0, dot(normal, light_direction));
+  float light_intensity = max(0.0, dot(normal, light_direction)) * directional_light.intensity;
   diffuse_light_color += directional_light.color * light_intensity;
   specular_light_color +=
     directional_light.color *
@@ -55,13 +54,13 @@ void main() {
     specular_light_color += light.color * specular_intensity;
   }
 
-  vec4 ambient_color = texture(textures[TEXTURE_AMBIENT], IN.tex_coord) * ambient_light_color;
+  vec4 ambient_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord) * ambient_light_color;
   vec4 diffuse_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord) * diffuse_light_color;
   vec4 specular_color = texture(textures[TEXTURE_SPECULAR], IN.tex_coord) * specular_light_color;
-  specular_color = specular_color * 0.03f;
+  specular_color = specular_color * 0.3f;
 
   frag_color = diffuse_color + ambient_color + specular_color;
-  // frag_color = texture(textures[TEXTURE_DIFFUSE], IN.tex_coord);
+  // frag_color = texture(textures[TEXTURE_SPECULAR], IN.tex_coord);
 
   // frag_color = vec4(normal, 1.0);
 }

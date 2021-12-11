@@ -55,6 +55,11 @@ namespace axl {
     std::array<f32, 6> bounds_snap;
     std::fill(bounds_snap.begin(), bounds_snap.end(), snap.x);
 
+    v2 view_manipulate_pos = window_pos;
+    view_manipulate_pos.x += _region_available.x - 128 - 30;
+    view_manipulate_pos.y += 30;
+    ImGuizmo::ViewManipulate(value_ptr(view), 8.0f, view_manipulate_pos, v2(128), 0x10101010);
+
     ImGuizmo::Manipulate(value_ptr(view),
                          value_ptr(proj),
                          operation,
@@ -64,9 +69,6 @@ namespace axl {
                          snap_enabled ? value_ptr(snap) : nullptr,
                          bounds_enabled ? &bounds[0] : nullptr,
                          snap_enabled ? value_ptr(snap) : nullptr);
-
-    m4 identity(1.0f);
-    ImGuizmo::DrawGrid(value_ptr(view), value_ptr(proj), value_ptr(identity), 100);
 
     if (!ImGuizmo::IsUsing()) return;
 

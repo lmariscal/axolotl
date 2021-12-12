@@ -10,10 +10,11 @@
 
 namespace axl {
 
-  Model::Model(std::filesystem::path path, std::array<std::string, (i32)ShaderType::Last> paths, bool root):
+  Model::Model(std::filesystem::path path, std::vector<std::string> paths, bool root):
     _path(path),
     _shader_paths(paths),
     _root(root),
+    _mesh_id(0),
     _meshes(std::make_shared<std::vector<Mesh *>>()) { }
 
   Model::~Model() {
@@ -43,13 +44,7 @@ namespace axl {
     aiVector3D scale, position;
     aiQuaternion rotation;
     scene->mRootNode->mTransformation.Decompose(scale, rotation, position);
-    Transform &transform = ento.TryAddComponent<Transform>();
-    transform.SetPosition(v3(position.x, position.y, position.z));
-    transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
-    transform.SetScale(v3(scale.x, scale.y, scale.z));
-
     ProcessNode(ento, *this, scene->mRootNode, scene);
-
     TextureStore::ProcessQueue();
   }
 
@@ -154,41 +149,38 @@ namespace axl {
     }
 
     for (u32 i = 0; i < node->mNumChildren; i++) {
-      Ento child = Scene::GetActiveScene()->CreateEntity();
-      Model &child_model = child.AddComponent<Model>(model._path, model._shader_paths, false);
-      child_model.Init();
-      child_model._mesh_id = i;
-      ento.AddChild(child);
+      Ento child;
+      bool child_alreay_exists = false;
 
-      aiVector3D scale, position;
-      aiQuaternion rotation;
-      Transform &transform = child.GetComponent<Transform>();
-      node->mTransformation.Decompose(scale, rotation, position);
-      transform.SetPosition(v3(position.x, position.y, position.z));
-      transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
-      transform.SetScale(v3(scale.x, scale.y, scale.z));
-
-      if (model._root) {
-        Transform &p_transform = ento.GetComponent<Transform>();
-        if (std::abs(transform.GetRotation().x + 90.0f) <= 1.0f) {
-          if (std::abs(p_transform.GetRotation().x + 90.0f) <= 1.0f) { p_transform.SetRotation(v3(0.0f)); }
-        }
+      for (Ento c : ento.Children()) {
+        if (!c.HasComponent<Model>()) continue;
+        Model &m = c.GetComponent<Model>();
+        if (m._mesh_id != i) continue;
+        child = c;
+        child_alreay_exists = true;
       }
 
-      if (transform.GetScale().x >= 100.0f) {
-        Ento p = ento;
-        while (p) {
-          Model &p_model = p.GetComponent<Model>();
-          if (!p_model._root) {
-            p = p.Parent();
-            continue;
-          }
+      if (!child_alreay_exists) {
+        child = Scene::GetActiveScene()->CreateEntity();
+        child.AddComponent<Model>(model._path, model._shader_paths, false);
+        ento.AddChild(child);
+        log::debug("Created child model {}", node->mChildren[i]->mName.C_Str());
 
-          Transform &p_transform = p.GetComponent<Transform>();
-          if (p_transform.GetScale().x < 1.0f) break;
+        log::debug("Parent had {} children", ento.Children().size());
+      }
 
-          p_transform.SetScale(p_transform.GetScale() / 100.0f);
-        }
+      Model &child_model = child.GetComponent<Model>();
+      child_model.Init();
+      child_model._mesh_id = i;
+
+      if (!child_alreay_exists) {
+        aiVector3D scale, position;
+        aiQuaternion rotation;
+        Transform &transform = child.GetComponent<Transform>();
+        node->mTransformation.Decompose(scale, rotation, position);
+        transform.SetPosition(v3(position.x, position.y, position.z));
+        transform.SetRotation(quat(rotation.w, rotation.x, rotation.y, rotation.z));
+        transform.SetScale(v3(scale.x, scale.y, scale.z));
       }
 
       log::debug("Processing node {}", node->mName.C_Str());
@@ -197,9 +189,6 @@ namespace axl {
   }
 
   void Model::Draw(Material &material) {
-    u8 culling_state;
-    if (two_sided) glDisable(GL_CULL_FACE);
-
     for (Mesh *mesh : *_meshes) {
       u32 material_id = mesh->GetMaterialID();
       if (!mesh->_single_mesh) {
@@ -212,8 +201,6 @@ namespace axl {
       }
       mesh->Draw();
     }
-
-    if (two_sided) glEnable(GL_CULL_FACE);
   }
 
   json Model::Serialize() const {

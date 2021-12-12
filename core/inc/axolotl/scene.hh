@@ -24,6 +24,7 @@ namespace axl {
 
     void Draw(Renderer &renderer, bool show_data = false);
     json Serialize();
+    void Deserialize(const json &data);
 
     static void SetActiveScene(Scene *scene);
     static Scene *GetActiveScene();

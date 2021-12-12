@@ -9,6 +9,7 @@
 #include <axolotl/shader.hh>
 #include <axolotl/transform.hh>
 #include <axolotl/window.hh>
+#include <fstream>
 #include <imgui.h>
 #include <iostream>
 
@@ -40,7 +41,16 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     if (ImGui::Begin("Serialize")) {
       if (ImGui::Button("Serialize")) {
         json j = scene.Serialize();
-        std::cout << j.dump(2) << std::endl;
+        std::ofstream out("scene.json");
+        out << j.dump(2);
+        out.close();
+      }
+      if (ImGui::Button("Deserialize")) {
+        std::ifstream in("scene.json");
+        json j;
+        in >> j;
+        in.close();
+        scene.Deserialize(j);
       }
       ImGui::End();
     }
@@ -94,6 +104,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
     }
 
+    renderer.SetMeshWireframe(dock.data.show_wireframe);
     if (dock.data.show_world_editor) scene.Draw(renderer, dock.data.show_renderer && show_frame);
 
     if (show_frame) {

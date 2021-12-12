@@ -32,12 +32,21 @@ namespace axl {
 
     void ShowData();
 
+    bool _show_wireframe;
     v2i _size;
+    f64 _gpu_render_time;
+    f64 _gpu_render_time_accum;
+    f64 _cpu_render_time;
+    f64 _cpu_render_time_accum;
     f64 _delta_time;
     f64 _delta_time_accum;
     f64 _last_time;
     u32 _fps;
     u32 _frame_count;
+    u32 _renderables;
+    u32 _mesh_count;
+    u32 _vertex_count;
+    u32 _triangle_count;
 
     u32 _lights_uniform_buffer;
 

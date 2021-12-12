@@ -5,13 +5,18 @@
 
 namespace axl {
 
-  Material::Material(const std::array<std::string, (i32)ShaderType::Last> &paths):
-    _shader(std::make_shared<Shader>(ShaderData(paths[(i32)ShaderType::Vertex],
-                                                paths[(i32)ShaderType::Fragment],
-                                                paths[(i32)ShaderType::Geometry],
-                                                paths[(i32)ShaderType::Compute]))),
+  Material::Material(const std::vector<std::string> &paths):
     _textures(std::make_shared<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>>()) {
+
     std::fill(_textures->begin(), _textures->end(), std::vector<Texture2D *>());
+    std::array<std::string, (i32)ShaderType::Last> shader_paths;
+    for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
+      shader_paths[i] = paths.size() > i ? paths[i] : "";
+    }
+    _shader = std::make_shared<Shader>(ShaderData(shader_paths[(i32)ShaderType::Vertex],
+                                                  shader_paths[(i32)ShaderType::Fragment],
+                                                  shader_paths[(i32)ShaderType::Geometry],
+                                                  shader_paths[(i32)ShaderType::Compute]));
 
     ShaderStore::ProcessQueue();
   }

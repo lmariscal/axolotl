@@ -20,10 +20,9 @@ namespace axl {
   }
 
   void Camera::Init() {
-    Transform &transform = Ento::FromComponent(*this).Transform();
-    transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-    transform.SetRotation(v3(90.0f, 0.0f, 0.0f));
+    if (_is_active_camera) SetAsActive();
     UpdateVectors();
+    log::debug("Camera initialized");
   }
 
   void Camera::MoveCamera(CameraDirection direction, f64 delta) {
@@ -121,20 +120,6 @@ namespace axl {
 
   void Camera::SetOrthographic() {
     _is_orthographic = true;
-  }
-
-  json Camera::Serialize() const {
-    json j;
-    j["is_orthographic"] = _is_orthographic;
-    j["movement_speed"] = _movement_speed;
-    j["mouse_sensitivity"] = _mouse_sensitivity;
-    return j;
-  }
-
-  void Camera::Deserialize(const json &j) {
-    if (j.find("is_orthographic") != j.end()) _is_orthographic = j["is_orthographic"];
-    if (j.find("movement_speed") != j.end()) _movement_speed = j["movement_speed"];
-    if (j.find("mouse_sensitivity") != j.end()) _mouse_sensitivity = j["mouse_sensitivity"];
   }
 
   bool Camera::ShowComponent(Ento &ento) {

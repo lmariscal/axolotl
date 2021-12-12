@@ -11,6 +11,7 @@
 #include <axolotl/terminal.hh>
 #include <axolotl/transform.hh>
 #include <axolotl/window.hh>
+#include <entt/entt.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <imgui.h>
 
@@ -24,15 +25,22 @@ namespace axl {
     Camera *camera = Camera::GetActiveCamera();
     if (!camera) return;
 
-    if (!_inspector._selected_entity) return;
-    if (action == EditorAction::Select) return;
-
     v2 window_pos = ImGui::GetWindowPos();
     window_pos += _region_cursor;
-    ImGuizmo::SetRect(window_pos.x, window_pos.y, _region_available.x, _region_available.y);
 
     m4 view = camera->GetViewMatrix();
     m4 proj = camera->GetProjectionMatrix(window);
+
+    v2 view_manipulate_pos = window_pos;
+    view_manipulate_pos.x += _region_available.x - 128 - 30;
+    view_manipulate_pos.y += 30;
+    ImGuizmo::ViewManipulate(value_ptr(view), 8.0f, view_manipulate_pos, v2(128), 0x10101010);
+
+    Ento selected_entity = Scene::GetActiveScene()->FromID(_inspector._selected_entity_id);
+    if (!selected_entity) return;
+    if (action == EditorAction::Select) return;
+
+    ImGuizmo::SetRect(window_pos.x, window_pos.y, _region_available.x, _region_available.y);
 
     IOManager &io = window.GetIOManager();
 
@@ -44,8 +52,8 @@ namespace axl {
     else if (action == EditorAction::Scale)
       operation = ImGuizmo::SCALE;
 
-    Transform &transform = _inspector._selected_entity.Transform();
-    m4 model = transform.GetModelMatrix(_inspector._selected_entity);
+    Transform &transform = selected_entity.Transform();
+    m4 model = transform.GetModelMatrix(selected_entity);
 
     v3 snap(action == EditorAction::Rotate ? 45.0f : 0.5f);
     bool snap_enabled = io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift);
@@ -54,11 +62,6 @@ namespace axl {
     std::array<f32, 6> bounds = { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
     std::array<f32, 6> bounds_snap;
     std::fill(bounds_snap.begin(), bounds_snap.end(), snap.x);
-
-    v2 view_manipulate_pos = window_pos;
-    view_manipulate_pos.x += _region_available.x - 128 - 30;
-    view_manipulate_pos.y += 30;
-    ImGuizmo::ViewManipulate(value_ptr(view), 8.0f, view_manipulate_pos, v2(128), 0x10101010);
 
     ImGuizmo::Manipulate(value_ptr(view),
                          value_ptr(proj),
@@ -272,6 +275,8 @@ namespace axl {
   }
 
   void FrameEditor::ShowTreeEnto(Ento ento, u32 depth, Scene &scene) {
+    Ento selected_entity = Scene::GetActiveScene()->FromID(_inspector._selected_entity_id);
+
     ImGui::PushID(uuids::to_string(ento.id).c_str());
     std::stringstream label;
     label << ICON_FA_CIRCLE_NOTCH << " ";
@@ -280,14 +285,14 @@ namespace axl {
     ImGuiTreeNodeFlags flags =
       ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
     if (!ento.HasChildren()) flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (_inspector._selected_entity == ento) flags |= ImGuiTreeNodeFlags_Selected;
+    if (selected_entity == ento) flags |= ImGuiTreeNodeFlags_Selected;
 
     // ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(4.0f, 4.0f));
     // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (depth * 18.0f));
     bool tree_open = ImGui::TreeNodeEx(label.str().c_str(), flags);
     if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-    if (ImGui::IsItemClicked()) _inspector._selected_entity = ento;
+    if (ImGui::IsItemClicked()) _inspector._selected_entity_id = ento.id;
     ImGui::PopStyleVar(1);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
@@ -333,7 +338,7 @@ namespace axl {
     bool marked_for_deletion = false;
     if (ImGui::Button(ICON_FA_TRASH_ALT " Delete", button_size)) {
       marked_for_deletion = true;
-      _inspector._selected_entity = {};
+      _inspector._selected_entity_id = {};
       ImGui::CloseCurrentPopup();
     }
     if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -369,11 +374,15 @@ namespace axl {
 
     scene._registry.each([&](auto entity) {
       Ento ento = scene.FromHandle(entity);
-      if (!ento || ento.HasParent()) return;
+      if (!ento) {
+        log::error("Entity is null");
+        return;
+      }
+      if (ento.HasParent()) return;
       ShowTreeEnto(ento, 0, scene);
     });
 
-    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) _inspector._selected_entity = {};
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) _inspector._selected_entity_id = {};
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {

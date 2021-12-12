@@ -14,6 +14,7 @@ namespace axl {
     Light();
     Light(LightType type, v3 color = v3(1.0f), f32 intensity = 1.0f);
 
+    void Init();
     v3 GetColorRGB();
     void SetColorRGB(const v3 &color);
     void SetColor(const v3 &color);

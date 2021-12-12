@@ -13,6 +13,8 @@ namespace axl {
     _scale(scale),
     _rotation(rotation) { }
 
+  void Transform::Init() { }
+
   const v3 &Transform::GetPosition() const {
     return _position;
   }

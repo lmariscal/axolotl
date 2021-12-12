@@ -30,7 +30,8 @@ namespace axl {
     _size(1920, 1080),
     _ambient_light(LightType::Ambient, v3(0.6f), 0.4f),
     _directional_light(LightType::Directional, v3(1.0f), 0.4f),
-    _directional_light_direction(v3(0.3f, 0.2f, 0.3f)) {
+    _directional_light_direction(v3(0.3f, 0.2f, 0.3f)),
+    _show_wireframe(false) {
 
     if (gladLoadGL() != GL_TRUE) {
       log::error("Failed to load OpenGL");
@@ -97,6 +98,18 @@ namespace axl {
     m4 view(1.0f);
     m4 projection(1.0f);
 
+    f64 cpu_starttime = Window::GetTime();
+    u32 gl_starttime;
+    u32 gl_endtime;
+    glGenQueries(1, &gl_starttime);
+    glGenQueries(1, &gl_endtime);
+    glQueryCounter(gl_starttime, GL_TIMESTAMP);
+
+    _mesh_count = 0;
+    _vertex_count = 0;
+    _triangle_count = 0;
+    Mesh::_draw_calls = 0;
+
     Camera *camera = Camera::GetActiveCamera();
     if (camera) {
       Ento camera_ento = Camera::GetActiveCameraEnto();
@@ -120,7 +133,14 @@ namespace axl {
       renderable.material = &material;
       renderable.transform = &transform;
       renderables.push_back(renderable);
+
+      _mesh_count += model._meshes->size();
+      for (auto &mesh : *model._meshes) {
+        _vertex_count += mesh->_num_vertices;
+        _triangle_count += mesh->_num_indices / 3;
+      }
     }
+    _renderables = renderables.size();
 
     std::sort(renderables.begin(), renderables.end(), [](const Renderable &a, const Renderable &b) {
       return a.transform->GetPosition().z < b.transform->GetPosition().z;
@@ -186,6 +206,11 @@ namespace axl {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
+    if (_show_wireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
     for (auto entity : renderables) {
       m4 model_mat = entity.transform->GetModelMatrix(entity.ento);
 
@@ -216,6 +241,8 @@ namespace axl {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     _post_process_framebuffer->Unbind();
 
     // Post process
@@ -239,6 +266,21 @@ namespace axl {
 
     _quad_mesh->Draw();
 
+    glQueryCounter(gl_endtime, GL_TIMESTAMP);
+    i32 query_available = false;
+    while (!query_available) {
+      glGetQueryObjectiv(gl_endtime, GL_QUERY_RESULT_AVAILABLE, &query_available);
+    }
+
+    u64 start_time, end_time;
+    glGetQueryObjectui64v(gl_starttime, GL_QUERY_RESULT, &start_time);
+    glGetQueryObjectui64v(gl_endtime, GL_QUERY_RESULT, &end_time);
+
+    _gpu_render_time_accum += (double)(end_time - start_time) / 1000.0;
+
+    f64 cpu_endtime = Window::GetTime();
+    _cpu_render_time_accum += cpu_endtime - cpu_starttime;
+
     if (show_data) ShowData();
   }
 
@@ -246,8 +288,14 @@ namespace axl {
     ImGui::Begin("Renderer");
 
     if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Text("  FPS: %u", _fps);
-      ImGui::Text("Delta: %.2fms", _delta_time * 1000.0);
+      ImGui::Text("            FPS: %u", _fps);
+      ImGui::Text("          Delta: %.2fms", _delta_time * 1000.0);
+      ImGui::Text("         Meshes: %u", _mesh_count);
+      ImGui::Text("       Vertices: %u", _vertex_count);
+      ImGui::Text("      Triangles: %u", _triangle_count);
+      ImGui::Text("     Draw Calls: %u", Mesh::_draw_calls);
+      ImGui::Text("GPU Render Time: %.2fµs", _gpu_render_time);
+      ImGui::Text("CPU Render Time: %.2fms", _cpu_render_time);
     }
 
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -264,10 +312,17 @@ namespace axl {
       _last_time = now;
 
       _fps = _frame_count * 4;
+
       _delta_time = _delta_time_accum / _frame_count;
+      _delta_time_accum = 0.0;
+
+      _gpu_render_time = _gpu_render_time_accum / _frame_count;
+      _gpu_render_time_accum = 0.0;
+
+      _cpu_render_time = _cpu_render_time_accum / _frame_count;
+      _cpu_render_time_accum = 0.0;
 
       _frame_count = 0;
-      _delta_time_accum = 0.0;
     }
 
     _delta_time_accum += _window->GetDeltaTime();
@@ -277,11 +332,7 @@ namespace axl {
   }
 
   void Renderer::SetMeshWireframe(bool state) {
-    if (state) {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    _show_wireframe = state;
   }
 
 } // namespace axl

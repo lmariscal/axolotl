@@ -14,6 +14,7 @@ namespace axl {
     Transform &operator=(const Transform &other) = default;
     Transform &operator=(Transform &&other) = default;
 
+    void Init();
     json Serialize() const;
     void Deserialize(const json &json);
     bool ShowComponent();

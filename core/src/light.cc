@@ -8,6 +8,8 @@ namespace axl {
 
   Light::Light(LightType type, v3 color, f32 intensity): color(v4(color, 1.0f)), intensity(intensity), type(type) { }
 
+  void Light::Init() { }
+
   v3 Light::GetColorRGB() {
     return color * 255.0f;
   }

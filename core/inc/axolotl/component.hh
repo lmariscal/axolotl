@@ -42,11 +42,9 @@
     .prop("name"_hs, std::string(#Type))                                                                           \
     .func<static_cast<Type &(entt::registry::*)(const entt::entity)>(&entt::registry::get<Type>), entt::as_ref_t>( \
       "get"_hs)                                                                                                    \
-    .func<entt::overload(                                                                                          \
-            static_cast<const Type &(entt::registry::*)(const entt::entity) const>(&entt::registry::get<Type>)),   \
-          entt::as_ref_t>("get"_hs)                                                                                \
     .func<&entt::registry::emplace_or_replace<Type>, entt::as_ref_t>("emplace"_hs)                                 \
-    .func<&Type::GetHash>("GetHash"_hs) COMPONENT_FOR_EACH(REGISTER_COMPONENT_MEMBER, Type, __VA_ARGS__)
+    .func<&Type::GetHash>("GetHash"_hs)                                                                            \
+    .func<&Type::Init>("Init"_hs) COMPONENT_FOR_EACH(REGISTER_COMPONENT_MEMBER, Type, __VA_ARGS__)
 
 #define REGISTER_COMPONENT_DATA_TYPE(Type) \
   entt::meta<Type>().type().conv<json>().func<&DefaultFromJson<Type>>("FromJSON"_hs)

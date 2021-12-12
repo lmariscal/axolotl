@@ -100,7 +100,7 @@ namespace axl {
     return _delta_time;
   }
 
-  f64 Window::GetTime() const {
+  f64 Window::GetTime() {
     return glfwGetTime();
   }
 

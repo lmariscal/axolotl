@@ -13,6 +13,8 @@ namespace axl {
 
   class HierarchyComponent {
    public:
+    void Init() { }
+
     uuid parent;
     std::vector<uuid> children;
 
@@ -22,6 +24,8 @@ namespace axl {
   class Tag {
    public:
     static constexpr std::string_view DefaultTag = "Entity";
+
+    void Init() { }
 
     std::string value;
 
@@ -128,8 +132,6 @@ namespace axl {
     void AddChild(Ento child);
     void RemoveChild(Ento child);
     std::vector<Ento> Children();
-
-    REGISTER_COMPONENT(Ento, id)
 
     uuid id;
     entt::entity handle;

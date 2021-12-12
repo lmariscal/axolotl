@@ -22,6 +22,7 @@ namespace axl {
     REGISTER_COMPONENT_DATA_TYPE(std::filesystem::path);
 
     REGISTER_COMPONENT_DATA_TYPE(std::vector<uuid>);
+    REGISTER_COMPONENT_DATA_TYPE(std::vector<std::string>);
 
     REGISTER_COMPONENT_DATA_TYPE(v2);
     REGISTER_COMPONENT_DATA_TYPE(v3);

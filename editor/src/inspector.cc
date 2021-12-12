@@ -18,7 +18,8 @@ namespace axl {
 
   void Inspector::Draw(Scene &scene, DockSpace &dock) {
     ImGui::Begin("Inspector", &dock.data.show_inspector);
-    if (!_selected_entity) {
+    Ento selected_entity = scene.FromID(_selected_entity_id);
+    if (!selected_entity) {
       v2 size = ImGui::GetWindowSize();
       std::string text = "No entity selected";
       f32 width = ImGui::CalcTextSize(text.c_str()).x;
@@ -30,18 +31,18 @@ namespace axl {
       return;
     }
 
-    v2 id_text_size = ImGui::CalcTextSize(uuids::to_string(_selected_entity.id).c_str());
+    v2 id_text_size = ImGui::CalcTextSize(uuids::to_string(selected_entity.id).c_str());
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - id_text_size.x - ImGui::GetStyle().FramePadding.x) / 2.0f);
 
-    ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(_selected_entity.id).c_str());
+    ImGui::TextColored(v4(1.0f, 1.0f, 1.0f, 0.6f), "%s", uuids::to_string(selected_entity.id).c_str());
     if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-    if (ImGui::IsItemClicked()) ImGui::SetClipboardText(uuids::to_string(_selected_entity.id).c_str());
+    if (ImGui::IsItemClicked()) ImGui::SetClipboardText(uuids::to_string(selected_entity.id).c_str());
 
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().ItemSpacing.y);
 
     if (_edit_name) {
-      Tag &tag = _selected_entity.Tag();
+      Tag &tag = selected_entity.Tag();
 
       std::array<char, 128> name_buffer;
       std::fill(name_buffer.begin(), name_buffer.end(), 0);
@@ -62,7 +63,7 @@ namespace axl {
       }
     } else {
       ImGui::SetWindowFontScale(1.1f);
-      ImGui::Text("%s", _selected_entity.Tag().value.c_str());
+      ImGui::Text("%s", selected_entity.Tag().value.c_str());
       if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
       if (ImGui::IsItemClicked()) {
         _edit_name = true;
@@ -79,16 +80,15 @@ namespace axl {
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.0f);
 
-    ShowComponents(_selected_entity, scene);
+    ShowComponents(selected_entity, scene);
 
     ShowAddComponent(scene);
 
     if (_add_model) {
-      std::array<std::string, (i32)ShaderType::Last> shader_paths;
-      shader_paths[(i32)ShaderType::Vertex] = Axolotl::GetDistDir() + "res/shaders/testy.vert";
-      shader_paths[(i32)ShaderType::Fragment] = Axolotl::GetDistDir() + "res/shaders/testy.frag";
+      std::vector<std::string> shader_paths = { Axolotl::GetDistDir() + "res/shaders/testy.vert",
+                                                Axolotl::GetDistDir() + "res/shaders/testy.frag" };
       log::info("Adding model \"{}\"", _model_path);
-      Model &model = _selected_entity.AddComponent<Model>(_model_path, shader_paths);
+      Model &model = selected_entity.AddComponent<Model>(_model_path, shader_paths);
       model.Init();
       _add_model = false;
       _model_path = "";
@@ -135,14 +135,17 @@ namespace axl {
   }
 
   void Inspector::ShowAddComponent(Scene &scene) {
+    Ento selected_entity = scene.FromID(_selected_entity_id);
+    if (!selected_entity) return;
+
     if (ImGui::BeginPopup("ComponentAddPopUp")) {
       if (ImGui::MenuItem("Camera")) {
-        Camera &camera = _selected_entity.TryAddComponent<Camera>();
+        Camera &camera = selected_entity.TryAddComponent<Camera>();
         camera.Init();
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Transform")) {
-        _selected_entity.TryAddComponent<Transform>();
+        selected_entity.TryAddComponent<Transform>();
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("Model")) {
@@ -155,12 +158,15 @@ namespace axl {
   }
 
   void Inspector::ShowComponents(Ento &ento, Scene &scene) {
+    Ento selected_entity = scene.FromID(_selected_entity_id);
+    if (!selected_entity) return;
+
     if (ento.HasComponent<Transform>()) {
       if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         Transform &transform = ento.GetComponent<Transform>();
         if (transform.ShowComponent()) {
 
-          if (_selected_entity.HasComponent<Camera>()) _selected_entity.GetComponent<Camera>().UpdateVectors();
+          if (selected_entity.HasComponent<Camera>()) selected_entity.GetComponent<Camera>().UpdateVectors();
         }
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);

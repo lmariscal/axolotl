@@ -91,6 +91,9 @@ namespace axl {
         if (ImGui::MenuItem("Full Screen", "F11", data.fullscreen)) { data.fullscreen = !data.fullscreen; }
         if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
+        if (ImGui::MenuItem("Wireframe", "", data.show_wireframe)) { data.show_wireframe = !data.show_wireframe; }
+        if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
         ImGui::EndMenu();
       }
 

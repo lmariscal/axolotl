@@ -16,8 +16,8 @@ namespace axl {
     Ento camera_ento = CreateEntity();
     camera_ento.Tag().value = "Camera";
     Camera &camera_component = camera_ento.AddComponent<Camera>();
-    camera_component.Init();
     camera_component.SetAsActive();
+    camera_component.Init();
     camera_ento.Transform().SetPosition(v3(0.0f, 0.0f, -5.0f));
 
     Ento light_ento = CreateEntity();
@@ -26,9 +26,8 @@ namespace axl {
 
     Ento cube_ento = CreateEntity();
     cube_ento.Tag().value = "Cube";
-    std::array<std::string, (i32)ShaderType::Last> shader_paths;
-    shader_paths[(i32)ShaderType::Vertex] = Axolotl::GetDistDir() + "res/shaders/testy.vert";
-    shader_paths[(i32)ShaderType::Fragment] = Axolotl::GetDistDir() + "res/shaders/testy.frag";
+    std::vector<std::string> shader_paths = { Axolotl::GetDistDir() + "res/shaders/testy.vert",
+                                              Axolotl::GetDistDir() + "res/shaders/testy.frag" };
     Model &cube_model = cube_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
     cube_model.Init();
     TextureStore::ProcessQueue();

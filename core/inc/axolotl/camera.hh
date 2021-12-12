@@ -16,8 +16,6 @@ namespace axl {
     Camera();
     ~Camera();
 
-    json Serialize() const;
-    void Deserialize(const json &json);
     bool ShowComponent(Ento &ento);
 
     void Init();
@@ -35,7 +33,7 @@ namespace axl {
     static Camera *GetActiveCamera();
     static Ento GetActiveCameraEnto();
 
-    REGISTER_COMPONENT(Camera, _movement_speed, _mouse_sensitivity, _fov, _is_orthographic, _is_active_camera);
+    REGISTER_COMPONENT(Camera, _movement_speed, _mouse_sensitivity, _fov, _is_orthographic, _is_active_camera)
 
    protected:
     inline static Ento _active_camera_ento;

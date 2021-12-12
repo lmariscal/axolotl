@@ -29,7 +29,7 @@ namespace axl {
     const v2i &GetFrameBufferSize() const;
     // Returns Delta time in milliseconds
     f64 GetDeltaTime() const;
-    f64 GetTime() const;
+    static f64 GetTime();
     Renderer &GetRenderer() const;
     IOManager &GetIOManager() const;
     GUI &GetGUI() const;

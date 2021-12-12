@@ -73,6 +73,8 @@ namespace axl {
     else
       glDrawArrays(GL_TRIANGLES, 0, _num_vertices);
     glBindVertexArray(0);
+
+    _draw_calls++;
   }
 
   void Mesh::CreateCube(Mesh **mesh) {

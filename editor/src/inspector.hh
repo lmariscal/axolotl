@@ -1,9 +1,9 @@
 #pragma once
 
-#include <axolotl/types.hh>
-#include <axolotl/ento.hh>
-
 #include "dockspace.hh"
+
+#include <axolotl/ento.hh>
+#include <axolotl/types.hh>
 
 namespace axl {
 
@@ -27,7 +27,7 @@ namespace axl {
     bool _want_model = false;
     bool _edit_name = false;
     bool _edit_name_first = false;
-    Ento _selected_entity;
+    uuid _selected_entity_id;
   };
 
 } // namespace axl

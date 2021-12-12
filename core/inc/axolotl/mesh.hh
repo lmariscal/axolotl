@@ -30,6 +30,9 @@ namespace axl {
 
    protected:
     friend class Model;
+    friend class Renderer;
+
+    inline static u32 _draw_calls = 0;
 
     u32 _vao;
     u32 _num_vertices;

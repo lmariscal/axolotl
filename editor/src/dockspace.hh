@@ -12,6 +12,7 @@ namespace axl {
     bool fullscreen = false;
     bool ratio_locked = false;
 
+    bool show_wireframe = false;
     bool show_world_editor = true;
     bool show_terminal = true;
     bool show_inspector = true;

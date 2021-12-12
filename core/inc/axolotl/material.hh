@@ -10,7 +10,7 @@ namespace axl {
 
   class Material {
    public:
-    Material(const std::array<std::string, (i32)ShaderType::Last> &paths);
+    Material(const std::vector<std::string> &paths);
     ~Material();
 
     virtual json Serialize() const;

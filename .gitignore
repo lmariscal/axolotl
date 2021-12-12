@@ -5,6 +5,7 @@ imgui.ini
 debug/
 compile_commands.json
 Font Awesome*
+scene.json
 
 # */**/renderer.cc
 # */**/renderer.h

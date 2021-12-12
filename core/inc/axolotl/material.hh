@@ -17,6 +17,8 @@ namespace axl {
     virtual void Deserialize(const json &json);
     virtual bool ShowData();
 
+    void Init();
+
     bool Bind(u32 id = 0, u32 unit = 0, u32 count = 0, TextureType type = TextureType::Last);
     void BindAll();
     void Build();

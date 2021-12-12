@@ -86,7 +86,8 @@ namespace axl {
       _skybox_shader = nullptr;
     }
 
-    if (!skybox) return;
+    if (!skybox)
+      return;
 
     _skybox_texture = skybox;
     Mesh::CreateCube(&_skybox_mesh);
@@ -95,10 +96,10 @@ namespace axl {
   }
 
   void Renderer::Render(Scene &scene, bool show_data, bool focused) {
+    f64 cpu_starttime = Window::GetTime();
     m4 view(1.0f);
     m4 projection(1.0f);
 
-    f64 cpu_starttime = Window::GetTime();
     u32 gl_starttime;
     u32 gl_endtime;
     glGenQueries(1, &gl_starttime);
@@ -116,6 +117,8 @@ namespace axl {
       view = camera->GetViewMatrix();
       projection = camera->GetProjectionMatrix(*_window);
     }
+
+    f64 orginzation_starttime = Window::GetTime();
 
     entt::registry &registry = scene.GetRegistry();
     std::vector<Renderable> renderables;
@@ -146,6 +149,10 @@ namespace axl {
       return a.transform->GetPosition().z < b.transform->GetPosition().z;
     });
 
+    f64 orginzation_endtime = Window::GetTime();
+    _organization_time_accum += orginzation_endtime - orginzation_starttime;
+
+    f64 lights_starttime = Window::GetTime();
     std::vector<LightData> lights_data;
 
     LightData ambient_light_data;
@@ -195,6 +202,10 @@ namespace axl {
                     nullptr);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    f64 lights_endtime = Window::GetTime();
+    _lights_time_accum += lights_endtime - lights_starttime;
+
+    // f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
 
     Grid::Draw(view, projection, 100);
@@ -211,8 +222,12 @@ namespace axl {
     } else {
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
+    f64 main_draw_time;
     for (auto entity : renderables) {
-      m4 model_mat = entity.transform->GetModelMatrix(entity.ento);
+      f64 main_draw_starttime = Window::GetTime();
+      m4 model_mat = entity.transform->GetModelMatrix();
+      f64 main_draw_endtime = Window::GetTime();
+      main_draw_time += main_draw_endtime - main_draw_starttime;
 
       entity.material->GetShader().Bind();
       u32 block_index = entity.material->GetShader().GetUniformBlockIndex("Lights");
@@ -225,6 +240,7 @@ namespace axl {
 
       entity.model->Draw(*entity.material);
     }
+    main_draw_time = main_draw_time;
 
     if (_skybox_texture) {
       glDisable(GL_CULL_FACE);
@@ -245,7 +261,11 @@ namespace axl {
 
     _post_process_framebuffer->Unbind();
 
+    // f64 main_draw_endtime = Window::GetTime();
+    _main_draw_time_accum += main_draw_time;
+
     // Post process
+    f64 post_draw_starttime = Window::GetTime();
 
     _post_process_shader->Bind();
     _post_process_shader->SetUniformM4((u32)UniformLocation::ModelMatrix, m4(1.0f));
@@ -257,7 +277,8 @@ namespace axl {
     glUniform1i(_post_process_shader->GetUniformLocation("depth_tex"), 2);
 
     v2 relative_mouse = v2(0.0f);
-    if (focused) relative_mouse = _window->GetIOManager().GetRelativePosition();
+    if (focused)
+      relative_mouse = _window->GetIOManager().GetRelativePosition();
     glUniform2f(_post_process_shader->GetUniformLocation("mouse_delta"), relative_mouse.x, relative_mouse.y);
 
     v4 viewport_size;
@@ -265,6 +286,9 @@ namespace axl {
     glUniform2f(_post_process_shader->GetUniformLocation("viewport_size"), viewport_size.z, viewport_size.w);
 
     _quad_mesh->Draw();
+
+    f64 post_draw_endtime = Window::GetTime();
+    _post_draw_time_accum += post_draw_endtime - post_draw_starttime;
 
     glQueryCounter(gl_endtime, GL_TIMESTAMP);
     i32 query_available = false;
@@ -276,26 +300,30 @@ namespace axl {
     glGetQueryObjectui64v(gl_starttime, GL_QUERY_RESULT, &start_time);
     glGetQueryObjectui64v(gl_endtime, GL_QUERY_RESULT, &end_time);
 
-    _gpu_render_time_accum += (double)(end_time - start_time) / 1000.0;
+    _gpu_render_time_accum += (f64)(end_time - start_time) / 1000000.0;
 
     f64 cpu_endtime = Window::GetTime();
     _cpu_render_time_accum += cpu_endtime - cpu_starttime;
-
-    if (show_data) ShowData();
+    if (show_data)
+      ShowData();
   }
 
   void Renderer::ShowData() {
     ImGui::Begin("Renderer");
 
     if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Text("            FPS: %u", _fps);
-      ImGui::Text("          Delta: %.2fms", _delta_time * 1000.0);
-      ImGui::Text("         Meshes: %u", _mesh_count);
-      ImGui::Text("       Vertices: %u", _vertex_count);
-      ImGui::Text("      Triangles: %u", _triangle_count);
-      ImGui::Text("     Draw Calls: %u", Mesh::_draw_calls);
-      ImGui::Text("GPU Render Time: %.2fµs", _gpu_render_time);
-      ImGui::Text("CPU Render Time: %.2fms", _cpu_render_time);
+      ImGui::Text("              FPS: %u", _fps);
+      ImGui::Text("            Delta: %.2fms", _delta_time * 1000.0);
+      ImGui::Text("           Meshes: %u", _mesh_count);
+      ImGui::Text("         Vertices: %u", _vertex_count);
+      ImGui::Text("        Triangles: %u", _triangle_count);
+      ImGui::Text("       Draw Calls: %u", Mesh::_draw_calls);
+      ImGui::Text("   Main Draw Time: %.2fms", _main_draw_time * 1000.0);
+      ImGui::Text("   Post Draw Time: %.2fms", _post_draw_time * 1000.0);
+      ImGui::Text("  GPU Render Time: %.2fms", _gpu_render_time);
+      ImGui::Text("  CPU Render Time: %.2fms", _cpu_render_time * 1000.0);
+      ImGui::Text("Organization Time: %.2fms", _organization_time * 1000.0);
+      ImGui::Text("Light Update Time: %.2fms", _lights_time * 1000.0);
     }
 
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -321,6 +349,18 @@ namespace axl {
 
       _cpu_render_time = _cpu_render_time_accum / _frame_count;
       _cpu_render_time_accum = 0.0;
+
+      _organization_time = _organization_time_accum / _frame_count;
+      _organization_time_accum = 0.0;
+
+      _main_draw_time = _main_draw_time_accum / _frame_count;
+      _main_draw_time_accum = 0.0;
+
+      _post_draw_time = _post_draw_time_accum / _frame_count;
+      _post_draw_time_accum = 0.0;
+
+      _lights_time = _lights_time_accum / _frame_count;
+      _lights_time_accum = 0.0;
 
       _frame_count = 0;
     }

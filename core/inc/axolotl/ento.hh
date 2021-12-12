@@ -61,13 +61,18 @@ namespace axl {
     T &AddComponent(Args &&...args) {
       AXL_ASSERT_MESSAGE(!HasComponent<T>(), "Entity already has component");
 
-      return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
+      T &t = scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
+      t.Init();
+      return t;
     }
 
     template<typename T, typename... Args>
     T &TryAddComponent(Args &&...args) {
-      if (HasComponent<T>()) return GetComponent<T>();
-      return scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
+      if (HasComponent<T>())
+        return GetComponent<T>();
+      T &t = scene->_registry.emplace<T>(handle, std::forward<Args>(args)...);
+      t.Init();
+      return t;
     }
 
     template<typename T>
@@ -94,7 +99,8 @@ namespace axl {
     template<typename T>
     static Ento FromComponent(T &component) {
       Scene *scene = Scene::GetActiveScene();
-      if (!scene) return Ento();
+      if (!scene)
+        return Ento();
       entt::entity e = entt::to_entity(scene->GetRegistry(), component);
       return _handle_ento_map[e];
     }

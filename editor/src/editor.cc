@@ -35,6 +35,11 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   constexpr f64 time_step = 1.0 / 100.0;
   f64 time_accumulator = 0.0;
 
+  f64 update_time_start;
+  f64 update_time_end;
+  f64 imgui_starttime;
+  f64 imgui_endtime;
+
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
@@ -55,11 +60,15 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       ImGui::End();
     }
 
-    if (terminal_data.watch_shaders) { ShaderStore::ProcessQueue(); }
+    if (terminal_data.watch_shaders) {
+      ShaderStore::ProcessQueue();
+    }
 
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);
-    if (frame_editor.focused && io.KeyTriggered(Key::Escape)) frame_editor.focused = false;
-    if (io.KeyTriggered(Key::F11)) dock.data.fullscreen = !dock.data.fullscreen;
+    if (frame_editor.focused && io.KeyTriggered(Key::Escape))
+      frame_editor.focused = false;
+    if (io.KeyTriggered(Key::F11))
+      dock.data.fullscreen = !dock.data.fullscreen;
 
     if (!show_frame != last_fullscreen) {
       if (show_frame) {
@@ -76,6 +85,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       dock.Draw(window);
     }
 
+    update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
       time_accumulator += window.GetDeltaTime();
       while (time_accumulator >= time_step) {
@@ -83,8 +93,14 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         time_accumulator -= time_step;
       }
     }
+    update_time_end = window.GetTime();
+
+    scene.Focused(window, frame_editor.focused);
+
+    // Actual Scene Rendering START
 
     if (!show_frame) {
+
       v2i region_available = window.GetWindowFrameBufferSize();
       FrameBuffer::BindDefault();
       v3 color(33, 33, 33);
@@ -92,31 +108,54 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(region_available.x, region_available.y);
       window.SetFrameBufferSize(region_available);
 
-      if (terminal_data.display_terminal) terminal.show();
-    } else {
-      v2i region_available = frame_editor.GetRegionAvailable();
-      if (region_available.x > 0 && region_available.y > 0) window.SetFrameBufferSize(region_available);
+      if (terminal_data.display_terminal)
+        terminal.show();
 
-      if (dock.data.show_terminal) terminal.show();
+      scene.Draw(renderer, dock.data.show_renderer && show_frame);
+
+    } else {
+
+      v2i region_available = frame_editor.GetRegionAvailable();
+      if (region_available.x > 0 && region_available.y > 0)
+        window.SetFrameBufferSize(region_available);
+
       frame_editor.Bind(window);
       v3 color(33, 33, 33);
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
-    }
+      renderer.SetMeshWireframe(dock.data.show_wireframe);
 
-    renderer.SetMeshWireframe(dock.data.show_wireframe);
-    if (dock.data.show_world_editor) scene.Draw(renderer, dock.data.show_renderer && show_frame);
+      if (dock.data.show_world_editor)
+        scene.Draw(renderer, dock.data.show_renderer && show_frame);
 
-    if (show_frame) {
       frame_editor.Unbind(window);
 
-      renderer.ClearScreen({ 0.13f, 0.13f, 0.13f });
-      if (dock.data.show_world_editor) frame_editor.Draw(window, dock);
-      if (dock.data.show_hierarchy) frame_editor.DrawEntityList(scene, dock);
-      if (dock.data.show_inspector) frame_editor.DrawInspector(scene, dock);
+      imgui_starttime = window.GetTime();
+
+      renderer.ClearScreen(v4(color / 255.0f, 1.0f));
+      if (dock.data.show_terminal)
+        terminal.show();
+      if (dock.data.show_world_editor)
+        frame_editor.Draw(window, dock);
+      if (dock.data.show_hierarchy)
+        frame_editor.DrawEntityList(scene, dock);
+      if (dock.data.show_inspector)
+        frame_editor.DrawInspector(scene, dock);
+
+      imgui_endtime = window.GetTime();
     }
 
-    scene.Focused(window, frame_editor.focused);
+    // Actual Scene Rendering END
+
+    ImGui::Begin("Renderer");
+    if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+      f64 imgui_time = imgui_endtime - imgui_starttime;
+      f64 update_time = update_time_end - update_time_start;
+
+      ImGui::Text("      ImGui Time: %.2fms", imgui_time * 1000.0);
+      ImGui::Text("     Update Time: %.2fms", update_time * 1000.0);
+    }
+    ImGui::End();
 
     window.Draw();
 
@@ -130,7 +169,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       }
     }
     if (io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl)) {
-      if (io.KeyDown(Key::Q)) terminal_data.quit_requested = true;
+      if (io.KeyDown(Key::Q))
+        terminal_data.quit_requested = true;
     }
   }
 

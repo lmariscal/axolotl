@@ -17,13 +17,16 @@ namespace axl {
                                                   shader_paths[(i32)ShaderType::Fragment],
                                                   shader_paths[(i32)ShaderType::Geometry],
                                                   shader_paths[(i32)ShaderType::Compute]));
+  }
 
+  void Material::Init() {
     ShaderStore::ProcessQueue();
   }
 
   Material::~Material() {
     log::debug("Material destroyed, texture use cound is {}", _textures.use_count());
-    if (_textures.use_count() > 1) return;
+    if (_textures.use_count() > 1)
+      return;
 
     log::debug("Destroying textures");
 
@@ -43,15 +46,18 @@ namespace axl {
       std::vector<Texture2D *> &textures = (*_textures)[i];
       for (i32 j = 0; j < textures.size(); ++j) {
         u32 count = counter[i]++;
-        if (Bind(j, unit_count, count, (TextureType)i)) unit_count++;
+        if (Bind(j, unit_count, count, (TextureType)i))
+          unit_count++;
       }
 
-      if (textures.empty()) _shader->SetUniformTexture((TextureType)i, -1);
+      if (textures.empty())
+        _shader->SetUniformTexture((TextureType)i, -1);
     }
   }
 
   bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
-    if (type == TextureType::Last) return false;
+    if (type == TextureType::Last)
+      return false;
 
     if ((*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size()) {
       _shader->SetUniformTexture(type, -1);
@@ -66,7 +72,8 @@ namespace axl {
   }
 
   void Material::AddTexture(const std::filesystem::path &path, TextureType type) {
-    if (_textures_path.count(path)) return;
+    if (_textures_path.count(path))
+      return;
 
     Texture2D *texture = new Texture2D(path, type);
     (*_textures)[(i32)type].push_back(texture);

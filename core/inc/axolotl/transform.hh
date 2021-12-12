@@ -2,6 +2,7 @@
 
 #include <axolotl/component.hh>
 #include <axolotl/types.hh>
+#include <unordered_map>
 
 namespace axl {
 
@@ -28,8 +29,9 @@ namespace axl {
     void SetScale(const v3 &scale);
     void SetRotation(const quat &rotation);
     void SetRotation(const v3 &rotation);
+    bool IsDirty() const;
 
-    m4 GetModelMatrix(Ento ento) const;
+    m4 GetModelMatrix();
 
     REGISTER_COMPONENT(Transform, _position, _scale, _rotation);
 
@@ -37,6 +39,10 @@ namespace axl {
     v3 _position;
     v3 _scale;
     quat _rotation;
+
+    bool _is_dirty;
+    m4 _model_matrix;
+    m4 _parent_model_matrix;
   };
 
 } // namespace axl

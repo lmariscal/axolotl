@@ -34,6 +34,14 @@ namespace axl {
 
     bool _show_wireframe;
     v2i _size;
+    f64 _organization_time;
+    f64 _organization_time_accum;
+    f64 _main_draw_time;
+    f64 _main_draw_time_accum;
+    f64 _post_draw_time;
+    f64 _post_draw_time_accum;
+    f64 _lights_time;
+    f64 _lights_time_accum;
     f64 _gpu_render_time;
     f64 _gpu_render_time_accum;
     f64 _cpu_render_time;

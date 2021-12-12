@@ -17,8 +17,9 @@ namespace axl {
     camera_ento.Tag().value = "Camera";
     Camera &camera_component = camera_ento.AddComponent<Camera>();
     camera_component.SetAsActive();
-    camera_component.Init();
-    camera_ento.Transform().SetPosition(v3(0.0f, 0.0f, -5.0f));
+    camera_ento.Transform().SetPosition(v3(-2.7f, 4.6f, -6.4f));
+    camera_ento.Transform().SetRotation(v3(67.5f, -29.5f, 0));
+    camera_component.UpdateVectors();
 
     Ento light_ento = CreateEntity();
     light_ento.Tag().value = "Light";
@@ -29,7 +30,6 @@ namespace axl {
     std::vector<std::string> shader_paths = { Axolotl::GetDistDir() + "res/shaders/testy.vert",
                                               Axolotl::GetDistDir() + "res/shaders/testy.frag" };
     Model &cube_model = cube_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
-    cube_model.Init();
     TextureStore::ProcessQueue();
 
     window.GetRenderer().SetSkybox(new TextureCube(Axolotl::GetDistDir() + "res/textures/TropicalSunnyDay"));
@@ -43,12 +43,18 @@ namespace axl {
       Ento camera_ento = Camera::GetActiveCameraEnto();
       camera->RotateCamera(io.GetRelativePosition(), delta);
 
-      if (io.KeyDown(Key::W)) camera->MoveCamera(CameraDirection::Front, delta);
-      if (io.KeyDown(Key::S)) camera->MoveCamera(CameraDirection::Back, delta);
-      if (io.KeyDown(Key::A)) camera->MoveCamera(CameraDirection::Left, delta);
-      if (io.KeyDown(Key::D)) camera->MoveCamera(CameraDirection::Right, delta);
-      if (io.KeyDown(Key::Q)) camera->MoveCamera(CameraDirection::Up, delta);
-      if (io.KeyDown(Key::E)) camera->MoveCamera(CameraDirection::Down, delta);
+      if (io.KeyDown(Key::W))
+        camera->MoveCamera(CameraDirection::Front, delta);
+      if (io.KeyDown(Key::S))
+        camera->MoveCamera(CameraDirection::Back, delta);
+      if (io.KeyDown(Key::A))
+        camera->MoveCamera(CameraDirection::Left, delta);
+      if (io.KeyDown(Key::D))
+        camera->MoveCamera(CameraDirection::Right, delta);
+      if (io.KeyDown(Key::Q))
+        camera->MoveCamera(CameraDirection::Up, delta);
+      if (io.KeyDown(Key::E))
+        camera->MoveCamera(CameraDirection::Down, delta);
     }
   }
 

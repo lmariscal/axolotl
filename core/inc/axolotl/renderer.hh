@@ -10,10 +10,10 @@ namespace axl {
   class Window;
   class GUI;
 
-  struct TextureCube;
-  struct Mesh;
-  struct Shader;
-  struct FrameBuffer;
+  class TextureCube;
+  class Mesh;
+  class Shader;
+  class FrameBuffer;
 
   class Renderer {
    public:

@@ -1,16 +1,12 @@
 #include <axolotl/ento.hh>
-#include <axolotl/transform.hh>
-
 #include <axolotl/model.hh>
+#include <axolotl/transform.hh>
 
 namespace axl {
 
   uuids::uuid_random_generator Ento::_uuid_generator(nullptr);
 
-  Ento::Ento(entt::entity handle, Scene *scene):
-    handle(handle),
-    scene(scene)
-  {
+  Ento::Ento(entt::entity handle, Scene *scene): handle(handle), scene(scene) {
     if (_first_gen) {
       std::random_device rd;
       std::array<int, std::mt19937::state_size> _seed_data;
@@ -28,8 +24,7 @@ namespace axl {
   }
 
   Ento::~Ento() {
-    if (id.is_nil())
-      return;
+    if (id.is_nil()) return;
   }
 
   void Ento::AddChild(Ento child) {
@@ -40,33 +35,30 @@ namespace axl {
 
   void Ento::RemoveChild(Ento child) {
     HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
-    hierarchy.children.erase(
-        std::remove(hierarchy.children.begin(), hierarchy.children.end(), child),
-        hierarchy.children.end()
-      );
-    child.SetParent({ });
+    hierarchy.children.erase(std::remove(hierarchy.children.begin(), hierarchy.children.end(), child),
+                             hierarchy.children.end());
+    child.SetParent({});
   }
 
-  Transform & Ento::Transform() {
-    return GetComponent<struct Transform>();
+  Transform &Ento::Transform() {
+    return GetComponent<class Transform>();
   }
 
-  const Transform & Ento::Transform() const {
-    return GetComponent<struct Transform>();
+  const Transform &Ento::Transform() const {
+    return GetComponent<class Transform>();
   }
 
-  Tag & Ento::Tag() {
-    return GetComponent<struct Tag>();
+  Tag &Ento::Tag() {
+    return GetComponent<class Tag>();
   }
 
-  const Tag & Ento::Tag() const {
-    return GetComponent<struct Tag>();
+  const Tag &Ento::Tag() const {
+    return GetComponent<class Tag>();
   }
 
   Ento Ento::Parent() {
     HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
-    if (hierarchy.parent.is_nil())
-      return { };
+    if (hierarchy.parent.is_nil()) return {};
     return scene->FromID(hierarchy.parent);
   }
 
@@ -107,8 +99,7 @@ namespace axl {
     j["components"] = json::array();
     j["components"].push_back(Transform().Serialize());
 
-    if (HasComponent<Model>())
-      j["components"].push_back(GetComponent<Model>().Serialize());
+    if (HasComponent<Model>()) j["components"].push_back(GetComponent<Model>().Serialize());
 
     return j;
   }

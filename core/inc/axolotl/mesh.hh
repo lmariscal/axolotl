@@ -7,12 +7,13 @@
 
 namespace axl {
 
-  struct BufferData {
+  class BufferData {
+   public:
     u32 vbo;
     i32 target;
   };
 
-  struct Mesh {
+  class Mesh {
    public:
     Mesh(const std::vector<f32> &vertices, const std::vector<u32> &indices = {});
     ~Mesh();

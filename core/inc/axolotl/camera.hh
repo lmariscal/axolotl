@@ -11,7 +11,7 @@ namespace axl {
 
   enum class CameraDirection { Up, Down, Front, Back, Left, Right };
 
-  struct Camera {
+  class Camera {
    public:
     Camera();
     ~Camera();
@@ -34,6 +34,8 @@ namespace axl {
 
     static Camera *GetActiveCamera();
     static Ento GetActiveCameraEnto();
+
+    REGISTER_COMPONENT(Camera, _movement_speed, _mouse_sensitivity, _fov, _is_orthographic, _is_active_camera);
 
    protected:
     inline static Ento _active_camera_ento;

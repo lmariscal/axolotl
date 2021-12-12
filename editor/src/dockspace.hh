@@ -6,7 +6,8 @@
 
 namespace axl {
 
-  struct DockSpaceData {
+  class DockSpaceData {
+   public:
     TerminalData *terminal;
     bool fullscreen = false;
     bool ratio_locked = false;

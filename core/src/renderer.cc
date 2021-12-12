@@ -14,7 +14,8 @@
 
 namespace axl {
 
-  struct Renderable {
+  class Renderable {
+   public:
     Ento ento;
     Model *model;
     Material *material;
@@ -250,10 +251,10 @@ namespace axl {
     }
 
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ShowDataColor("Ambient Light", _ambient_light.color);
+      axl::ShowData("Ambient Light", _ambient_light.color);
       axl::ShowData("Ambient Light Intensity", _ambient_light.intensity);
 
-      ShowDataColor("Directional Light", _directional_light.color);
+      axl::ShowData("Directional Light", _directional_light.color);
       axl::ShowData("Directional Light Intensity", _directional_light.intensity);
       axl::ShowData("Directional Light Angle", _directional_light_direction);
     }

@@ -1,20 +1,17 @@
 #pragma once
 
+#include <axolotl/component.hh>
 #include <axolotl/types.hh>
 
 namespace axl {
 
   constexpr u32 LIGHT_COUNT = 32;
 
-  enum class LightType {
-    Ambient,
-    Directional,
-    Point,
-    Spot,
-    Last
-  };
+  enum class LightType { Ambient, Directional, Point, Spot, Last };
 
-  struct Light {
+  class Light {
+   public:
+    Light();
     Light(LightType type, v3 color = v3(1.0f), f32 intensity = 1.0f);
 
     v3 GetColorRGB();
@@ -23,12 +20,15 @@ namespace axl {
 
     bool ShowComponent();
 
-    v4 color;
+    REGISTER_COMPONENT(Light, color, intensity, type)
+
+    Color color;
     f32 intensity;
     LightType type;
   };
 
-  struct LightData {
+  class LightData {
+   public:
     v4 position;
     v4 color;
     f32 intensity;

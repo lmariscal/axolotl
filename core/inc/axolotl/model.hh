@@ -10,7 +10,8 @@
 
 namespace axl {
 
-  struct Model {
+  class Model {
+   public:
     Model(std::filesystem::path path = "", std::array<std::string, (i32)ShaderType::Last> paths = {}, bool root = true);
     ~Model();
 
@@ -22,6 +23,8 @@ namespace axl {
     void Init();
 
     bool two_sided;
+
+    REGISTER_COMPONENT(Model, _path, _root)
 
    protected:
     static void ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene);

@@ -37,6 +37,14 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
+    if (ImGui::Begin("Serialize")) {
+      if (ImGui::Button("Serialize")) {
+        json j = scene.Serialize();
+        std::cout << j.dump(2) << std::endl;
+      }
+      ImGui::End();
+    }
+
     if (terminal_data.watch_shaders) { ShaderStore::ProcessQueue(); }
 
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);

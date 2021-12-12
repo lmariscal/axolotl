@@ -7,7 +7,8 @@
 
 namespace axl {
 
-  struct TerminalData {
+  class TerminalData {
+   public:
     bool quit_requested = false;
     bool watch_shaders = true;
     bool scene_playing = false;

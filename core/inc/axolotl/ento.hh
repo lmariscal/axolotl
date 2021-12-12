@@ -11,21 +11,28 @@
 
 namespace axl {
 
-  struct HierarchyComponent {
+  class HierarchyComponent {
+   public:
     uuid parent;
     std::vector<uuid> children;
+
+    REGISTER_COMPONENT(HierarchyComponent, parent, children)
   };
 
-  struct Tag {
+  class Tag {
+   public:
     static constexpr std::string_view DefaultTag = "Entity";
 
     std::string value;
+
+    REGISTER_COMPONENT(Tag, value)
 
     Tag(const std::string &value): value(value) { }
     Tag(): value(DefaultTag) { }
   };
 
-  struct Ento {
+  class Ento {
+   public:
     Ento(): handle(entt::null), scene(nullptr), id(uuid()) { }
     Ento(entt::entity handle, Scene *scene);
     ~Ento();
@@ -109,10 +116,10 @@ namespace axl {
     }
 
     Transform &Transform();
-    const struct Transform &Transform() const;
+    const class Transform &Transform() const;
 
     Tag &Tag();
-    const struct Tag &Tag() const;
+    const class Tag &Tag() const;
 
     bool HasParent() const;
     bool HasChildren() const;
@@ -121,6 +128,8 @@ namespace axl {
     void AddChild(Ento child);
     void RemoveChild(Ento child);
     std::vector<Ento> Children();
+
+    REGISTER_COMPONENT(Ento, id)
 
     uuid id;
     entt::entity handle;

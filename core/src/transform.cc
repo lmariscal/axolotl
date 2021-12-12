@@ -1,31 +1,27 @@
-#include <axolotl/transform.hh>
+#include <axolotl/component.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/scene.hh>
+#include <axolotl/transform.hh>
 #include <imgui.h>
 
 namespace axl {
 
-  Transform::Transform():
-    _position({ 0.0f, 0.0f, 0.0f }),
-    _scale({ 1.0f, 1.0f, 1.0f }),
-    _rotation()
-  { }
+  Transform::Transform(): _position({ 0.0f, 0.0f, 0.0f }), _scale({ 1.0f, 1.0f, 1.0f }), _rotation() { }
 
-  Transform::Transform(const v3& position, const v3& scale, const quat& rotation):
+  Transform::Transform(const v3 &position, const v3 &scale, const quat &rotation):
     _position(position),
     _scale(scale),
-    _rotation(rotation)
-  { }
+    _rotation(rotation) { }
 
-  const v3 & Transform::GetPosition() const {
+  const v3 &Transform::GetPosition() const {
     return _position;
   }
 
-  const v3 & Transform::GetScale() const {
+  const v3 &Transform::GetScale() const {
     return _scale;
   }
 
-  const quat & Transform::GetRotationQuat() const {
+  const quat &Transform::GetRotationQuat() const {
     return _rotation;
   }
 
@@ -37,15 +33,15 @@ namespace axl {
     _rotation = quat(radians(rotation));
   }
 
-  void Transform::SetPosition(const v3& position) {
+  void Transform::SetPosition(const v3 &position) {
     _position = position;
   }
 
-  void Transform::SetScale(const v3& scale) {
+  void Transform::SetScale(const v3 &scale) {
     _scale = scale;
   }
 
-  void Transform::SetRotation(const quat& rotation) {
+  void Transform::SetRotation(const quat &rotation) {
     _rotation = rotation;
   }
 
@@ -55,8 +51,7 @@ namespace axl {
     model *= toMat4(_rotation);
     model = scale(model, _scale);
 
-    if (!ento.HasParent() || !ento.Parent())
-      return model;
+    if (!ento.HasParent() || !ento.Parent()) return model;
 
     Ento parent = ento.Parent();
     return parent.GetComponent<Transform>().GetModelMatrix(parent) * model;
@@ -65,12 +60,9 @@ namespace axl {
   bool Transform::ShowComponent() {
     bool modified = false;
 
-    if (ShowData("Position", _position))
-      modified = true;
-    if (ShowData("Scale", _scale, v3(1.0f)))
-      modified = true;
-    if (ShowData("Rotation", _rotation))
-      modified = true;
+    if (ShowData("Position", _position)) modified = true;
+    if (ShowData("Scale", _scale, v3(1.0f))) modified = true;
+    if (ShowData("Rotation", _rotation)) modified = true;
 
     return modified;
   }
@@ -87,7 +79,6 @@ namespace axl {
     return j;
   }
 
-  void Transform::Deserialize(const json &json) {
-  }
+  void Transform::Deserialize(const json &json) { }
 
 } // namespace axl

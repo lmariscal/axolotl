@@ -8,7 +8,7 @@ namespace axl {
   class Renderer;
   class Window;
 
-  struct Ento;
+  class Ento;
 
   class Scene {
    public:

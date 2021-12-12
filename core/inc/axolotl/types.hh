@@ -42,7 +42,9 @@ namespace axl {
     using namespace spdlog;
   }
 
-  struct Color {
+  // Stores color information as a normalized v4
+  class Color {
+   public:
     v4 rgba;
 
     Color(): rgba(1.0f) { }
@@ -51,16 +53,28 @@ namespace axl {
     Color(const v3 &rgb): rgba(v4(rgb, 1.0f)) { }
     Color(const v4 &rgba): rgba(rgba) { }
 
+    void SetRGB(f32 r, f32 g, f32 b) {
+      rgba = v4(r, g, b, rgba.a);
+    }
+
+    void SetRGBA(f32 r, f32 g, f32 b, f32 a) {
+      rgba = v4(r, g, b, a);
+    }
+
+    void SetRGB(const v3 &rgb) {
+      rgba = v4(rgb, rgba.a);
+    }
+
+    void SetRGBA(const v4 &rgba) {
+      this->rgba = rgba;
+    }
+
     operator v3() const {
       return rgba;
     }
 
     operator v4() const {
       return rgba;
-    }
-
-    v4 normalized() const {
-      return normalize(v4(v3(rgba), rgba.a));
     }
 
     Color &operator=(const v3 &rgb) {

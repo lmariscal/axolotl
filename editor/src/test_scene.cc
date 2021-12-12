@@ -51,11 +51,6 @@ namespace axl {
       if (io.KeyDown(Key::Q)) camera->MoveCamera(CameraDirection::Up, delta);
       if (io.KeyDown(Key::E)) camera->MoveCamera(CameraDirection::Down, delta);
     }
-
-    // ImGui::Begin("Test Scene");
-    // if (ImGui::Button("Serialize"))
-    //   log::info("Scene:\n{}", Serialize().dump(2));
-    // ImGui::End();
   }
 
   void TestScene::Focused(Window &window, bool state) {

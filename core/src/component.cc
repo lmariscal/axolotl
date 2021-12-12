@@ -1,5 +1,6 @@
 #include <axolotl/component.hh>
 #include <axolotl/scene.hh>
+#include <axolotl/texture.hh>
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -355,7 +356,7 @@ namespace axl {
     return modified;
   }
 
-  bool ShowDataTexture(const std::string &label, i32 texture_id) {
+  bool ShowData(const std::string &label, GLTexture texture) {
     bool modified = false;
 
     ImGui::PushID(label.c_str());
@@ -364,7 +365,7 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
 
     f32 size = ImGui::CalcItemWidth();
-    ImGui::Image((void *)(intptr_t)texture_id, v2(size));
+    ImGui::Image((void *)(intptr_t)texture.id, v2(size));
 
     ImGui::PopID();
     return modified;
@@ -397,7 +398,7 @@ namespace axl {
     return modified;
   }
 
-  bool ShowDataColor(const std::string &label, v4 &v) {
+  bool ShowData(const std::string &label, Color &v) {
     bool modified = false;
 
     ImGuiIO &io = ImGui::GetIO();
@@ -421,7 +422,7 @@ namespace axl {
 
     ImGui::PushFont(bold_font);
     // imgui button position on the left
-    if (ImGui::ColorEdit4("##color", value_ptr(v))) modified = true;
+    if (ImGui::ColorEdit4("##color", value_ptr(v.rgba))) modified = true;
     ImGui::PopFont();
 
     ImGui::PopItemWidth();

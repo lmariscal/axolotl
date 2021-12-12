@@ -54,7 +54,8 @@ namespace axl {
 
   enum class ShaderType { Vertex, Fragment, Geometry, Compute, Last };
 
-  struct ShaderData {
+  class ShaderData {
+   public:
     ShaderData() = default;
     ShaderData(const std::filesystem::path &vertex_path,
                const std::filesystem::path &fragment_path,

@@ -1,18 +1,13 @@
 #pragma once
 
-#include <axolotl/types.hh>
-
 #include <axolotl/texture.hh>
+#include <axolotl/types.hh>
 
 namespace axl {
 
-  enum class FrameBufferTexture {
-    Color,
-    DepthStencil,
-    Last
-  };
+  enum class FrameBufferTexture { Color, DepthStencil, Last };
 
-  struct FrameBuffer {
+  class FrameBuffer {
    public:
     FrameBuffer(u32 widht, u32 height);
     ~FrameBuffer();

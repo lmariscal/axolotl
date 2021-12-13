@@ -1,13 +1,9 @@
 #include <axolotl/framebuffer.hh>
-
 #include <glad.h>
 
 namespace axl {
 
-  FrameBuffer::FrameBuffer(u32 width, u32 height):
-    _width(width),
-    _height(height)
-  {
+  FrameBuffer::FrameBuffer(u32 width, u32 height): _width(width), _height(height) {
     for (i32 i = 0; i < (i32)FrameBufferTexture::Last; ++i)
       _textures[i] = nullptr;
 
@@ -68,10 +64,16 @@ namespace axl {
     }
     TextureStore::ProcessQueue();
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D,
-        *_textures[(i32)FrameBufferTexture::DepthStencil], 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-        *_textures[(i32)FrameBufferTexture::Color], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_DEPTH_STENCIL_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           *_textures[(i32)FrameBufferTexture::DepthStencil],
+                           0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           *_textures[(i32)FrameBufferTexture::Color],
+                           0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
       log::error("Framebuffer not complete!");

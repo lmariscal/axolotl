@@ -18,7 +18,7 @@ namespace axl {
    public:
     Ento ento;
     Model *model;
-    Material *material;
+    // Material *material;
     Transform *transform;
   };
 
@@ -123,17 +123,17 @@ namespace axl {
     entt::registry &registry = scene.GetRegistry();
     std::vector<Renderable> renderables;
 
-    auto entities = registry.group<Model, Material>();
+    auto entities = registry.view<Model>();
     for (auto entity : entities) {
       Ento ento = scene.FromHandle(entity);
       Model &model = ento.GetComponent<Model>();
-      Material &material = ento.GetComponent<Material>();
+      // Material &material = ento.GetComponent<Material>();
       Transform &transform = ento.GetComponent<Transform>();
 
       Renderable renderable;
       renderable.ento = ento;
       renderable.model = &model;
-      renderable.material = &material;
+      // renderable.material = (*model._materials).begin()->second.get();
       renderable.transform = &transform;
       renderables.push_back(renderable);
 
@@ -205,7 +205,7 @@ namespace axl {
     f64 lights_endtime = Window::GetTime();
     _lights_time_accum += lights_endtime - lights_starttime;
 
-    // f64 main_draw_starttime = Window::GetTime();
+    f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
 
     Grid::Draw(view, projection, 100);
@@ -222,25 +222,24 @@ namespace axl {
     } else {
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-    f64 main_draw_time;
     for (auto entity : renderables) {
-      f64 main_draw_starttime = Window::GetTime();
       m4 model_mat = entity.transform->GetModelMatrix();
-      f64 main_draw_endtime = Window::GetTime();
-      main_draw_time += main_draw_endtime - main_draw_starttime;
 
-      entity.material->GetShader().Bind();
-      u32 block_index = entity.material->GetShader().GetUniformBlockIndex("Lights");
-      entity.material->GetShader().SetUniformBlockBinding(block_index, 0);
-      glBindBufferBase(GL_UNIFORM_BUFFER, 0, _lights_uniform_buffer);
+      // TODO: This is horrible, MAKE A RESOURCE MANAGER!
+      for (auto itr = entity.model->_materials->begin(); itr != entity.model->_materials->end(); ++itr) {
+        Material &material = *itr->second;
+        material.GetShader().Bind();
+        u32 block_index = material.GetShader().GetUniformBlockIndex("Lights");
+        material.GetShader().SetUniformBlockBinding(block_index, 0);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, _lights_uniform_buffer);
 
-      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
-      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
-      entity.material->GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
+        material.GetShader().SetUniformM4((u32)UniformLocation::ModelMatrix, model_mat);
+        material.GetShader().SetUniformM4((u32)UniformLocation::ViewMatrix, view);
+        material.GetShader().SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
+      }
 
-      entity.model->Draw(*entity.material);
+      entity.model->Draw();
     }
-    main_draw_time = main_draw_time;
 
     if (_skybox_texture) {
       glDisable(GL_CULL_FACE);
@@ -261,8 +260,8 @@ namespace axl {
 
     _post_process_framebuffer->Unbind();
 
-    // f64 main_draw_endtime = Window::GetTime();
-    _main_draw_time_accum += main_draw_time;
+    f64 main_draw_endtime = Window::GetTime();
+    _main_draw_time_accum += main_draw_endtime - main_draw_starttime;
 
     // Post process
     f64 post_draw_starttime = Window::GetTime();

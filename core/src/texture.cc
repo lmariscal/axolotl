@@ -1,14 +1,12 @@
 #include <axolotl/texture.hh>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include <glad.h>
+#include <stb_image.h>
 
 namespace axl {
 
-  TextureCube::TextureCube(const std::filesystem::path &path, TextureType type, const  TextureData &data):
-    type(type)
-  {
+  TextureCube::TextureCube(const std::filesystem::path &path, TextureType type, const TextureData &data): type(type) {
     TextureStore::RegisterTexture(*this, path, type, data);
   }
 
@@ -37,11 +35,11 @@ namespace axl {
     glBindTexture(GL_TEXTURE_CUBE_MAP, TextureStore::GetRendererID(texture_id));
   }
 
-  Texture2D::Texture2D(const std::filesystem::path &path, TextureType type, const  TextureData &data):
-    type(type)
-  {
+  Texture2D::Texture2D(const std::filesystem::path &path, TextureType type, const TextureData &data): type(type) {
     TextureStore::RegisterTexture(*this, path, type, data);
   }
+
+  Texture2D::Texture2D(): type(TextureType::Last), texture_id(0) { }
 
   Texture2D::Texture2D(const Texture2D &other) {
     TextureStore::GetData(other.texture_id).instances++;
@@ -57,6 +55,13 @@ namespace axl {
 
   Texture2D::~Texture2D() {
     TextureStore::DeregisterTexture(texture_id);
+  }
+
+  Texture2D &Texture2D::operator=(const Texture2D &other) {
+    TextureStore::GetData(other.texture_id).instances++;
+    texture_id = other.texture_id;
+    type = other.type;
+    return *this;
   }
 
   std::string Texture2D::TextureTypeToString(TextureType type) {
@@ -95,9 +100,10 @@ namespace axl {
     return 0;
   }
 
-  void TextureStore::RegisterTexture(Texture2D &texture, const std::filesystem::path &path,
-                                     TextureType type, const TextureData &data)
-  {
+  void TextureStore::RegisterTexture(Texture2D &texture,
+                                     const std::filesystem::path &path,
+                                     TextureType type,
+                                     const TextureData &data) {
     if (!path.empty() && _path_to_id.count(path)) {
       texture.texture_id = _path_to_id[path];
       _data[texture.texture_id].instances++;
@@ -114,14 +120,18 @@ namespace axl {
     _texture_2d_queue.emplace(texture);
   }
 
-  void TextureStore::RegisterTexture(TextureCube &texture, const std::filesystem::path &path,
-                                     TextureType type, const TextureData &data)
-  {
+  void TextureStore::RegisterTexture(TextureCube &texture,
+                                     const std::filesystem::path &path,
+                                     TextureType type,
+                                     const TextureData &data) {
     if (!path.empty() && _path_to_id.count(path)) {
       texture.texture_id = _path_to_id[path];
       _data[texture.texture_id].instances++;
       return;
     }
+
+    if (path.empty() && data.size == v2i(0))
+      return;
 
     _id_counter++;
     texture.texture_id = _id_counter;
@@ -235,7 +245,10 @@ namespace axl {
   void TextureStore::CreateTexture(const Texture2D &texture) {
     TextureData &data = _data[texture.texture_id];
     if (data.size.x <= 0 || data.size.y <= 0) {
-      log::debug("Texture \"{}\" has invalid data.size {}x{}", Texture2D::TextureTypeToString(texture.type), data.size.x, data.size.y);
+      // log::debug("Texture \"{}\" has invalid data.size {}x{}",
+      //            Texture2D::TextureTypeToString(texture.type),
+      //            data.size.x,
+      //            data.size.y);
       _data[texture.texture_id].loaded = false;
       return;
     }
@@ -329,8 +342,17 @@ namespace axl {
     log::debug("Created Texture size {}x{} id {}", data.size.x, data.size.y, tex);
   }
 
-  TextureData & TextureStore::GetData(u32 id) {
+  TextureData &TextureStore::GetData(u32 id) {
     return _data[id];
+  }
+
+  Texture2D TextureStore::FromID(u32 id) {
+    for (auto &[key, value] : _path_to_id) {
+      if (value == id) {
+        return Texture2D(key);
+      }
+    }
+    return Texture2D();
   }
 
   void TextureStore::DeregisterTexture(u32 id) {

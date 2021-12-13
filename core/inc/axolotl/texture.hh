@@ -42,12 +42,13 @@ namespace axl {
 
   class Texture2D {
    public:
-    Texture2D(const std::filesystem::path &path = "",
-              TextureType type = TextureType::Last,
-              const TextureData &data = {});
+    Texture2D(const std::filesystem::path &path, TextureType type = TextureType::Last, const TextureData &data = {});
+    Texture2D();
     Texture2D(const Texture2D &other);
     Texture2D(Texture2D &&other);
     ~Texture2D();
+
+    Texture2D &operator=(const Texture2D &other);
 
     void Init();
     void Bind(u32 unit = 0);
@@ -90,8 +91,11 @@ namespace axl {
     RegisterTexture(TextureCube &texture, const std::filesystem::path &path, TextureType type, const TextureData &data);
     static void ProcessQueue();
     static void DeregisterTexture(u32 id);
+    static Texture2D FromID(u32 id);
 
    protected:
+    friend class Scene;
+
     inline static u32 _id_counter = 0;
     inline static std::unordered_map<u32, TextureData> _data;       // renderer_id -> texture_data
     inline static std::map<std::filesystem::path, u32> _path_to_id; // path -> renderer_id

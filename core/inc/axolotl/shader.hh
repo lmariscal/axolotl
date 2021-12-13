@@ -64,10 +64,14 @@ namespace axl {
       for (i32 i = 0; i < (i32)ShaderType::Last; ++i)
         paths[i] = std::filesystem::path();
 
-      if (!vertex_path.empty()) paths[(i32)ShaderType::Vertex] = vertex_path;
-      if (!fragment_path.empty()) paths[(i32)ShaderType::Fragment] = fragment_path;
-      if (!geometry_path.empty()) paths[(i32)ShaderType::Geometry] = geometry_path;
-      if (!compute_path.empty()) paths[(i32)ShaderType::Compute] = compute_path;
+      if (!vertex_path.empty())
+        paths[(i32)ShaderType::Vertex] = vertex_path;
+      if (!fragment_path.empty())
+        paths[(i32)ShaderType::Fragment] = fragment_path;
+      if (!geometry_path.empty())
+        paths[(i32)ShaderType::Geometry] = geometry_path;
+      if (!compute_path.empty())
+        paths[(i32)ShaderType::Compute] = compute_path;
 
       std::fill(shaders, shaders + (i32)ShaderType::Last, 0);
     }
@@ -177,6 +181,7 @@ namespace axl {
    protected:
     friend class Shader;
     friend class ShaderWatcher;
+    friend class Scene;
 
     inline static u32 _id_counter = 0;
     inline static std::unordered_map<u32, ShaderData> _shader_data;

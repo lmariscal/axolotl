@@ -21,6 +21,42 @@ namespace axl {
 
   FrameEditor::~FrameEditor() { }
 
+  bool FrameEditor::CompareEntoID(const Ento &a, const Ento &b) {
+    return a.id < b.id;
+  }
+
+  const std::set<Ento, decltype(FrameEditor::CompareEntoID) *>
+  FrameEditor::FilterEntities(Scene &scene, const std::vector<Ento> &ents, bool root) {
+    std::set<Ento, decltype(CompareEntoID) *> entities(CompareEntoID);
+
+    for (Ento ento : ents) {
+      if (!ento) {
+        log::error("Entity is null");
+        continue;
+      }
+
+      bool search = !_search_string.empty();
+      if (search) {
+        if (ento.Tag().value.find(_search_string) == std::string::npos &&
+            uuids::to_string(ento.id).find(_search_string) == std::string::npos)
+          continue;
+      }
+
+      entities.insert(ento);
+
+      if (!search)
+        continue;
+
+      auto parent = ento.Parent();
+      while (parent) {
+        entities.insert(parent);
+        parent = parent.Parent();
+      }
+    }
+
+    return entities;
+  }
+
   void FrameEditor::DrawGuizmo(Window &window) {
     Camera *camera = Camera::GetActiveCamera();
     if (!camera)
@@ -167,8 +203,13 @@ namespace axl {
     }
     if (ImGui::Button(dock.data.terminal->scene_playing ? ICON_FA_STOP : ICON_FA_PLAY, v2(33, 24))) {
       dock.data.terminal->scene_playing = !dock.data.terminal->scene_playing;
-      if (dock.data.terminal->scene_playing)
+      if (dock.data.terminal->scene_playing) {
         focused = true;
+        _pre_play_state = dock.data.scene->Serialize();
+      } else {
+        if (!_pre_play_state.empty())
+          dock.data.scene->Deserialize(_pre_play_state);
+      }
       if (!dock.data.terminal->scene_playing && dock.data.terminal->scene_paused)
         dock.data.terminal->scene_paused = false;
     }
@@ -297,7 +338,10 @@ namespace axl {
     }
   }
 
-  void FrameEditor::ShowTreeEnto(Ento ento, u32 depth, Scene &scene) {
+  void FrameEditor::ShowTreeEnto(Ento ento,
+                                 u32 depth,
+                                 Scene &scene,
+                                 const std::set<Ento, decltype(CompareEntoID) *> &entities) {
     Ento selected_entity = Scene::GetActiveScene()->FromID(_inspector._selected_entity_id);
 
     ImGui::PushID(uuids::to_string(ento.id).c_str());
@@ -307,8 +351,10 @@ namespace axl {
 
     ImGuiTreeNodeFlags flags =
       ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
+
     if (!ento.HasChildren())
       flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
     if (selected_entity == ento)
       flags |= ImGuiTreeNodeFlags_Selected;
 
@@ -333,8 +379,10 @@ namespace axl {
     ImGui::PopID();
 
     if (tree_open && ento.HasChildren()) {
-      for (Ento child : ento.Children()) {
-        ShowTreeEnto(child, depth + 1, scene);
+      for (const Ento &child : ento.Children()) {
+        if (!entities.count(child))
+          continue;
+        ShowTreeEnto(child, depth + 1, scene, entities);
       }
 
       ImGui::TreePop();
@@ -402,16 +450,17 @@ namespace axl {
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
 
-    scene._registry.each([&](auto entity) {
-      Ento ento = scene.FromHandle(entity);
-      if (!ento) {
-        log::error("Entity is null");
+    std::vector<Ento> entities;
+    scene._registry.each([&](auto entity) { entities.push_back(scene.FromHandle(entity)); });
+    auto filtered_entities = FilterEntities(scene, entities, true);
+
+    for (const Ento &ento : filtered_entities) {
+      if (!scene._registry.valid(ento.handle))
         return;
-      }
       if (ento.HasParent())
-        return;
-      ShowTreeEnto(ento, 0, scene);
-    });
+        continue;
+      ShowTreeEnto(ento, 0, scene, filtered_entities);
+    }
 
     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
       _inspector._selected_entity_id = {};

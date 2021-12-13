@@ -6,9 +6,9 @@
 namespace axl {
 
   Material::Material(const std::vector<std::string> &paths):
-    _textures(std::make_shared<std::array<std::vector<Texture2D *>, (i32)TextureType::Last>>()) {
+    _textures(std::array<Texture2D, (i32)TextureType::Last>()) {
 
-    std::fill(_textures->begin(), _textures->end(), std::vector<Texture2D *>());
+    std::fill(_textures.begin(), _textures.end(), Texture2D());
     std::array<std::string, (i32)ShaderType::Last> shader_paths;
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       shader_paths[i] = paths.size() > i ? paths[i] : "";
@@ -23,50 +23,26 @@ namespace axl {
     ShaderStore::ProcessQueue();
   }
 
-  Material::~Material() {
-    log::debug("Material destroyed, texture use cound is {}", _textures.use_count());
-    if (_textures.use_count() > 1)
-      return;
-
-    log::debug("Destroying textures");
-
-    for (i32 i = 0; i < (i32)TextureType::Last; ++i)
-      for (Texture2D *texture : (*_textures)[i])
-        delete texture;
-  }
+  Material::~Material() { }
 
   void Material::BindAll() {
     _shader->Bind();
-
-    u32 counter[(i32)TextureType::Last];
-    std::fill(counter, counter + (i32)TextureType::Last, 0);
-
-    u32 unit_count = 1;
     for (i32 i = 1; i < (i32)TextureType::Last; ++i) {
-      std::vector<Texture2D *> &textures = (*_textures)[i];
-      for (i32 j = 0; j < textures.size(); ++j) {
-        u32 count = counter[i]++;
-        if (Bind(j, unit_count, count, (TextureType)i))
-          unit_count++;
-      }
-
-      if (textures.empty())
-        _shader->SetUniformTexture((TextureType)i, -1);
+      Bind(i, (TextureType)i);
     }
   }
 
-  bool Material::Bind(u32 id, u32 unit, u32 count, TextureType type) {
+  bool Material::Bind(u32 unit, TextureType type) {
     if (type == TextureType::Last)
       return false;
 
-    if ((*_textures)[(i32)type].empty() || id >= (*_textures)[(i32)type].size()) {
+    if (!_textures[(i32)type].texture_id) {
       _shader->SetUniformTexture(type, -1);
       return false;
     }
 
-    auto &t = (*_textures)[(i32)type];
-    Texture2D *texture = t[id];
-    texture->Bind(unit);
+    Texture2D &texture = _textures[(i32)type];
+    texture.Bind(unit);
     _shader->SetUniformTexture(type, unit);
     return true;
   }
@@ -75,8 +51,7 @@ namespace axl {
     if (_textures_path.count(path))
       return;
 
-    Texture2D *texture = new Texture2D(path, type);
-    (*_textures)[(i32)type].push_back(texture);
+    _textures[(i32)type] = Texture2D(path, type);
     _textures_path.insert(path);
     log::debug("Added texture {} of type {}", path.string(), Texture2D::TextureTypeToString(type));
   }

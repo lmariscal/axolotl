@@ -19,20 +19,25 @@ namespace axl {
                                   const std::string &filename,
                                   efsw::Action action,
                                   std::string old_name = "") {
-      if (action != efsw::Actions::Modified) return;
+      if (action != efsw::Actions::Modified)
+        return;
 
       ShaderType type = ShaderType::Last;
       ShaderData &data = ShaderStore::GetData(_shader);
       for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-        if (data.paths[i].empty()) continue;
+        if (data.paths[i].empty())
+          continue;
         log::debug("Comparing {} with {}", data.paths[i].string(), filename);
-        if (filename != data.paths[i].filename().string()) continue;
-        if (dir != data.paths[i].parent_path().string() + "/") continue;
+        if (filename != data.paths[i].filename().string())
+          continue;
+        if (dir != data.paths[i].parent_path().string() + "/")
+          continue;
         type = (ShaderType)i;
         break;
       }
 
-      if (type == ShaderType::Last) return;
+      if (type == ShaderType::Last)
+        return;
 
       // TODO: Put a mutex here, it's not thread safe
       ShaderStore::_reload_queue.emplace(std::tuple<u32, ShaderType>(_shader, type));
@@ -83,10 +88,14 @@ namespace axl {
   ShaderType Shader::StringToShaderType(const std::string &str) {
     std::string lower = str;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-    if (lower == "vertex") return ShaderType::Vertex;
-    if (lower == "fragment") return ShaderType::Fragment;
-    if (lower == "geometry") return ShaderType::Geometry;
-    if (lower == "compute") return ShaderType::Compute;
+    if (lower == "vertex")
+      return ShaderType::Vertex;
+    if (lower == "fragment")
+      return ShaderType::Fragment;
+    if (lower == "geometry")
+      return ShaderType::Geometry;
+    if (lower == "compute")
+      return ShaderType::Compute;
     return ShaderType::Last;
   }
 
@@ -112,10 +121,12 @@ namespace axl {
       return -1;
     }
 
-    if (data._uniform_locations.count(name)) return data._uniform_locations[name];
+    if (data._uniform_locations.count(name))
+      return data._uniform_locations[name];
 
     i32 location = glGetUniformLocation(data.gl_id, name.c_str());
-    if (location == -1) log::error("Shader uniform \"{}\" not found", name);
+    if (location == -1)
+      log::error("Shader uniform \"{}\" not found", name);
     log::warn("Retrieving uniform location at runtime. Program {}, Uniform {}", data.gl_id, name);
     data._uniform_locations[name] = location;
     return location;
@@ -130,7 +141,8 @@ namespace axl {
           break;
         }
       }
-      if (equal) return itr->first;
+      if (equal)
+        return itr->first;
     }
     return 0;
   }
@@ -220,7 +232,8 @@ namespace axl {
     std::fill(_shader_data[shader.shader_id]._watch_ids.begin(), _shader_data[shader.shader_id]._watch_ids.end(), 0);
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (data.paths[i].empty()) continue;
+      if (data.paths[i].empty())
+        continue;
       LoadFromPath(shader, (ShaderType)i, data.paths[i]);
     }
     CompileProgram(shader);
@@ -258,24 +271,28 @@ namespace axl {
     }
 
     _shader_data[shader_id].instances--;
-    if (_shader_data[shader_id].instances > 0) return;
+    if (_shader_data[shader_id].instances > 0)
+      return;
 
     log::debug("Deleting shader id {}", shader_id);
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_shader_data[shader_id].shaders[i] == 0) continue;
+      if (_shader_data[shader_id].shaders[i] == 0)
+        continue;
       glDeleteShader(_shader_data[shader_id].shaders[i]);
     }
 
     glDeleteProgram(_shader_data[shader_id].gl_id);
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (_shader_data[shader_id].paths[i].empty()) continue;
+      if (_shader_data[shader_id].paths[i].empty())
+        continue;
       if (_shader_data[shader_id]._file_watcher)
         _shader_data[shader_id]._file_watcher->removeWatch(_shader_data[shader_id].paths[i]);
     }
 
-    if (_shader_data[shader_id]._watcher) delete _shader_data[shader_id]._watcher;
+    if (_shader_data[shader_id]._watcher)
+      delete _shader_data[shader_id]._watcher;
 
     if (_shader_data[shader_id]._file_watcher) {
       delete _shader_data[shader_id]._file_watcher;
@@ -316,7 +333,8 @@ namespace axl {
       log::info("Creating file watcher");
     }
 
-    if (data._watch_ids[(i32)type]) data._file_watcher->removeWatch(data._watch_ids[(i32)type]);
+    if (data._watch_ids[(i32)type])
+      data._file_watcher->removeWatch(data._watch_ids[(i32)type]);
     efsw::WatchID watch_id = data._file_watcher->addWatch(path.parent_path().string(), data._watcher, false);
     log::debug("Watching {} with watch_id {}", path.string(), watch_id);
     data._watch_ids[(i32)type] = watch_id;
@@ -345,7 +363,8 @@ namespace axl {
     std::string line;
 
     while (std::getline(file, line)) {
-      if (line.empty()) continue;
+      if (line.empty())
+        continue;
 
       if (line.find("#include ") == 0) {
         buffer << "// " << line << " START\n";
@@ -383,7 +402,8 @@ namespace axl {
   }
 
   u32 ShaderStore::CompileShader(ShaderType type, const std::string &source) {
-    if (source.empty()) return 0;
+    if (source.empty())
+      return 0;
 
     u32 shader_id = glCreateShader(ShaderTypeToGL(type));
 
@@ -431,7 +451,8 @@ namespace axl {
     data.gl_id = glCreateProgram();
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (data.shaders[i] == 0) continue;
+      if (data.shaders[i] == 0)
+        continue;
 
       glAttachShader(data.gl_id, data.shaders[i]);
     }
@@ -454,7 +475,8 @@ namespace axl {
     log::debug("Shader id {} compiled", shader.shader_id);
 
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (data.shaders[i] == 0) continue;
+      if (data.shaders[i] == 0)
+        continue;
 
       glDetachShader(data.gl_id, data.shaders[i]);
     }
@@ -643,9 +665,11 @@ namespace axl {
     }
 
     u32 shader_id = CompileShader(type, source);
-    if (shader_id == 0) return false;
+    if (shader_id == 0)
+      return false;
 
-    if (data.shaders[(i32)type] != 0) glDeleteShader(data.shaders[(i32)type]);
+    if (data.shaders[(i32)type] != 0)
+      glDeleteShader(data.shaders[(i32)type]);
     data.shaders[(i32)type] = shader_id;
 
     return true;
@@ -660,8 +684,10 @@ namespace axl {
 
     bool success = true;
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
-      if (data.paths[i].empty()) continue;
-      if (!ReloadShader(shader, (ShaderType)i)) success = false;
+      if (data.paths[i].empty())
+        continue;
+      if (!ReloadShader(shader, (ShaderType)i))
+        success = false;
     }
     return success;
   }
@@ -726,7 +752,8 @@ namespace axl {
 
   void Shader::SetUniformV2(u32 location, const v2 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Vector2) return;
+    if (data._uniform_data_types[location] != UniformDataType::Vector2)
+      return;
     glUniform2fv(location, 1, value_ptr(value));
     data._uniform_v2[location] = value;
   }
@@ -738,65 +765,76 @@ namespace axl {
 
   void Shader::SetUniformV3(u32 location, const v3 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Vector3) return;
+    if (data._uniform_data_types[location] != UniformDataType::Vector3)
+      return;
     glUniform3fv(location, 1, value_ptr(value));
     data._uniform_v3[location] = value;
   }
 
   void Shader::SetUniformV4(u32 location, const v4 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Vector4) return;
+    if (data._uniform_data_types[location] != UniformDataType::Vector4)
+      return;
     glUniform4fv(location, 1, value_ptr(value));
     data._uniform_v4[location] = value;
   }
 
   void Shader::SetUniformM3(u32 location, const m3 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Matrix3) return;
+    if (data._uniform_data_types[location] != UniformDataType::Matrix3)
+      return;
     glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(value));
     data._uniform_m3[location] = value;
   }
 
   void Shader::SetUniformM4(u32 location, const m4 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Matrix4) return;
+    if (data._uniform_data_types[location] != UniformDataType::Matrix4)
+      return;
     glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(value));
     data._uniform_m4[location] = value;
   }
 
   void Shader::SetUniformF32(u32 location, const f32 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Float) return;
+    if (data._uniform_data_types[location] != UniformDataType::Float)
+      return;
     glUniform1f(location, value);
     data._uniform_f32[location] = value;
   }
 
   void Shader::SetUniformI32(u32 location, const i32 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::Int) return;
+    if (data._uniform_data_types[location] != UniformDataType::Int)
+      return;
     glUniform1i(location, value);
     data._uniform_i32[location] = value;
   }
 
   void Shader::SetUniformU32(u32 location, const u32 &value) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (data._uniform_data_types[location] != UniformDataType::UInt) return;
+    if (data._uniform_data_types[location] != UniformDataType::UInt)
+      return;
     glUniform1ui(location, value);
     data._uniform_u32[location] = value;
   }
 
   void Shader::SetUniformTexture(TextureType type, i32 unit) {
     ShaderData &data = ShaderStore::GetData(shader_id);
-    if (type == TextureType::Last || !data._uniform_textures.count((i32)UniformLocation::Textures)) return;
+    if (type == TextureType::Last || !data._uniform_textures.count((i32)UniformLocation::Textures))
+      return;
 
     // log::debug("Setting texture {} to unit {}", Texture2D::TextureTypeToString(type), unit);
 
+    // TODO: Do we have to set the default texture units each frame? We will not touch this unit space.
+    //   Or at least, we shouldn't...
     if (unit < 0) {
       i32 max_unit_count = 0;
       glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_unit_count);
       unit = max_unit_count - 1 - (i32)type;
 
-      if (type == TextureType::Specular) ShaderStore::_black_texture->Bind(unit);
+      if (type == TextureType::Specular)
+        ShaderStore::_black_texture->Bind(unit);
       else if (type == TextureType::Normal)
         ShaderStore::_default_normal->Bind(unit);
       else

@@ -1,5 +1,7 @@
 #include <axolotl/ento.hh>
+#include <axolotl/material.hh>
 #include <axolotl/mesh.hh>
+#include <axolotl/model.hh>
 #include <axolotl/renderer.hh>
 #include <axolotl/scene.hh>
 #include <axolotl/shader.hh>
@@ -38,7 +40,8 @@ namespace axl {
       for (auto &child : e.Children())
         RemoveEntity(child);
 
-    if (e.HasParent()) e.Parent().RemoveChild(e);
+    if (e.HasParent())
+      e.Parent().RemoveChild(e);
 
     Ento::_uuid_ento_map.erase(e.id);
     Ento::_handle_ento_map.erase(e.handle);
@@ -48,13 +51,15 @@ namespace axl {
   }
 
   Ento Scene::FromID(uuid id) {
-    if (!Ento::_uuid_ento_map.count(id)) return {};
+    if (!Ento::_uuid_ento_map.count(id))
+      return {};
 
     return Ento::_uuid_ento_map[id];
   }
 
   Ento Scene::FromHandle(entt::entity handle) {
-    if (!Ento::_handle_ento_map.count(handle)) return {};
+    if (!Ento::_handle_ento_map.count(handle))
+      return {};
 
     return Ento::_handle_ento_map[handle];
   }
@@ -85,7 +90,7 @@ namespace axl {
         json c = {};
         auto meta = entt::resolve(info);
         if (!meta) {
-          log::error("Could not resolve meta for type {}", info.name());
+          // log::error("Could not resolve meta for type {}", info.name());
           return;
         }
         std::string component_name = meta.prop("name"_hs).value().cast<std::string>();
@@ -100,10 +105,10 @@ namespace axl {
           member.allow_cast<json>();
           json *member_values = member.try_cast<json>();
           if (!member_values) {
-            log::error("Could not convert to json {} | {} inside {}",
-                       data.type().info().name(),
-                       name,
-                       handle.type().info().name());
+            // log::error("Could not convert to json {} | {} inside {}",
+            //            data.type().info().name(),
+            //            name,
+            //            handle.type().info().name());
             continue;
           }
 
@@ -122,7 +127,22 @@ namespace axl {
   }
 
   void Scene::Deserialize(const json &j) {
-    _registry.each([&](entt::entity entity) { _registry.destroy(entity); });
+    std::vector<Texture2D> textures_tmp;
+    for (auto itr = TextureStore::_data.begin(); itr != TextureStore::_data.end(); itr++) {
+      Texture2D texture;
+      texture.texture_id = itr->first;
+      TextureStore::_data[itr->first].instances++;
+      textures_tmp.emplace_back(std::move(texture));
+    }
+
+    std::vector<Ento> to_destroy;
+    _registry.each([&](entt::entity entity) {
+      Ento ento = FromHandle(entity);
+      if (!ento.HasParent())
+        to_destroy.push_back(ento);
+    });
+    for (Ento &ento : to_destroy)
+      RemoveEntity(ento);
 
     Ento::_uuid_ento_map.clear();
     Ento::_handle_ento_map.clear();
@@ -147,7 +167,8 @@ namespace axl {
           const std::string name = d.prop("name"_hs).value().cast<std::string>();
           bool found = false;
           for (auto dj : c["data"]) {
-            if (dj["name"] != name) continue;
+            if (dj["name"] != name)
+              continue;
             found = true;
 
             auto member = d.get(handle);
@@ -155,7 +176,9 @@ namespace axl {
             d.set(handle, member);
             break;
           }
-          if (!found) log::error("Could not find data {} in component {}", name, c["type"]);
+          if (!found) {
+            // log::error("Could not find data {} in component {}", name, c["type"]);
+          }
         }
       }
     }
@@ -164,7 +187,7 @@ namespace axl {
       _registry.visit(entity, [&](const auto info) {
         auto meta = entt::resolve(info);
         if (!meta) {
-          log::error("Could not resolve meta for type {}", info.name());
+          // log::error("Could not resolve meta for type {}", info.name());
           return;
         }
         auto handle = meta.func("get"_hs).invoke({}, entt::forward_as_meta(_registry), entity);

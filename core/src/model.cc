@@ -15,25 +15,28 @@ namespace axl {
     _shader_paths(paths),
     _root(root),
     _mesh_id(0),
+    _materials(std::make_shared<std::unordered_map<u32, std::unique_ptr<Material>>>()),
     _meshes(std::make_shared<std::vector<Mesh *>>()) { }
 
   Model::~Model() {
-    if (_meshes.use_count() > 1) return;
+    if (_meshes.use_count() > 1)
+      return;
     for (Mesh *mesh : *_meshes)
       delete mesh;
   }
 
   void Model::Init() {
     Ento ento = Ento::FromComponent(*this);
-    ento.TryAddComponent<Material>(_shader_paths);
 
-    if (!_root) return;
+    if (!_root)
+      return;
 
     log::debug("Loading model from {}", _path.string());
     Assimp::Importer importer;
 
     u32 flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs;
-    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb") flags &= ~aiProcess_FlipUVs;
+    if (_path.extension().string() == ".gltf" || _path.extension().string() == ".glb")
+      flags &= ~aiProcess_FlipUVs;
     const aiScene *scene = importer.ReadFile(_path.string(), flags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -48,7 +51,7 @@ namespace axl {
     TextureStore::ProcessQueue();
   }
 
-  void Model::ProcessMaterialTextures(Ento ento, Model &model, aiMaterial *ai_material, aiTextureType ai_type) {
+  void Model::ProcessMaterialTextures(u32 index, Model &model, aiMaterial *ai_material, aiTextureType ai_type) {
     TextureType type = TextureType::Last;
     switch (ai_type) {
       case aiTextureType_DIFFUSE:
@@ -73,7 +76,10 @@ namespace axl {
         break;
     }
 
-    Material &material = ento.GetComponent<Material>();
+    if (!model._materials->count(index))
+      (*model._materials)[index] = std::make_unique<Material>(model._shader_paths);
+
+    Material &material = *(*model._materials)[index];
     for (unsigned int i = 0; i < ai_material->GetTextureCount(ai_type); ++i) {
       aiString path;
       ai_material->GetTexture(ai_type, i, &path);
@@ -123,12 +129,12 @@ namespace axl {
 
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-    ProcessMaterialTextures(ento, model, material, aiTextureType_DIFFUSE);
-    ProcessMaterialTextures(ento, model, material, aiTextureType_EMISSIVE);
-    ProcessMaterialTextures(ento, model, material, aiTextureType_SPECULAR);
-    ProcessMaterialTextures(ento, model, material, aiTextureType_AMBIENT);
-    ProcessMaterialTextures(ento, model, material, aiTextureType_NORMALS);
-    ProcessMaterialTextures(ento, model, material, aiTextureType_HEIGHT);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_DIFFUSE);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_EMISSIVE);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_SPECULAR);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_AMBIENT);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_NORMALS);
+    ProcessMaterialTextures(mesh->mMaterialIndex, model, material, aiTextureType_HEIGHT);
 
     Mesh *result = new Mesh(buffer_data, indices);
 
@@ -136,13 +142,15 @@ namespace axl {
   }
 
   void Model::ProcessNode(Ento ento, Model &model, aiNode *node, const aiScene *scene) {
-    if (ento.Tag().value == Tag::DefaultTag) ento.Tag().value = node->mName.C_Str();
+    if (ento.Tag().value == Tag::DefaultTag)
+      ento.Tag().value = node->mName.C_Str();
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
       aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
       Mesh *m = ProcessMesh(ento, model, mesh, scene);
 
-      if (node->mNumMeshes > 1) m->_single_mesh = false;
+      if (node->mNumMeshes > 1)
+        m->_single_mesh = false;
 
       model._meshes->push_back(m);
       m->SetMaterialID(mesh->mMaterialIndex);
@@ -153,9 +161,11 @@ namespace axl {
       bool child_alreay_exists = false;
 
       for (Ento c : ento.Children()) {
-        if (!c.HasComponent<Model>()) continue;
+        if (!c.HasComponent<Model>())
+          continue;
         Model &m = c.GetComponent<Model>();
-        if (m._mesh_id != i) continue;
+        if (m._mesh_id != i)
+          continue;
         child = c;
         child_alreay_exists = true;
       }
@@ -188,17 +198,10 @@ namespace axl {
     }
   }
 
-  void Model::Draw(Material &material) {
+  void Model::Draw() {
     for (Mesh *mesh : *_meshes) {
-      u32 material_id = mesh->GetMaterialID();
-      if (!mesh->_single_mesh) {
-        i32 unit_count = 1;
-        for (i32 i = 1; i < (i32)TextureType::Last; ++i) {
-          if (material.Bind(material_id, unit_count, 0, (TextureType)i)) unit_count++;
-        }
-      } else {
-        material.BindAll();
-      }
+      Material &material = *(*_materials)[mesh->GetMaterialID()];
+      material.BindAll();
       mesh->Draw();
     }
   }

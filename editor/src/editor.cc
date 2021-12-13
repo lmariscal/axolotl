@@ -22,13 +22,14 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
 
-  TestScene scene;
-  Scene::SetActiveScene(&scene);
+  DockSpace dock;
+
+  dock.data.scene = new TestScene();
+  Scene::SetActiveScene(dock.data.scene);
 
   FrameEditor frame_editor;
 
   IOManager &io = window.GetIOManager();
-  DockSpace dock;
 
   bool last_fullscreen = false;
 
@@ -40,6 +41,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   f64 imgui_starttime;
   f64 imgui_endtime;
 
+  Scene &scene = *dock.data.scene;
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
@@ -174,6 +176,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
   }
 
+  delete (TestScene *)dock.data.scene;
   terminal.get_terminal_helper()->Terminate();
 }
 

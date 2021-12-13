@@ -18,19 +18,23 @@ namespace axl {
     FrameEditor();
     ~FrameEditor();
 
+    static bool CompareEntoID(const Ento &a, const Ento &b);
+
     void Bind(Window &window);
     void Unbind(Window &window);
     void Draw(Window &window, DockSpace &dock);
     void DrawEntityList(Scene &scene, DockSpace &dock);
     void DrawInspector(Scene &scene, DockSpace &dock);
     void DrawGuizmo(Window &window);
+    const std::set<Ento, decltype(CompareEntoID) *>
+    FilterEntities(Scene &scene, const std::vector<Ento> &entities, bool root);
     const v2 &GetRegionAvailable() const;
 
     bool focused;
     EditorAction action;
 
    protected:
-    void ShowTreeEnto(Ento ento, u32 depth, Scene &scene);
+    void ShowTreeEnto(Ento ento, u32 depth, Scene &scene, const std::set<Ento, decltype(CompareEntoID) *> &entities);
     bool ShowEntityPopUp(Ento ento, Scene &scene);
 
     FrameBuffer _frame;
@@ -39,6 +43,8 @@ namespace axl {
     std::string _search_string;
     v2 _region_available;
     v2 _region_cursor;
+
+    json _pre_play_state;
   };
 
 } // namespace axl

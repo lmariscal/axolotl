@@ -25,7 +25,7 @@ struct Light {
 };
 
 // Texture indices
-#define TEXTURE_SKYBOX   0 // Do not use as is
+#define TEXTURE_SKYBOX   0 // Do not use as is, used to reserve the texture unit space
 #define TEXTURE_DIFFUSE  1
 #define TEXTURE_SPECULAR 2
 #define TEXTURE_NORMAL   3
@@ -43,7 +43,7 @@ struct Light {
 #define UNIFORM_CUSTOM_VERTEX     6
 
 // Fragment uniform locations
-#define UNIFORM_SKYBOX          10 // Do not use as is
+#define UNIFORM_SKYBOX          10 // Do not use as is, used to reserve the texture unit space
 #define UNIFORM_TEXTURES        10 // 10 - 17
 #define UNIFORM_LIGHTS          18 // 18 - 49
 #define UNIFORM_CUSTOM_FRAGMENT 50

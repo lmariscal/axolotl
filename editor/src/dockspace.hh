@@ -1,5 +1,6 @@
 #pragma once
 
+#include <axolotl/scene.hh>
 #include <axolotl/terminal.hh>
 #include <axolotl/types.hh>
 #include <axolotl/window.hh>
@@ -20,6 +21,8 @@ namespace axl {
     bool show_renderer = true;
     bool show_guizmos = true;
     bool show_imgui_demo = false;
+
+    Scene *scene;
   };
 
   class DockSpace {

@@ -31,6 +31,7 @@ namespace axl {
    protected:
     friend class Model;
     friend class Renderer;
+    friend class RendererPerformance;
 
     inline static u32 _draw_calls = 0;
 

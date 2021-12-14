@@ -111,8 +111,9 @@ namespace axl {
           i32 len = std::strlen(out_path);
           _model_path.resize(len);
           std::strncpy(_model_path.data(), out_path, len);
-          NFD_Free(out_path);
           ImGui::CloseCurrentPopup();
+
+          NFD_Free(out_path);
         } else if (result == NFD_CANCEL) {
           log::info("User pressed cancel");
         } else {

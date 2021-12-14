@@ -45,23 +45,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
-    if (ImGui::Begin("Serialize")) {
-      if (ImGui::Button("Serialize")) {
-        json j = scene.Serialize();
-        std::ofstream out("scene.json");
-        out << j.dump(2);
-        out.close();
-      }
-      if (ImGui::Button("Deserialize")) {
-        std::ifstream in("scene.json");
-        json j;
-        in >> j;
-        in.close();
-        scene.Deserialize(j);
-      }
-      ImGui::End();
-    }
-
     if (terminal_data.watch_shaders) {
       ShaderStore::ProcessQueue();
     }
@@ -149,15 +132,28 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     // Actual Scene Rendering END
 
-    ImGui::Begin("Renderer");
-    if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (dock.data.show_performance) {
+      ImGui::Begin("Performance", &dock.data.show_performance);
+      const RendererPerformance &performance = renderer.GetPerformance();
       f64 imgui_time = imgui_endtime - imgui_starttime;
       f64 update_time = update_time_end - update_time_start;
 
-      ImGui::Text("      ImGui Time: %.2fms", imgui_time * 1000.0);
-      ImGui::Text("     Update Time: %.2fms", update_time * 1000.0);
+      ImGui::Text("FPS: %u", performance.fps);
+      ImGui::Text("Delta: %.2fms", performance.delta_time * 1000.0);
+      ImGui::Text("Meshes: %u", performance.mesh_count);
+      ImGui::Text("Vertices: %u", performance.vertex_count);
+      ImGui::Text("Triangles: %u", performance.triangle_count);
+      ImGui::Text("Draw Calls: %u", performance.draw_calls);
+      ImGui::Text("ImGui Time: %.2fms", imgui_time * 1000.0);
+      ImGui::Text("Update Time: %.2fms", update_time * 1000.0);
+      ImGui::Text("Main Draw Time: %.2fms", performance.main_draw_time * 1000.0);
+      ImGui::Text("Post Draw Time: %.2fms", performance.post_draw_time * 1000.0);
+      ImGui::Text("GPU Render Time: %.2fms", performance.gpu_render_time);
+      ImGui::Text("CPU Render Time: %.2fms", performance.cpu_render_time * 1000.0);
+      ImGui::Text("Organization Time: %.2fms", performance.organization_time * 1000.0);
+      ImGui::Text("Light Update Time: %.2fms", performance.lights_time * 1000.0);
+      ImGui::End();
     }
-    ImGui::End();
 
     window.Draw();
 
@@ -171,12 +167,26 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       }
     }
     if (io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl)) {
-      if (io.KeyDown(Key::Q))
-        terminal_data.quit_requested = true;
+      if (io.KeyTriggered(Key::O)) {
+        dock.LoadProject();
+      }
+      if (io.KeyTriggered(Key::S)) {
+        if (dock.data.project_path.empty())
+          dock.SelectProjectPath();
+        dock.SaveProject();
+      }
+      if (io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift)) {
+        if (io.KeyTriggered(Key::S)) {
+          dock.SaveProject();
+        }
+        if (io.KeyDown(Key::Q)) {
+          terminal_data.quit_requested = true;
+        }
+      }
     }
   }
 
-  delete (TestScene *)dock.data.scene;
+  delete dock.data.scene;
   terminal.get_terminal_helper()->Terminate();
 }
 

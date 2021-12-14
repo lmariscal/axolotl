@@ -21,13 +21,18 @@ namespace axl {
     bool show_renderer = true;
     bool show_guizmos = true;
     bool show_imgui_demo = false;
+    bool show_performance = true;
 
-    Scene *scene;
+    std::filesystem::path project_path = "";
+    Scene *scene = nullptr;
   };
 
   class DockSpace {
    public:
     void Draw(Window &window);
+    void LoadProject();
+    void SaveProject();
+    bool SelectProjectPath();
 
     DockSpaceData data;
     u32 dock_left;
@@ -35,6 +40,8 @@ namespace axl {
     u32 dock_bottom;
     u32 dock_top;
     u32 dock_top_right;
+    u32 dock_top_right_top;
+    u32 dock_top_right_bottom;
     u32 dock_top_left;
     u32 dock_left_bottom;
     bool first_iteration = true;

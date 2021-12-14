@@ -15,6 +15,35 @@ namespace axl {
   class Shader;
   class FrameBuffer;
 
+  class RendererPerformance {
+   public:
+    f64 organization_time;
+    f64 organization_time_accum;
+    f64 main_draw_time;
+    f64 main_draw_time_accum;
+    f64 post_draw_time;
+    f64 post_draw_time_accum;
+    f64 lights_time;
+    f64 lights_time_accum;
+    f64 gpu_render_time;
+    f64 gpu_render_time_accum;
+    f64 cpu_render_time;
+    f64 cpu_render_time_accum;
+    f64 delta_time;
+    f64 delta_time_accum;
+    f64 last_time;
+    u32 fps;
+    u32 frame_count;
+    u32 renderables;
+    u32 mesh_count;
+    u32 vertex_count;
+    u32 triangle_count;
+    u32 draw_calls;
+
+    void StartCapture(f64 now);
+    void EndCapture(f64 now, f64 delta);
+  };
+
   class Renderer {
    public:
     Renderer(Window *window);
@@ -27,34 +56,18 @@ namespace axl {
     void Render(Scene &scene, bool show_data, bool focused);
     void SetMeshWireframe(bool state);
 
+    const RendererPerformance &GetPerformance() const;
+
    protected:
     friend class GUI;
 
     void ShowData();
 
+    RendererPerformance _performance;
+    RendererPerformance _last_performance;
+
     bool _show_wireframe;
     v2i _size;
-    f64 _organization_time;
-    f64 _organization_time_accum;
-    f64 _main_draw_time;
-    f64 _main_draw_time_accum;
-    f64 _post_draw_time;
-    f64 _post_draw_time_accum;
-    f64 _lights_time;
-    f64 _lights_time_accum;
-    f64 _gpu_render_time;
-    f64 _gpu_render_time_accum;
-    f64 _cpu_render_time;
-    f64 _cpu_render_time_accum;
-    f64 _delta_time;
-    f64 _delta_time_accum;
-    f64 _last_time;
-    u32 _fps;
-    u32 _frame_count;
-    u32 _renderables;
-    u32 _mesh_count;
-    u32 _vertex_count;
-    u32 _triangle_count;
 
     u32 _lights_uniform_buffer;
 

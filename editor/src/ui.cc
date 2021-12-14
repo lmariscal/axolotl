@@ -25,6 +25,84 @@ namespace axl {
     return a.id < b.id;
   }
 
+  void FrameEditor::DrawActionButtons(Window &window) {
+    ImVec4 *colors = ImGui::GetStyle().Colors;
+
+    v4 button_color = colors[(i32)ImGuiCol_Button];
+    v4 button_color_active = colors[(i32)ImGuiCol_ButtonActive];
+    v4 button_color_hovered = colors[(i32)ImGuiCol_ButtonHovered];
+    button_color.w = 0.75f;
+    button_color_active.w = 0.75f;
+    button_color_hovered.w = 0.75f;
+    ImGui::PushStyleColor(ImGuiCol_Button, button_color);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, button_color_active);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, button_color_hovered);
+
+    v2 cursor_pos = v2(12, 12);
+
+    EditorAction original_action = action;
+    ImGui::SetWindowFontScale(1.1f);
+
+    if (original_action == EditorAction::Select)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    ImGui::SetCursorPos(cursor_pos);
+    if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30)))
+      action = EditorAction::Select;
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    cursor_pos.x += 30;
+    if (original_action == EditorAction::Select)
+      ImGui::PopStyleColor();
+
+    if (original_action == EditorAction::Move)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    ImGui::SetCursorPos(cursor_pos);
+    if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30)))
+      action = EditorAction::Move;
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    cursor_pos.x += 30;
+    if (original_action == EditorAction::Move)
+      ImGui::PopStyleColor();
+
+    if (original_action == EditorAction::Rotate)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    ImGui::SetCursorPos(cursor_pos);
+    if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30)))
+      action = EditorAction::Rotate;
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    cursor_pos.x += 30;
+    if (original_action == EditorAction::Rotate)
+      ImGui::PopStyleColor();
+
+    if (original_action == EditorAction::Scale)
+      ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
+    ImGui::SetCursorPos(cursor_pos);
+    if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30)))
+      action = EditorAction::Scale;
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    cursor_pos.x += 30;
+    if (original_action == EditorAction::Scale)
+      ImGui::PopStyleColor();
+
+    if (!focused) {
+      IOManager &io = window.GetIOManager();
+      if (io.KeyTriggered(Key::Q))
+        action = EditorAction::Select;
+      else if (io.KeyTriggered(Key::W))
+        action = EditorAction::Move;
+      else if (io.KeyTriggered(Key::E))
+        action = EditorAction::Rotate;
+      else if (io.KeyTriggered(Key::R))
+        action = EditorAction::Scale;
+    }
+
+    ImGui::SetWindowFontScale(1.0f);
+    ImGui::PopStyleColor(3);
+  }
+
   const std::set<Ento, decltype(FrameEditor::CompareEntoID) *>
   FrameEditor::FilterEntities(Scene &scene, const std::vector<Ento> &ents, bool root) {
     std::set<Ento, decltype(CompareEntoID) *> entities(CompareEntoID);
@@ -63,13 +141,13 @@ namespace axl {
       return;
 
     v2 window_pos = ImGui::GetWindowPos();
-    window_pos += _region_cursor;
+    v2 window_size = ImGui::GetWindowSize();
 
     m4 view = camera->GetViewMatrix();
     m4 proj = camera->GetProjectionMatrix(window);
 
     v2 view_manipulate_pos = window_pos;
-    view_manipulate_pos.x += _region_available.x - 128 - 30;
+    view_manipulate_pos.x += window_size.x - 128 - 30;
     view_manipulate_pos.y += 30;
     ImGuizmo::ViewManipulate(value_ptr(view), 8.0f, view_manipulate_pos, v2(128), 0x10101010);
 
@@ -79,7 +157,7 @@ namespace axl {
     if (action == EditorAction::Select)
       return;
 
-    ImGuizmo::SetRect(window_pos.x, window_pos.y, _region_available.x, _region_available.y);
+    ImGuizmo::SetRect(window_pos.x, window_pos.y, window_size.x, window_size.y);
 
     IOManager &io = window.GetIOManager();
 
@@ -183,9 +261,13 @@ namespace axl {
     bool one_camera_active = Camera::GetActiveCamera() != nullptr;
 
     if (one_camera_active) {
+      ImGui::BeginChild("##frame_editor_region", buffer_size, true, ImGuiWindowFlags_NoScrollbar);
       ImGui::Image((ImTextureID)(size_t)_frame.GetTexture(FrameBufferTexture::Color), buffer_size, uv0, uv1);
       if (!focused && dock.data.terminal->scene_playing && ImGui::IsItemClicked() && !ImGuizmo::IsOver())
         focused = true;
+      DrawGuizmo(window);
+      DrawActionButtons(window);
+      ImGui::EndChild();
     }
 
     ImGui::SetCursorPos(v2(5, (cursor_pos.y * 0.66f) + 12));
@@ -237,87 +319,6 @@ namespace axl {
       ImGui::PopStyleColor();
     ImGui::SameLine();
 
-    if (one_camera_active) {
-      // ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Hi there").x - 30);
-      // ImGui::Text("Hi there");
-
-      v4 button_color = colors[(i32)ImGuiCol_Button];
-      v4 button_color_active = colors[(i32)ImGuiCol_ButtonActive];
-      v4 button_color_hovered = colors[(i32)ImGuiCol_ButtonHovered];
-      button_color.w = 0.75f;
-      button_color_active.w = 0.75f;
-      button_color_hovered.w = 0.75f;
-      ImGui::PushStyleColor(ImGuiCol_Button, button_color);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, button_color_active);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, button_color_hovered);
-
-      cursor_pos = ImGui::GetCursorPos();
-      cursor_pos.x = 12;
-      cursor_pos.y += 42;
-
-      EditorAction original_action = action;
-      ImGui::SetWindowFontScale(1.1f);
-
-      if (original_action == EditorAction::Select)
-        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
-      ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30)))
-        action = EditorAction::Select;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-      cursor_pos.x += 30;
-      if (original_action == EditorAction::Select)
-        ImGui::PopStyleColor();
-
-      if (original_action == EditorAction::Move)
-        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
-      ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30)))
-        action = EditorAction::Move;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-      cursor_pos.x += 30;
-      if (original_action == EditorAction::Move)
-        ImGui::PopStyleColor();
-
-      if (original_action == EditorAction::Rotate)
-        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
-      ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30)))
-        action = EditorAction::Rotate;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-      cursor_pos.x += 30;
-      if (original_action == EditorAction::Rotate)
-        ImGui::PopStyleColor();
-
-      if (original_action == EditorAction::Scale)
-        ImGui::PushStyleColor(ImGuiCol_Button, colors[(i32)ImGuiCol_ButtonActive]);
-      ImGui::SetCursorPos(cursor_pos);
-      if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30)))
-        action = EditorAction::Scale;
-      if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-      cursor_pos.x += 30;
-      if (original_action == EditorAction::Scale)
-        ImGui::PopStyleColor();
-
-      if (!focused) {
-        IOManager &io = window.GetIOManager();
-        if (io.KeyTriggered(Key::Q))
-          action = EditorAction::Select;
-        else if (io.KeyTriggered(Key::W))
-          action = EditorAction::Move;
-        else if (io.KeyTriggered(Key::E))
-          action = EditorAction::Rotate;
-        else if (io.KeyTriggered(Key::R))
-          action = EditorAction::Scale;
-      }
-
-      ImGui::SetWindowFontScale(1.0f);
-      ImGui::PopStyleColor(3);
-    }
-
     if (!one_camera_active) {
       v2 window_size = ImGui::GetWindowSize();
       std::string text = "No active camera";
@@ -325,8 +326,6 @@ namespace axl {
       ImGui::SetCursorPos(v2(window_size.x - text_size.x, window_size.y) / 2.0f);
       ImGui::TextColored(v4(v3(1.0f), 0.6f), "%s", text.c_str());
     }
-
-    DrawGuizmo(window);
 
     ImGui::End();
     ImGui::PopStyleVar();

@@ -65,6 +65,10 @@ namespace axl {
     glDeleteBuffers(1, &_lights_uniform_buffer);
   }
 
+  const RendererPerformance &Renderer::GetPerformance() const {
+    return _last_performance;
+  }
+
   void Renderer::ClearScreen(const v3 &color) {
     glClearColor(color.x, color.y, color.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -106,10 +110,7 @@ namespace axl {
     glGenQueries(1, &gl_endtime);
     glQueryCounter(gl_starttime, GL_TIMESTAMP);
 
-    _mesh_count = 0;
-    _vertex_count = 0;
-    _triangle_count = 0;
-    Mesh::_draw_calls = 0;
+    _performance.StartCapture(_window->GetTime());
 
     Camera *camera = Camera::GetActiveCamera();
     if (camera) {
@@ -137,20 +138,20 @@ namespace axl {
       renderable.transform = &transform;
       renderables.push_back(renderable);
 
-      _mesh_count += model._meshes->size();
+      _performance.mesh_count += model._meshes->size();
       for (auto &mesh : *model._meshes) {
-        _vertex_count += mesh->_num_vertices;
-        _triangle_count += mesh->_num_indices / 3;
+        _performance.vertex_count += mesh->_num_vertices;
+        _performance.triangle_count += mesh->_num_indices / 3;
       }
     }
-    _renderables = renderables.size();
+    _performance.renderables = renderables.size();
 
     std::sort(renderables.begin(), renderables.end(), [](const Renderable &a, const Renderable &b) {
       return a.transform->GetPosition().z < b.transform->GetPosition().z;
     });
 
     f64 orginzation_endtime = Window::GetTime();
-    _organization_time_accum += orginzation_endtime - orginzation_starttime;
+    _performance.organization_time_accum += orginzation_endtime - orginzation_starttime;
 
     f64 lights_starttime = Window::GetTime();
     std::vector<LightData> lights_data;
@@ -203,7 +204,7 @@ namespace axl {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     f64 lights_endtime = Window::GetTime();
-    _lights_time_accum += lights_endtime - lights_starttime;
+    _performance.lights_time_accum += lights_endtime - lights_starttime;
 
     f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
@@ -261,7 +262,7 @@ namespace axl {
     _post_process_framebuffer->Unbind();
 
     f64 main_draw_endtime = Window::GetTime();
-    _main_draw_time_accum += main_draw_endtime - main_draw_starttime;
+    _performance.main_draw_time_accum += main_draw_endtime - main_draw_starttime;
 
     // Post process
     f64 post_draw_starttime = Window::GetTime();
@@ -287,7 +288,7 @@ namespace axl {
     _quad_mesh->Draw();
 
     f64 post_draw_endtime = Window::GetTime();
-    _post_draw_time_accum += post_draw_endtime - post_draw_starttime;
+    _performance.post_draw_time_accum += post_draw_endtime - post_draw_starttime;
 
     glQueryCounter(gl_endtime, GL_TIMESTAMP);
     i32 query_available = false;
@@ -299,32 +300,64 @@ namespace axl {
     glGetQueryObjectui64v(gl_starttime, GL_QUERY_RESULT, &start_time);
     glGetQueryObjectui64v(gl_endtime, GL_QUERY_RESULT, &end_time);
 
-    _gpu_render_time_accum += (f64)(end_time - start_time) / 1000000.0;
+    _performance.gpu_render_time_accum += (f64)(end_time - start_time) / 1000000.0;
 
     f64 cpu_endtime = Window::GetTime();
-    _cpu_render_time_accum += cpu_endtime - cpu_starttime;
+    _performance.cpu_render_time_accum += cpu_endtime - cpu_starttime;
+
+    _performance.EndCapture(_window->GetTime(), _window->GetDeltaTime());
+    _last_performance = _performance;
     if (show_data)
       ShowData();
   }
 
-  void Renderer::ShowData() {
-    ImGui::Begin("Renderer");
+  void RendererPerformance::StartCapture(f64 now) {
+    mesh_count = 0;
+    vertex_count = 0;
+    triangle_count = 0;
+    Mesh::_draw_calls = 0;
+  }
 
-    if (ImGui::CollapsingHeader("General Information", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Text("              FPS: %u", _fps);
-      ImGui::Text("            Delta: %.2fms", _delta_time * 1000.0);
-      ImGui::Text("           Meshes: %u", _mesh_count);
-      ImGui::Text("         Vertices: %u", _vertex_count);
-      ImGui::Text("        Triangles: %u", _triangle_count);
-      ImGui::Text("       Draw Calls: %u", Mesh::_draw_calls);
-      ImGui::Text("   Main Draw Time: %.2fms", _main_draw_time * 1000.0);
-      ImGui::Text("   Post Draw Time: %.2fms", _post_draw_time * 1000.0);
-      ImGui::Text("  GPU Render Time: %.2fms", _gpu_render_time);
-      ImGui::Text("  CPU Render Time: %.2fms", _cpu_render_time * 1000.0);
-      ImGui::Text("Organization Time: %.2fms", _organization_time * 1000.0);
-      ImGui::Text("Light Update Time: %.2fms", _lights_time * 1000.0);
+  void RendererPerformance::EndCapture(f64 now, f64 delta) {
+    if (now - last_time >= 0.25) {
+      last_time = now;
+
+      fps = frame_count * 4;
+
+      delta_time = delta_time_accum / frame_count;
+      delta_time_accum = 0.0;
+
+      gpu_render_time = gpu_render_time_accum / frame_count;
+      gpu_render_time_accum = 0.0;
+
+      cpu_render_time = cpu_render_time_accum / frame_count;
+      cpu_render_time_accum = 0.0;
+
+      organization_time = organization_time_accum / frame_count;
+      organization_time_accum = 0.0;
+
+      main_draw_time = main_draw_time_accum / frame_count;
+      main_draw_time_accum = 0.0;
+
+      post_draw_time = post_draw_time_accum / frame_count;
+      post_draw_time_accum = 0.0;
+
+      lights_time = lights_time_accum / frame_count;
+      lights_time_accum = 0.0;
+
+      frame_count = 0;
     }
 
+    draw_calls = Mesh::_draw_calls;
+    delta_time_accum += delta;
+    frame_count++;
+  }
+
+  void Renderer::ShowData() {
+    ImGui::Begin("Performance");
+    ImGui::End();
+
+    ImGui::Begin("Renderer");
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
       axl::ShowData("Ambient Light", _ambient_light.color);
       axl::ShowData("Ambient Light Intensity", _ambient_light.intensity);
@@ -333,39 +366,6 @@ namespace axl {
       axl::ShowData("Directional Light Intensity", _directional_light.intensity);
       axl::ShowData("Directional Light Angle", _directional_light_direction);
     }
-
-    f64 now = _window->GetTime();
-    if (now - _last_time >= 0.25) {
-      _last_time = now;
-
-      _fps = _frame_count * 4;
-
-      _delta_time = _delta_time_accum / _frame_count;
-      _delta_time_accum = 0.0;
-
-      _gpu_render_time = _gpu_render_time_accum / _frame_count;
-      _gpu_render_time_accum = 0.0;
-
-      _cpu_render_time = _cpu_render_time_accum / _frame_count;
-      _cpu_render_time_accum = 0.0;
-
-      _organization_time = _organization_time_accum / _frame_count;
-      _organization_time_accum = 0.0;
-
-      _main_draw_time = _main_draw_time_accum / _frame_count;
-      _main_draw_time_accum = 0.0;
-
-      _post_draw_time = _post_draw_time_accum / _frame_count;
-      _post_draw_time_accum = 0.0;
-
-      _lights_time = _lights_time_accum / _frame_count;
-      _lights_time_accum = 0.0;
-
-      _frame_count = 0;
-    }
-
-    _delta_time_accum += _window->GetDeltaTime();
-    _frame_count++;
 
     ImGui::End();
   }

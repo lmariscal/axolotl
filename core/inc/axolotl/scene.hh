@@ -12,6 +12,7 @@ namespace axl {
 
   class Scene {
    public:
+    virtual ~Scene() = default;
     virtual void Init(Window &window) = 0;
     virtual void Update(Window &window, f64 delta) = 0;
     virtual void Focused(Window &window, bool stat) = 0;

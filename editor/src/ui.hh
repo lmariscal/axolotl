@@ -23,6 +23,7 @@ namespace axl {
     void Bind(Window &window);
     void Unbind(Window &window);
     void Draw(Window &window, DockSpace &dock);
+    void DrawActionButtons(Window &window);
     void DrawEntityList(Scene &scene, DockSpace &dock);
     void DrawInspector(Scene &scene, DockSpace &dock);
     void DrawGuizmo(Window &window);

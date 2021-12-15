@@ -22,11 +22,11 @@ namespace axl {
 
     void Bind(Window &window);
     void Unbind(Window &window);
-    void Draw(Window &window, DockSpace &dock);
-    void DrawActionButtons(Window &window);
+    void Draw(Window &window, DockSpace &dock, Camera *camera);
+    void DrawActionButtons(Window &window, DockSpaceData &dock_space_data);
     void DrawEntityList(Scene &scene, DockSpace &dock);
     void DrawInspector(Scene &scene, DockSpace &dock);
-    void DrawGuizmo(Window &window);
+    void DrawGuizmo(Window &window, Camera *camera);
     const std::set<Ento, decltype(CompareEntoID) *>
     FilterEntities(Scene &scene, const std::vector<Ento> &entities, bool root);
     const v2 &GetRegionAvailable() const;

@@ -28,15 +28,15 @@ namespace axl {
     return _scale;
   }
 
-  const quat &Transform::GetRotationQuat() const {
+  const quat &Transform::GetRotation() const {
     return _rotation;
   }
 
-  const v3 Transform::GetRotation() const {
+  const v3 Transform::GetRotationEuler() const {
     return degrees(eulerAngles(_rotation));
   }
 
-  void Transform::SetRotation(const v3 &rotation) {
+  void Transform::SetRotationEuler(const v3 &rotation) {
     _rotation = quat(radians(rotation));
     _is_dirty = true;
   }

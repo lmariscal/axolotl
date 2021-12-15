@@ -26,8 +26,10 @@ namespace axl {
     void SetPerspective();
     void SetMovementSpeed(f32 speed);
     void SetMouseSensitivity(f32 sensitivity);
-    void UpdateVectors();
-    m4 GetViewMatrix();
+    void SetFov(f32 fov);
+    void UpdateVectors(Transform *transform);
+    void SetCustomViewMatrix(m4 view);
+    m4 GetViewMatrix(Transform *transform);
     m4 GetProjectionMatrix(Window &window);
 
     static Camera *GetActiveCamera();
@@ -38,9 +40,6 @@ namespace axl {
    protected:
     inline static Ento _active_camera_ento;
 
-    v3 _last_position;
-    v3 _last_rotation;
-
     v3 _up;
     v3 _front;
     v3 _right;
@@ -49,6 +48,8 @@ namespace axl {
     f32 _movement_speed;
     f32 _mouse_sensitivity;
     f32 _fov;
+
+    m4 _view_matrix;
 
     bool _is_orthographic;
     bool _is_active_camera;

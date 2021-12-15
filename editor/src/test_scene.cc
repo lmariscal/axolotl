@@ -18,8 +18,8 @@ namespace axl {
     Camera &camera_component = camera_ento.AddComponent<Camera>();
     camera_component.SetAsActive();
     camera_ento.Transform().SetPosition(v3(-2.7f, 4.6f, -6.4f));
-    camera_ento.Transform().SetRotation(v3(67.5f, -29.5f, 0));
-    camera_component.UpdateVectors();
+    camera_ento.Transform().SetRotationEuler(v3(67.5f, -29.5f, 0));
+    camera_component.UpdateVectors(&camera_ento.Transform());
 
     Ento light_ento = CreateEntity();
     light_ento.Tag().value = "Light";

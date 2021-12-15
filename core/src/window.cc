@@ -121,7 +121,8 @@ namespace axl {
 
   void Window::KeyEvent(GLFWwindow *glfw_window, i32 key, i32 scancode, i32 action, i32 mods) {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
-    if (action != GLFW_REPEAT) window->_io_manager->KeyEvent(key, action != GLFW_RELEASE);
+    if (action != GLFW_REPEAT)
+      window->_io_manager->KeyEvent(key, action != GLFW_RELEASE);
 
     // if (window->lockMouse)
     //   return;
@@ -152,11 +153,13 @@ namespace axl {
     //   return;
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
 
+    window->_io_manager->ScrollEvent({ xoffset, yoffset });
     window->_gui->ScrollCallback(glfw_window, xoffset, yoffset);
   }
 
   void Window::MouseEvent(GLFWwindow *glfw_window, f64 x, f64 y) {
-    if (!glfwGetWindowAttrib(glfw_window, GLFW_HOVERED)) return;
+    if (!glfwGetWindowAttrib(glfw_window, GLFW_HOVERED))
+      return;
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
     window->_io_manager->MouseEvent(x, y);
   }

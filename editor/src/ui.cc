@@ -25,7 +25,7 @@ namespace axl {
     return a.id < b.id;
   }
 
-  void FrameEditor::DrawActionButtons(Window &window) {
+  void FrameEditor::DrawActionButtons(Window &window, DockSpaceData &dock_space_data) {
     ImVec4 *colors = ImGui::GetStyle().Colors;
 
     v4 button_color = colors[(i32)ImGuiCol_Button];
@@ -48,8 +48,10 @@ namespace axl {
     ImGui::SetCursorPos(cursor_pos);
     if (ImGui::Button(ICON_FA_HAND_POINTER, v2(30, 30)))
       action = EditorAction::Select;
-    if (ImGui::IsItemHovered())
+    if (ImGui::IsItemHovered()) {
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      dock_space_data.hover_action_buttons = true;
+    }
     cursor_pos.x += 30;
     if (original_action == EditorAction::Select)
       ImGui::PopStyleColor();
@@ -59,8 +61,10 @@ namespace axl {
     ImGui::SetCursorPos(cursor_pos);
     if (ImGui::Button(ICON_FA_ARROWS, v2(30, 30)))
       action = EditorAction::Move;
-    if (ImGui::IsItemHovered())
+    if (ImGui::IsItemHovered()) {
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      dock_space_data.hover_action_buttons = true;
+    }
     cursor_pos.x += 30;
     if (original_action == EditorAction::Move)
       ImGui::PopStyleColor();
@@ -70,8 +74,10 @@ namespace axl {
     ImGui::SetCursorPos(cursor_pos);
     if (ImGui::Button(ICON_FA_SYNC_ALT, v2(30, 30)))
       action = EditorAction::Rotate;
-    if (ImGui::IsItemHovered())
+    if (ImGui::IsItemHovered()) {
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      dock_space_data.hover_action_buttons = true;
+    }
     cursor_pos.x += 30;
     if (original_action == EditorAction::Rotate)
       ImGui::PopStyleColor();
@@ -81,8 +87,10 @@ namespace axl {
     ImGui::SetCursorPos(cursor_pos);
     if (ImGui::Button(ICON_FA_EXPAND, v2(30, 30)))
       action = EditorAction::Scale;
-    if (ImGui::IsItemHovered())
+    if (ImGui::IsItemHovered()) {
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      dock_space_data.hover_action_buttons = true;
+    }
     cursor_pos.x += 30;
     if (original_action == EditorAction::Scale)
       ImGui::PopStyleColor();
@@ -135,15 +143,14 @@ namespace axl {
     return entities;
   }
 
-  void FrameEditor::DrawGuizmo(Window &window) {
-    Camera *camera = Camera::GetActiveCamera();
+  void FrameEditor::DrawGuizmo(Window &window, Camera *camera) {
     if (!camera)
       return;
 
     v2 window_pos = ImGui::GetWindowPos();
     v2 window_size = ImGui::GetWindowSize();
 
-    m4 view = camera->GetViewMatrix();
+    m4 view = camera->GetViewMatrix(nullptr);
     m4 proj = camera->GetProjectionMatrix(window);
 
     v2 view_manipulate_pos = window_pos;
@@ -227,7 +234,7 @@ namespace axl {
     window.GetRenderer().Resize(size.x, size.y);
   }
 
-  void FrameEditor::Draw(Window &window, DockSpace &dock) {
+  void FrameEditor::Draw(Window &window, DockSpace &dock, Camera *camera) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -261,12 +268,21 @@ namespace axl {
     bool one_camera_active = Camera::GetActiveCamera() != nullptr;
 
     if (one_camera_active) {
+      dock.data.hover_frame_editor = false;
       ImGui::BeginChild("##frame_editor_region", buffer_size, true, ImGuiWindowFlags_NoScrollbar);
       ImGui::Image((ImTextureID)(size_t)_frame.GetTexture(FrameBufferTexture::Color), buffer_size, uv0, uv1);
-      if (!focused && dock.data.terminal->scene_playing && ImGui::IsItemClicked() && !ImGuizmo::IsOver())
+      if (ImGui::IsItemHovered())
+        dock.data.hover_frame_editor = true;
+      if (!focused && dock.data.terminal->scene_playing && !dock.data.terminal->scene_paused &&
+          ImGui::IsItemClicked() && !ImGuizmo::IsOver() && !dock.data.hover_action_buttons)
         focused = true;
-      DrawGuizmo(window);
-      DrawActionButtons(window);
+
+      if (!dock.data.terminal->scene_playing) {
+        DrawGuizmo(window, camera);
+
+        dock.data.hover_action_buttons = false;
+        DrawActionButtons(window, dock.data);
+      }
       ImGui::EndChild();
     }
 

@@ -99,7 +99,7 @@ namespace axl {
       ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert", Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
   }
 
-  void Renderer::Render(Scene &scene, bool show_data, bool focused) {
+  void Renderer::Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform) {
     f64 cpu_starttime = Window::GetTime();
     m4 view(1.0f);
     m4 projection(1.0f);
@@ -112,12 +112,8 @@ namespace axl {
 
     _performance.StartCapture(_window->GetTime());
 
-    Camera *camera = Camera::GetActiveCamera();
-    if (camera) {
-      Ento camera_ento = Camera::GetActiveCameraEnto();
-      view = camera->GetViewMatrix();
-      projection = camera->GetProjectionMatrix(*_window);
-    }
+    view = camera.GetViewMatrix(&camera_transform);
+    projection = camera.GetProjectionMatrix(*_window);
 
     f64 orginzation_starttime = Window::GetTime();
 
@@ -190,11 +186,7 @@ namespace axl {
 
     glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &size);
 
-    if (camera) {
-      Ento camera_ento = Camera::GetActiveCameraEnto();
-      Transform &transform = registry.get<Transform>(camera_ento);
-      glBufferSubData(GL_UNIFORM_BUFFER, 16, sizeof(v3), value_ptr(transform.GetPosition()));
-    }
+    glBufferSubData(GL_UNIFORM_BUFFER, 16, sizeof(v3), value_ptr(camera_transform.GetPosition()));
 
     glBufferSubData(GL_UNIFORM_BUFFER, 32, sizeof(LightData) * lights_data.size(), lights_data.data());
     glBufferSubData(GL_UNIFORM_BUFFER,

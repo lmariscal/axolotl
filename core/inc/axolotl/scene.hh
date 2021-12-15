@@ -7,6 +7,8 @@ namespace axl {
 
   class Renderer;
   class Window;
+  class Camera;
+  class Transform;
 
   class Ento;
 
@@ -23,7 +25,8 @@ namespace axl {
     Ento FromHandle(entt::entity handle);
     entt::registry &GetRegistry();
 
-    void Draw(Renderer &renderer, bool show_data = false);
+    void
+    Draw(Renderer &renderer, bool show_data = false, Camera *camera = nullptr, Transform *camera_transform = nullptr);
     json Serialize();
     void Deserialize(const json &data);
 

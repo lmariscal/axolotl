@@ -5,7 +5,7 @@
 
 namespace axl {
 
-  IOManager::IOManager(Window &owner): _sensitivity(0.3f) {
+  IOManager::IOManager(Window &owner): _sensitivity(0.3f), _last_scroll(0.0f) {
     for (i32 i = 0; i < (i32)Key::Last; ++i) {
       _keys[i] = false;
       _hold_keys[i] = false;
@@ -27,16 +27,31 @@ namespace axl {
 
   IOManager::~IOManager() { }
 
+  bool IOManager::WheelMoved() {
+    return _last_scroll != v2 {};
+  }
+
+  v2 IOManager::GetWheelMovement() {
+    return _last_scroll;
+  }
+
+  void IOManager::ScrollEvent(v2 offset) {
+    _last_scroll = offset;
+  }
+
   void IOManager::UpdatePads(GLFWwindow *glfwWindow) {
     for (i32 j = 0; j < (i32)Pad::Last; ++j) {
-      if (!PadPresent((Pad)j)) continue;
+      if (!PadPresent((Pad)j))
+        continue;
 
       GLFWgamepadstate state;
-      if (!glfwGetGamepadState(j, &state)) return;
+      if (!glfwGetGamepadState(j, &state))
+        return;
 
       int count;
       const float *axes = glfwGetJoystickAxes(j, &count);
-      if (count > (i32)JoyStick::Last) count = (i32)JoyStick::Last;
+      if (count > (i32)JoyStick::Last)
+        count = (i32)JoyStick::Last;
       for (int n = 0; n < count; ++n)
         _joy_sticks[n] = axes[n];
 
@@ -69,6 +84,8 @@ namespace axl {
     std::copy_n(_mouse, (i32)MouseButton::Last, _hold_mouse);
     for (i32 i = 0; i < (i32)Pad::Last; ++i)
       std::copy_n(_pad[i], (i32)PadButton::Last, _hold_pad[i]);
+
+    _last_scroll = v2(0.0f);
   }
 
   bool IOManager::KeyDown(Key key) {

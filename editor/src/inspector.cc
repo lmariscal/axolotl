@@ -175,7 +175,7 @@ namespace axl {
         if (transform.ShowComponent()) {
 
           if (selected_entity.HasComponent<Camera>())
-            selected_entity.GetComponent<Camera>().UpdateVectors();
+            selected_entity.GetComponent<Camera>().UpdateVectors(&selected_entity.Transform());
         }
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);

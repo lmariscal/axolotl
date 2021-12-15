@@ -23,6 +23,9 @@ namespace axl {
     bool show_imgui_demo = false;
     bool show_performance = true;
 
+    bool hover_action_buttons = false;
+    bool hover_frame_editor = false;
+
     std::filesystem::path project_path = "";
     Scene *scene = nullptr;
   };

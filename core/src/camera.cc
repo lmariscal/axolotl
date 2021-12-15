@@ -13,15 +13,19 @@ namespace axl {
     _movement_speed(6.0f),
     _mouse_sensitivity(2.0f),
     _fov(60.0f),
-    _is_active_camera(false) { }
+    _is_active_camera(false),
+    _view_matrix(1.0f) { }
 
   Camera::~Camera() {
-    if (_is_active_camera) _active_camera_ento = {};
+    if (_is_active_camera)
+      _active_camera_ento = {};
   }
 
   void Camera::Init() {
-    if (_is_active_camera) SetAsActive();
-    UpdateVectors();
+    if (_is_active_camera)
+      SetAsActive();
+    Transform &transform = Ento::FromComponent(*this).Transform();
+    UpdateVectors(&transform);
     log::debug("Camera initialized");
   }
 
@@ -52,35 +56,40 @@ namespace axl {
   void Camera::RotateCamera(const v2 &mouse_delta, f64 delta) {
     Transform &transform = Ento::FromComponent(*this).Transform();
 
-    v3 euler = transform.GetRotation();
+    v3 euler = transform.GetRotationEuler();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
 
     yaw += mouse_delta.x * (f32)delta * _mouse_sensitivity * 10.0f;
     pitch -= mouse_delta.y * (f32)delta * _mouse_sensitivity * 10.0f;
 
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
+    if (pitch > 89.0f)
+      pitch = 89.0f;
+    if (pitch < -89.0f)
+      pitch = -89.0f;
 
     std::min(yaw, 360.0f);
     std::max(yaw, 0.0f);
 
-    transform.SetRotation(euler);
+    transform.SetRotationEuler(euler);
 
-    UpdateVectors();
+    UpdateVectors(&transform);
   }
 
   m4 Camera::GetProjectionMatrix(Window &window) {
     v2 window_size = window.GetFrameBufferSize();
     f32 aspect_ratio = window_size.x / window_size.y;
-    if (_is_orthographic) return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
+    if (_is_orthographic)
+      return ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
     else
       return perspective(radians(_fov), aspect_ratio, 0.1f, 10000.0f);
   }
 
-  void Camera::UpdateVectors() {
-    Transform &transform = Ento::FromComponent(*this).Transform();
-    v3 euler = transform.GetRotation();
+  void Camera::UpdateVectors(Transform *transform) {
+    if (!transform)
+      transform = &Ento::FromComponent(*this).Transform();
+
+    v3 euler = transform->GetRotationEuler();
     f32 &yaw = euler.x;
     f32 &pitch = euler.y;
 
@@ -93,20 +102,31 @@ namespace axl {
     _up = normalize(cross(_right, _front));
   }
 
-  m4 Camera::GetViewMatrix() {
-    Transform &transform = Ento::FromComponent(*this).Transform();
-    return lookAt(transform.GetPosition(), transform.GetPosition() + _front, _up);
+  void Camera::SetCustomViewMatrix(m4 view) {
+    _view_matrix = view;
+  }
+
+  m4 Camera::GetViewMatrix(Transform *transform) {
+    if (_view_matrix != m4(1.0f))
+      return _view_matrix;
+
+    if (!transform)
+      transform = &Ento::FromComponent(*this).Transform();
+
+    return lookAt(transform->GetPosition(), transform->GetPosition() + _front, _up);
   }
 
   void Camera::SetAsActive() {
     Ento ento = Ento::FromComponent(*this);
-    if (_active_camera_ento) _active_camera_ento.GetComponent<Camera>()._is_active_camera = false;
+    if (_active_camera_ento)
+      _active_camera_ento.GetComponent<Camera>()._is_active_camera = false;
     _active_camera_ento = ento;
     _is_active_camera = true;
   }
 
   Camera *Camera::GetActiveCamera() {
-    if (!_active_camera_ento) return nullptr;
+    if (!_active_camera_ento)
+      return nullptr;
     return &_active_camera_ento.GetComponent<Camera>();
   }
 
@@ -122,6 +142,10 @@ namespace axl {
     _is_orthographic = true;
   }
 
+  void Camera::SetFov(f32 fov) {
+    _fov = fov;
+  }
+
   bool Camera::ShowComponent(Ento &ento) {
     bool modified = false;
 
@@ -130,15 +154,20 @@ namespace axl {
       if (active) {
         SetAsActive();
       } else {
-        if (GetActiveCameraEnto() == ento) _active_camera_ento = {};
+        if (GetActiveCameraEnto() == ento)
+          _active_camera_ento = {};
         _is_active_camera = false;
       }
       modified = true;
     }
-    if (ShowData("Orthographic", _is_orthographic)) modified = true;
-    if (ShowData("Speed", _movement_speed)) modified = true;
-    if (ShowData("Sensitivity", _mouse_sensitivity)) modified = true;
-    if (ShowData("FOV", _fov)) modified = true;
+    if (ShowData("Orthographic", _is_orthographic))
+      modified = true;
+    if (ShowData("Speed", _movement_speed))
+      modified = true;
+    if (ShowData("Sensitivity", _mouse_sensitivity))
+      modified = true;
+    if (ShowData("FOV", _fov))
+      modified = true;
 
     return modified;
   }

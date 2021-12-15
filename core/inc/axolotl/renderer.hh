@@ -12,6 +12,8 @@ namespace axl {
 
   class TextureCube;
   class Mesh;
+  class Camera;
+  class Transform;
   class Shader;
   class FrameBuffer;
 
@@ -53,7 +55,7 @@ namespace axl {
     void Resize(u32 width, u32 height);
     void SetSkybox(TextureCube *skybox);
 
-    void Render(Scene &scene, bool show_data, bool focused);
+    void Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform);
     void SetMeshWireframe(bool state);
 
     const RendererPerformance &GetPerformance() const;

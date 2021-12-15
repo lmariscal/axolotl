@@ -1,3 +1,4 @@
+#include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/material.hh>
 #include <axolotl/mesh.hh>
@@ -64,8 +65,13 @@ namespace axl {
     return Ento::_handle_ento_map[handle];
   }
 
-  void Scene::Draw(Renderer &renderer, bool show_data) {
-    renderer.Render(*this, show_data, focused);
+  void Scene::Draw(Renderer &renderer, bool show_data, Camera *camera, Transform *camera_transform) {
+    if (!camera)
+      camera = Camera::GetActiveCamera();
+    if (!camera_transform)
+      camera_transform = &Ento::FromComponent(*camera).GetComponent<Transform>();
+
+    renderer.Render(*this, show_data, focused, *camera, *camera_transform);
   }
 
   Scene *Scene::GetActiveScene() {

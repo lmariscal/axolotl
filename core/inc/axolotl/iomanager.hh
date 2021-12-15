@@ -204,7 +204,7 @@ namespace axl {
     bool WheelMoved();
     v2 GetRelativePosition();
     v2 GetAbsolutePosition();
-    i32 GetWheelMovement();
+    v2 GetWheelMovement();
 
     bool PadPresent(Pad pad);
 
@@ -220,6 +220,7 @@ namespace axl {
     void MouseEvent(f64 x, f64 y);
     void UpdateHolds();
     void UpdateRelativePositions();
+    void ScrollEvent(v2 offset);
 
     bool _keys[(i32)Key::Last];
     bool _mouse[(i32)MouseButton::Last];
@@ -227,6 +228,7 @@ namespace axl {
     bool _hold_keys[(i32)Key::Last];
     bool _hold_mouse[(i32)MouseButton::Last];
     bool _hold_pad[(i32)Pad::Last][(i32)PadButton::Last];
+    v2 _last_scroll;
     v2d _mouse_pos;
     v2d _last_mouse_pos;
     v2d _relative_mouse_pos;

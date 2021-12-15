@@ -4,6 +4,7 @@
 
 #include <ImGuizmo.h>
 #include <axolotl/axolotl.hh>
+#include <axolotl/camera.hh>
 #include <axolotl/gui.hh>
 #include <axolotl/renderer.hh>
 #include <axolotl/shader.hh>
@@ -15,12 +16,74 @@
 
 using namespace axl;
 
+v3 target_position;
+f32 eye_vertical;
+f32 eye_horizontal;
+f32 target_distance = 5.0f;
+v2 start_dragging_pos;
+v2 start_rotating_pos;
+
+void UpdateEditorCamera(Window &window,
+                        Camera &camera,
+                        Transform &transform,
+                        DockSpaceData &dock_space_data,
+                        f32 step) {
+
+  v3 movement { sin(eye_horizontal), eye_vertical, cos(eye_horizontal) };
+  v3 pos = normalize(movement) * target_distance;
+  pos += target_position;
+  v3 right = normalize(cross({ 0.0f, 1.0f, 0.0f }, (pos - target_position)));
+  v3 front = normalize(cross(right, { 0.0f, 1.0f, 0.0f }));
+  m4 view = lookAt(pos, target_position, { 0.0f, 1.0f, 0.0f });
+
+  camera.SetCustomViewMatrix(view);
+
+  if (!dock_space_data.hover_frame_editor)
+    return;
+
+  IOManager &io = window.GetIOManager();
+  if (io.ButtonTriggered(MouseButton::Middle)) {
+    start_dragging_pos = io.GetAbsolutePosition();
+  }
+
+  if (io.ButtonDown(MouseButton::Middle)) {
+    v2 delta = io.GetAbsolutePosition() - start_dragging_pos;
+    delta *= step;
+
+    if (io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift)) {
+      v3 right_delta = right * delta.x;
+      v3 front_delta = front * delta.y;
+      target_position -= right_delta;
+      target_position -= front_delta;
+    } else {
+      eye_vertical += delta.y * 6.0f;
+      eye_horizontal -= delta.x;
+    }
+
+    start_dragging_pos = io.GetAbsolutePosition();
+  }
+
+  if (io.ButtonReleased(MouseButton::Middle)) {
+    start_dragging_pos = v2 {};
+  }
+
+  if (io.WheelMoved()) {
+    target_distance -= io.GetWheelMovement().y * step * 12.0f;
+    target_distance = max(target_distance, 0.3f);
+  }
+}
+
 void MainLoop(Window &window, TerminalData &terminal_data) {
   Renderer &renderer = window.GetRenderer();
 
   ImTerm::terminal<Terminal> terminal(terminal_data);
   terminal.get_terminal_helper()->Init();
   terminal.set_min_log_level(ImTerm::message::severity::debug);
+
+  Camera editor_camera;
+  editor_camera.SetFov(90.0f);
+  Transform editor_camera_transform;
+  editor_camera_transform.SetRotationEuler({ 67.0f, -29.5f, 0.0f });
 
   DockSpace dock;
 
@@ -45,6 +108,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   scene.Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
+    UpdateEditorCamera(window, editor_camera, editor_camera_transform, dock.data, window.GetDeltaTime());
     if (terminal_data.watch_shaders) {
       ShaderStore::ProcessQueue();
     }
@@ -96,7 +160,11 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       if (terminal_data.display_terminal)
         terminal.show();
 
-      scene.Draw(renderer, dock.data.show_renderer && show_frame);
+      if (dock.data.terminal->scene_playing && !dock.data.terminal->scene_paused) {
+        scene.Draw(renderer, dock.data.show_renderer && show_frame);
+      } else {
+        scene.Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
+      }
 
     } else {
 
@@ -110,8 +178,19 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       renderer.Resize(frame_editor.GetRegionAvailable().x, frame_editor.GetRegionAvailable().y);
       renderer.SetMeshWireframe(dock.data.show_wireframe);
 
-      if (dock.data.show_world_editor)
-        scene.Draw(renderer, dock.data.show_renderer && show_frame);
+      if (dock.data.show_world_editor) {
+        if (dock.data.terminal->scene_playing && !dock.data.terminal->scene_paused) {
+          scene.Draw(renderer, dock.data.show_renderer && show_frame);
+        } else {
+          scene.Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
+        }
+
+        ImGui::Begin("Testy");
+        Ento tmp {};
+        editor_camera.ShowComponent(tmp);
+        editor_camera_transform.ShowComponent();
+        ImGui::End();
+      }
 
       frame_editor.Unbind(window);
 
@@ -121,7 +200,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       if (dock.data.show_terminal)
         terminal.show();
       if (dock.data.show_world_editor)
-        frame_editor.Draw(window, dock);
+        frame_editor.Draw(window, dock, &editor_camera);
       if (dock.data.show_hierarchy)
         frame_editor.DrawEntityList(scene, dock);
       if (dock.data.show_inspector)

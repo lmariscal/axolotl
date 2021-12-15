@@ -22,13 +22,13 @@ namespace axl {
 
     const v3 &GetPosition() const;
     const v3 &GetScale() const;
-    const quat &GetRotationQuat() const;
-    const v3 GetRotation() const;
+    const quat &GetRotation() const;
+    const v3 GetRotationEuler() const;
 
     void SetPosition(const v3 &position);
     void SetScale(const v3 &scale);
     void SetRotation(const quat &rotation);
-    void SetRotation(const v3 &rotation);
+    void SetRotationEuler(const v3 &rotation);
     bool IsDirty() const;
 
     m4 GetModelMatrix();

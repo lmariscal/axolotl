@@ -17,8 +17,7 @@
 using namespace axl;
 
 v3 target_position;
-f32 eye_vertical;
-f32 eye_horizontal;
+v2 eye_position;
 f32 target_distance = 5.0f;
 v2 start_dragging_pos;
 v2 start_rotating_pos;
@@ -29,7 +28,7 @@ void UpdateEditorCamera(Window &window,
                         DockSpaceData &dock_space_data,
                         f32 step) {
 
-  v3 movement { sin(eye_horizontal), eye_vertical, cos(eye_horizontal) };
+  v3 movement { sin(eye_position.x), eye_position.y, cos(eye_position.x) };
   v3 pos = normalize(movement) * target_distance;
   pos += target_position;
   v3 right = normalize(cross({ 0.0f, 1.0f, 0.0f }, (pos - target_position)));
@@ -56,8 +55,8 @@ void UpdateEditorCamera(Window &window,
       target_position -= right_delta;
       target_position -= front_delta;
     } else {
-      eye_vertical += delta.y * 6.0f;
-      eye_horizontal -= delta.x;
+      eye_position.y += delta.y * 2.0f;
+      eye_position.x -= delta.x * 0.3f;
     }
 
     start_dragging_pos = io.GetAbsolutePosition();
@@ -68,8 +67,8 @@ void UpdateEditorCamera(Window &window,
   }
 
   if (io.WheelMoved()) {
-    target_distance -= io.GetWheelMovement().y * step * 12.0f;
-    target_distance = max(target_distance, 0.3f);
+    target_distance -= io.GetWheelMovement().y * step * 100.0f;
+    target_distance = max(target_distance, 2.0f);
   }
 }
 

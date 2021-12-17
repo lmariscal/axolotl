@@ -119,8 +119,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       ShaderStore::ProcessQueue();
     }
 
-    renderer.AddLine({ { (f32)0, 0.0f, 0.0f }, { (f32)0, 10.0f, 10.0f }, { 255.0f, 0.0f, 0.0f } });
-
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);
     if (frame_editor.focused && io.KeyTriggered(Key::Escape))
       frame_editor.focused = false;
@@ -192,12 +190,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         } else {
           scene.Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
         }
-
-        ImGui::Begin("Testy");
-        Ento tmp {};
-        editor_camera.ShowComponent(tmp);
-        editor_camera_transform.ShowComponent();
-        ImGui::End();
       }
 
       frame_editor.Unbind(window);

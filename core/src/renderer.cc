@@ -48,7 +48,7 @@ namespace axl {
 
     _line_shader = std::make_unique<Shader>(
       ShaderData(Axolotl::GetDistDir() + "res/shaders/line.vert", Axolotl::GetDistDir() + "res/shaders/line.frag"));
-    _grid = std::make_unique<Grid>(v2i(100), v2i(1));
+    _grid = std::make_unique<Grid>(v2i(300, 300), v2i(1));
 
     Mesh::CreateQuad(&_quad_mesh);
     _post_process_shader = new Shader(
@@ -71,10 +71,6 @@ namespace axl {
 
   const RendererPerformance &Renderer::GetPerformance() const {
     return _last_performance;
-  }
-
-  void Renderer::AddLine(const Line &line) {
-    _lines.emplace(line);
   }
 
   void Renderer::ClearScreen(const v3 &color) {
@@ -105,6 +101,10 @@ namespace axl {
     Mesh::CreateCube(&_skybox_mesh);
     _skybox_shader = new Shader(
       ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert", Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
+  }
+
+  void Renderer::AddLine(const Line &line) {
+    _lines.emplace(line);
   }
 
   void Renderer::Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform) {
@@ -209,6 +209,8 @@ namespace axl {
     f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
 
+    // Grid::Draw(view, projection, 100);
+
     ClearScreen(v3(0.3f));
 
     glEnable(GL_DEPTH_TEST);
@@ -240,7 +242,7 @@ namespace axl {
       entity.model->Draw();
     }
 
-    // _grid->Draw(view, projection);
+    _grid->Draw(view, projection);
 
     if (_skybox_texture) {
       glDisable(GL_CULL_FACE);
@@ -263,10 +265,8 @@ namespace axl {
     _line_shader->Bind();
     _line_shader->SetUniformM4((u32)UniformLocation::ViewMatrix, view);
     _line_shader->SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
-    glEnable(GL_LINE_SMOOTH);
     while (!_lines.empty()) {
       Line &line = _lines.front();
-      _line_shader->SetUniformV4("color", line.color);
       line.Draw();
       _lines.pop();
     }

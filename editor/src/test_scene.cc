@@ -32,7 +32,7 @@ namespace axl {
     Model &cube_model = cube_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
     TextureStore::ProcessQueue();
 
-    window.GetRenderer().SetSkybox(new TextureCube(Axolotl::GetDistDir() + "res/textures/TropicalSunnyDay"));
+    // window.GetRenderer().SetSkybox(new TextureCube(Axolotl::GetDistDir() + "res/textures/TropicalSunnyDay"));
   }
 
   void TestScene::Update(Window &window, f64 delta) {

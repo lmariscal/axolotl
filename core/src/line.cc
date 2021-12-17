@@ -3,21 +3,20 @@
 
 namespace axl {
 
-  Line::Line(v3 pos0, v3 pos1, Color color, f32 thickness, bool loop):
-    _vertices({ pos0, pos1 }),
-    color(color),
-    thickness(thickness),
-    loop(loop) {
+  Line::Line(v3 pos0, v3 pos1, Color color, f32 thickness, bool loop): thickness(thickness), loop(loop), _vertices() {
     LoadBuffers();
+
+    v4 &c = color.rgba;
+    _vertices.push_back({ pos0, c });
+    _vertices.push_back({ pos1, c });
 
     if (_line_thickness_range == v2(0.0f))
       glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, value_ptr(_line_thickness_range));
   }
 
-  Line::Line(const std::vector<v3> &vertices, const std::vector<v2u> &indices, Color color, f32 thickness):
+  Line::Line(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness):
     _vertices(vertices),
     _indices(indices),
-    color(color),
     thickness(thickness),
     loop(false) {
     LoadBuffers();
@@ -26,11 +25,11 @@ namespace axl {
       glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, value_ptr(_line_thickness_range));
   }
 
-  Line::Line(const std::vector<v3> &positions, Color color, f32 thickness, bool loop):
-    _vertices(positions),
-    color(color),
+  Line::Line(const std::vector<LineVertex> &vertices, f32 thickness, bool loop):
+    _vertices(vertices),
     thickness(thickness),
     loop(loop) {
+
     LoadBuffers();
 
     if (_line_thickness_range == v2(0.0f))
@@ -39,7 +38,7 @@ namespace axl {
 
   Line::Line(Line &&other) {
     _vertices = std::move(other._vertices);
-    color = other.color;
+    _indices = std::move(other._indices);
     thickness = other.thickness;
     loop = other.loop;
 
@@ -48,7 +47,7 @@ namespace axl {
 
   Line::Line(const Line &other) {
     _vertices = other._vertices;
-    color = other.color;
+    _indices = other._indices;
     thickness = other.thickness;
     loop = other.loop;
 
@@ -57,7 +56,7 @@ namespace axl {
 
   Line &Line::operator=(Line &&other) {
     _vertices = std::move(other._vertices);
-    color = other.color;
+    _indices = std::move(other._indices);
     thickness = other.thickness;
     loop = other.loop;
 
@@ -68,7 +67,7 @@ namespace axl {
 
   Line &Line::operator=(const Line &other) {
     _vertices = other._vertices;
-    color = other.color;
+    _indices = other._indices;
     thickness = other.thickness;
     loop = other.loop;
 
@@ -90,7 +89,7 @@ namespace axl {
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(v3) * _vertices.size(), _vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * _vertices.size(), _vertices.data(), GL_STATIC_DRAW);
 
     if (!_indices.empty()) {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
@@ -98,7 +97,9 @@ namespace axl {
     }
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(v3), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void *)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void *)(sizeof(v3)));
 
     glBindVertexArray(0);
   }
@@ -109,7 +110,7 @@ namespace axl {
     glBindVertexArray(_vao);
 
     if (!_indices.empty())
-      glDrawElements(GL_LINES, _indices.size(), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_LINES, _indices.size() * 2, GL_UNSIGNED_INT, 0);
     else
       glDrawArrays(loop ? GL_LINE_LOOP : GL_LINE_STRIP, 0, _vertices.size());
 

@@ -5,11 +5,17 @@
 
 namespace axl {
 
+  // RGBA has to be normalized from 255
+  struct LineVertex {
+    v3 pos;
+    v4 color;
+  };
+
   class Line {
    public:
     Line(v3 pos0, v3 pos1, Color color = Color(), f32 thickness = 1.0f, bool loop = false);
-    Line(const std::vector<v3> &positions, Color color = Color(), f32 thickness = 1.0f, bool loop = false);
-    Line(const std::vector<v3> &vertices, const std::vector<v2u> &indices, Color color = Color(), f32 thickness = 1.0f);
+    Line(const std::vector<LineVertex> &vertices, f32 thickness = 1.0f, bool loop = false);
+    Line(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness = 1.0f);
 
     Line(Line &&other);
     Line(const Line &other);
@@ -21,14 +27,13 @@ namespace axl {
 
     void Draw() const;
 
-    Color color;
     f32 thickness;
     bool loop;
 
    protected:
     void LoadBuffers();
 
-    std::vector<v3> _vertices;
+    std::vector<LineVertex> _vertices;
     std::vector<v2u> _indices;
 
     u32 _vao;

@@ -69,13 +69,13 @@ namespace axl {
 
     void ShowData();
 
+    RendererPerformance _performance;
+    RendererPerformance _last_performance;
+
     std::unique_ptr<Shader> _line_shader;
     std::queue<Line> _lines;
 
     std::unique_ptr<Grid> _grid;
-
-    RendererPerformance _performance;
-    RendererPerformance _last_performance;
 
     bool _show_wireframe;
     v2i _size;

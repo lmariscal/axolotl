@@ -1,12 +1,25 @@
 #pragma once
 
+#include <axolotl/line.hh>
 #include <axolotl/types.hh>
 
 namespace axl {
 
+  class Shader;
+  class Line;
+
   class Grid {
    public:
-    static void Draw(const m4 &view, const m4 &proj, i32 size);
+    Grid(const v2i &size, const v2i &cell_size);
+
+    void Draw(const m4 &view, const m4 &projection);
+
+   protected:
+    v2i _size;
+    v2i _cell_size;
+
+    std::unique_ptr<Shader> _shader;
+    std::unique_ptr<Line> _line;
   };
 
 } // namespace axl

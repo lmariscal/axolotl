@@ -14,6 +14,8 @@ namespace axl {
     bool scene_playing = false;
     bool scene_paused = false;
     bool display_terminal = false;
+
+    std::filesystem::path project_path = "";
   };
 
   class Terminal: public ImTerm::basic_spdlog_terminal_helper<Terminal, TerminalData, std::mutex> {

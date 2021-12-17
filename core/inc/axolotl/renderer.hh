@@ -1,9 +1,11 @@
 #pragma once
 
 #include <axolotl/light.hh>
+#include <axolotl/line.hh>
 #include <axolotl/scene.hh>
 #include <axolotl/types.hh>
 #include <entt/entt.hpp>
+#include <queue>
 
 namespace axl {
 
@@ -11,6 +13,7 @@ namespace axl {
   class GUI;
 
   class TextureCube;
+  class Grid;
   class Mesh;
   class Camera;
   class Transform;
@@ -57,6 +60,7 @@ namespace axl {
 
     void Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform);
     void SetMeshWireframe(bool state);
+    void AddLine(const Line &line);
 
     const RendererPerformance &GetPerformance() const;
 
@@ -64,6 +68,11 @@ namespace axl {
     friend class GUI;
 
     void ShowData();
+
+    std::unique_ptr<Shader> _line_shader;
+    std::queue<Line> _lines;
+
+    std::unique_ptr<Grid> _grid;
 
     RendererPerformance _performance;
     RendererPerformance _last_performance;

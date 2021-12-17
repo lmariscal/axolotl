@@ -4,11 +4,12 @@ add_subdirectory(ergo)
 
 # ASSIMP
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-else()
-  set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-endif()
+# if(CMAKE_BUILD_TYPE MATCHES Debug)
+#   set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+# else()
+#   set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+# endif()
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(assimp)
 

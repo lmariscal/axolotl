@@ -46,6 +46,10 @@ namespace axl {
 
     _post_process_framebuffer = new FrameBuffer(_size.x, _size.y);
 
+    _line_shader = std::make_unique<Shader>(
+      ShaderData(Axolotl::GetDistDir() + "res/shaders/line.vert", Axolotl::GetDistDir() + "res/shaders/line.frag"));
+    _grid = std::make_unique<Grid>(v2i(100), v2i(1));
+
     Mesh::CreateQuad(&_quad_mesh);
     _post_process_shader = new Shader(
       ShaderData(Axolotl::GetDistDir() + "res/shaders/post.vert", Axolotl::GetDistDir() + "res/shaders/post.frag"));
@@ -67,6 +71,10 @@ namespace axl {
 
   const RendererPerformance &Renderer::GetPerformance() const {
     return _last_performance;
+  }
+
+  void Renderer::AddLine(const Line &line) {
+    _lines.emplace(line);
   }
 
   void Renderer::ClearScreen(const v3 &color) {
@@ -201,8 +209,6 @@ namespace axl {
     f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
 
-    Grid::Draw(view, projection, 100);
-
     ClearScreen(v3(0.3f));
 
     glEnable(GL_DEPTH_TEST);
@@ -234,6 +240,8 @@ namespace axl {
       entity.model->Draw();
     }
 
+    // _grid->Draw(view, projection);
+
     if (_skybox_texture) {
       glDisable(GL_CULL_FACE);
       glDepthFunc(GL_LEQUAL);
@@ -250,6 +258,18 @@ namespace axl {
     glDisable(GL_CULL_FACE);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    // Debug draw
+    _line_shader->Bind();
+    _line_shader->SetUniformM4((u32)UniformLocation::ViewMatrix, view);
+    _line_shader->SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
+    glEnable(GL_LINE_SMOOTH);
+    while (!_lines.empty()) {
+      Line &line = _lines.front();
+      _line_shader->SetUniformV4("color", line.color);
+      line.Draw();
+      _lines.pop();
+    }
 
     _post_process_framebuffer->Unbind();
 

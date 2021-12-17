@@ -17,7 +17,11 @@
 
 namespace axl {
 
-  FrameEditor::FrameEditor(): _frame(1280, 720), _region_available({ 0, 0 }), action(EditorAction::Select) { }
+  FrameEditor::FrameEditor():
+    _frame(1280, 720),
+    _region_available({ 0, 0 }),
+    action(EditorAction::Select),
+    focused(false) { }
 
   FrameEditor::~FrameEditor() { }
 

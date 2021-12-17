@@ -6,6 +6,7 @@
 #include <axolotl/axolotl.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/gui.hh>
+#include <axolotl/line.hh>
 #include <axolotl/renderer.hh>
 #include <axolotl/shader.hh>
 #include <axolotl/transform.hh>
@@ -33,6 +34,7 @@ void UpdateEditorCamera(Window &window,
   pos += target_position;
   v3 right = normalize(cross({ 0.0f, 1.0f, 0.0f }, (pos - target_position)));
   v3 front = normalize(cross(right, { 0.0f, 1.0f, 0.0f }));
+
   m4 view = lookAt(pos, target_position, { 0.0f, 1.0f, 0.0f });
 
   camera.SetCustomViewMatrix(view);
@@ -46,15 +48,20 @@ void UpdateEditorCamera(Window &window,
   }
 
   if (io.ButtonDown(MouseButton::Middle)) {
+
     v2 delta = io.GetAbsolutePosition() - start_dragging_pos;
     delta *= step;
 
     if (io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift)) {
+      ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+
       v3 right_delta = right * delta.x;
       v3 front_delta = front * delta.y;
       target_position -= right_delta;
       target_position -= front_delta;
     } else {
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+
       eye_position.y += delta.y * 2.0f;
       eye_position.x -= delta.x * 0.3f;
     }
@@ -111,6 +118,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     if (terminal_data.watch_shaders) {
       ShaderStore::ProcessQueue();
     }
+
+    renderer.AddLine({ { (f32)0, 0.0f, 0.0f }, { (f32)0, 10.0f, 10.0f }, { 255.0f, 0.0f, 0.0f } });
 
     bool show_frame = !(terminal_data.scene_playing && dock.data.fullscreen);
     if (frame_editor.focused && io.KeyTriggered(Key::Escape))

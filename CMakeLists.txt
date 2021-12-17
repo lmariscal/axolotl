@@ -13,6 +13,10 @@ if(UNIX AND NOT APPLE)
 
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fstandalone-debug")
   set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fstandalone-debug")
+
+  if(EXISTS "/usr/bin/mold")
+    add_link_options("-fuse-ld=/usr/bin/mold")
+  endif()
 endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dist)

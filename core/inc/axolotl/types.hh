@@ -25,6 +25,7 @@ namespace axl {
   using v4 = vec4;
 
   using v2i = vec<2, i32>;
+  using v2u = vec<2, u32>;
   using v2d = vec<2, f64>;
   using v3i = vec<3, i32>;
   using v3d = vec<3, f64>;
@@ -43,6 +44,7 @@ namespace axl {
   }
 
   // Stores color information as a normalized v4
+  // Not using `using` because we want the RGB and HSV functions (TODO: HSV)
   class Color {
    public:
     v4 rgba;

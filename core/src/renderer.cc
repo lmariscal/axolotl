@@ -48,7 +48,7 @@ namespace axl {
 
     _line_shader = std::make_unique<Shader>(
       ShaderData(Axolotl::GetDistDir() + "res/shaders/line.vert", Axolotl::GetDistDir() + "res/shaders/line.frag"));
-    _grid = std::make_unique<Grid>(v2i(300, 300), v2i(1));
+    _grid = std::make_unique<Grid>(v2i(100, 100), v2i(1));
 
     Mesh::CreateQuad(&_quad_mesh);
     _post_process_shader = new Shader(
@@ -208,8 +208,6 @@ namespace axl {
 
     f64 main_draw_starttime = Window::GetTime();
     _post_process_framebuffer->Bind();
-
-    // Grid::Draw(view, projection, 100);
 
     ClearScreen(v3(0.3f));
 

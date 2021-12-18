@@ -158,8 +158,8 @@ namespace axl {
     m4 proj = camera->GetProjectionMatrix(window);
 
     v2 view_manipulate_pos = window_pos;
-    view_manipulate_pos.x += window_size.x - 128 - 30;
-    view_manipulate_pos.y += 30;
+    view_manipulate_pos.x += window_size.x - 128 - 12;
+    view_manipulate_pos.y += 12;
     ImGuizmo::ViewManipulate(value_ptr(view), 8.0f, view_manipulate_pos, v2(128), 0x10101010);
 
     Ento selected_entity = Scene::GetActiveScene()->FromID(_inspector._selected_entity_id);
@@ -185,8 +185,8 @@ namespace axl {
     m4 model = transform.GetModelMatrix();
 
     v3 snap(action == EditorAction::Rotate ? 45.0f : 0.5f);
-    bool snap_enabled = io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift);
-    bool bounds_enabled = io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl);
+    bool snap_enabled = io.KeyDown(Key::LeftControl) || io.KeyDown(Key::RightControl);
+    bool bounds_enabled = io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift);
 
     std::array<f32, 6> bounds = { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
     std::array<f32, 6> bounds_snap;
@@ -387,8 +387,8 @@ namespace axl {
       _inspector._selected_entity_id = ento.id;
     ImGui::PopStyleVar(1);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
     bool marked_for_deletion = false;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(8.0f, 8.0f));
     if (ImGui::BeginPopupContextItem()) {
       marked_for_deletion = ShowEntityPopUp(ento, scene);
       ImGui::EndPopup();
@@ -414,25 +414,18 @@ namespace axl {
   }
 
   bool FrameEditor::ShowEntityPopUp(Ento ento, Scene &scene) {
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, v2(0.0f, 0.0f));
-    ImGui::SetWindowFontScale(0.95f);
-
-    f32 width = ImGui::GetWindowWidth();
-    v2 button_size = v2(100.0f, ImGui::GetTextLineHeight() + 9.0f);
-    if (ImGui::Button(ICON_FA_PLUS_CIRCLE " Add", button_size)) {
+    if (ImGui::MenuItem(ICON_FA_PLUS_CIRCLE " Add")) {
       scene.CreateEntity();
       ImGui::CloseCurrentPopup();
     }
     if (ImGui::IsItemHovered())
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
-    if (!ento) {
-      ImGui::PopStyleVar();
+    if (!ento)
       return false;
-    }
 
     bool marked_for_deletion = false;
-    if (ImGui::Button(ICON_FA_TRASH_ALT " Delete", button_size)) {
+    if (ImGui::MenuItem(ICON_FA_TRASH_ALT " Delete")) {
       marked_for_deletion = true;
       _inspector._selected_entity_id = {};
       ImGui::CloseCurrentPopup();
@@ -440,13 +433,11 @@ namespace axl {
     if (ImGui::IsItemHovered())
       ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
-    ImGui::PopStyleVar();
     return marked_for_deletion;
   }
 
   void FrameEditor::DrawEntityList(Scene &scene, DockSpace &dock) {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 9.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, v2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 8.0f));
     ImGui::Begin("Entities", &dock.data.show_hierarchy);
 
     f32 width = ImGui::GetWindowWidth() - ImGui::GetCursorPosX() - 40.0f;
@@ -457,11 +448,7 @@ namespace axl {
     std::strcpy(buffer.data(), _search_string.c_str());
 
     ImGui::PushItemWidth(width);
-    if (ImGui::InputTextWithHint("##search",
-                                 ICON_FA_SEARCH " Search",
-                                 buffer.data(),
-                                 buffer.size(),
-                                 ImGuiInputTextFlags_EnterReturnsTrue))
+    if (ImGui::InputTextWithHint("##search", ICON_FA_SEARCH " Search", buffer.data(), buffer.size()))
       _search_string = buffer.data();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 9.0f);
 
@@ -474,8 +461,10 @@ namespace axl {
     auto filtered_entities = FilterEntities(scene, entities, true);
 
     for (const Ento &ento : filtered_entities) {
-      if (!scene._registry.valid(ento.handle))
+      if (!scene._registry.valid(ento.handle)) {
+        ImGui::End();
         return;
+      }
       if (ento.HasParent())
         continue;
       ShowTreeEnto(ento, 0, scene, filtered_entities);
@@ -484,15 +473,16 @@ namespace axl {
     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
       _inspector._selected_entity_id = {};
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(0.0f, 0.0f));
-    if (ImGui::BeginPopupContextWindow("entity_popup", 1, false)) {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, v2(8.0f, 8.0f));
+    if (ImGui::BeginPopupContextWindow("entity_popup",
+                                       ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
       ShowEntityPopUp({}, scene);
       ImGui::EndPopup();
     }
     ImGui::PopStyleVar();
 
     ImGui::End();
-    ImGui::PopStyleVar(2);
+    ImGui::PopStyleVar();
   }
 
   void FrameEditor::DrawInspector(Scene &scene, DockSpace &dock) {

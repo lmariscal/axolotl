@@ -33,7 +33,6 @@ void UpdateEditorCamera(Window &window,
   v3 pos = normalize(movement) * target_distance;
   pos += target_position;
   v3 right = normalize(cross({ 0.0f, 1.0f, 0.0f }, (pos - target_position)));
-  v3 front = normalize(cross(right, { 0.0f, 1.0f, 0.0f }));
 
   m4 view = lookAt(pos, target_position, { 0.0f, 1.0f, 0.0f });
 
@@ -55,8 +54,8 @@ void UpdateEditorCamera(Window &window,
     if (io.KeyDown(Key::LeftShift) || io.KeyDown(Key::RightShift)) {
       ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
 
-      v3 right_delta = right * delta.x;
-      v3 front_delta = front * delta.y;
+      v3 right_delta = right * delta.x * 2.0f;
+      v3 front_delta = v3(0.0f, 1.0f, 0.0f) * delta.y * -2.0f;
       target_position -= right_delta;
       target_position -= front_delta;
     } else {

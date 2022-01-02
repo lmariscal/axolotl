@@ -103,7 +103,7 @@ namespace axl {
       ShaderData(Axolotl::GetDistDir() + "res/shaders/skybox.vert", Axolotl::GetDistDir() + "res/shaders/skybox.frag"));
   }
 
-  void Renderer::AddLine(const Line &line) {
+  void Renderer::AddLine(const LinePrimitive &line) {
     _lines.emplace(line);
   }
 
@@ -264,7 +264,7 @@ namespace axl {
     _line_shader->SetUniformM4((u32)UniformLocation::ViewMatrix, view);
     _line_shader->SetUniformM4((u32)UniformLocation::ProjectionMatrix, projection);
     while (!_lines.empty()) {
-      Line &line = _lines.front();
+      LinePrimitive &line = _lines.front();
       line.Draw();
       _lines.pop();
     }

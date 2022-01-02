@@ -92,11 +92,19 @@ namespace axl {
       e["id"] = FromHandle(entity).id;
       e["components"] = {};
 
-      _registry.visit(entity, [&](const entt::type_info &info) {
+      for (auto [id, pool] : _registry.storage()) {
+        // TODO: Rework how componenets are thought of. In the current system, it is represented as
+        // Entity => [Component...], but it should be represented as Component => [Entity...]. And in the
+        // deserialization, it should all be tight up. It is called a Pool for a reason...
+        if (!pool.contains(entity))
+          continue;
+
         json c = {};
-        auto meta = entt::resolve(info);
+        auto meta = entt::resolve(id);
         if (!meta) {
-          // log::error("Could not resolve meta for type {}", info.name());
+#ifdef AXOLOTL_DEBUG
+          log::error("Could not resolve meta for type {}", id);
+#endif
           return;
         }
         std::string component_name = meta.prop("name"_hs).value().cast<std::string>();
@@ -104,17 +112,19 @@ namespace axl {
 
         c["data"] = {};
         c["type"] = component_name;
-        c["hash"] = meta.func("GetHash"_hs).invoke({}).cast<i32>();
+        c["id"] = id;
         for (entt::meta_data data : handle.type().data()) {
           std::string name = data.prop("name"_hs).value().cast<std::string>();
           auto member = data.get(handle);
           member.allow_cast<json>();
           json *member_values = member.try_cast<json>();
           if (!member_values) {
-            // log::error("Could not convert to json {} | {} inside {}",
-            //            data.type().info().name(),
-            //            name,
-            //            handle.type().info().name());
+#ifdef AXOLOTL_DEBUG
+            log::error("Could not convert to json {} | {} inside {}",
+                       data.type().info().name(),
+                       name,
+                       handle.type().info().name());
+#endif
             continue;
           }
 
@@ -125,7 +135,7 @@ namespace axl {
           c["data"].push_back(mj);
         }
         e["components"].push_back(c);
-      });
+      }
 
       j["entities"].push_back(e);
     });
@@ -165,8 +175,13 @@ namespace axl {
       Ento::_handle_ento_map.insert(std::make_pair(entity, ento));
 
       for (auto &c : e["components"]) {
-        auto hs = entt::hashed_string::value(c["type"].get<std::string>().c_str());
-        auto meta = entt::resolve(hs);
+        if (!c.contains("id")) {
+#ifdef AXOLOTL_DEBUG
+          log::error("Component id is null");
+#endif
+          continue;
+        }
+        auto meta = entt::resolve(c["id"].get<entt::id_type>());
         auto handle = meta.func("emplace"_hs).invoke({}, entt::forward_as_meta(_registry), entity);
 
         for (auto d : meta.data()) {
@@ -189,17 +204,19 @@ namespace axl {
       }
     }
 
-    _registry.each([&](entt::entity entity) {
-      _registry.visit(entity, [&](const auto info) {
-        auto meta = entt::resolve(info);
+    for (auto [id, pool] : _registry.storage()) {
+      for (auto entity : pool) {
+        auto meta = entt::resolve(id);
         if (!meta) {
-          // log::error("Could not resolve meta for type {}", info.name());
+#ifdef AXOLOTL_DEBUG
+          log::error("Could not resolve meta for type {}", meta.info().name());
+#endif
           return;
         }
         auto handle = meta.func("get"_hs).invoke({}, entt::forward_as_meta(_registry), entity);
         meta.func("Init"_hs).invoke(handle);
-      });
-    });
+      }
+    }
   }
 
 } // namespace axl

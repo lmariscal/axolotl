@@ -461,10 +461,8 @@ namespace axl {
     auto filtered_entities = FilterEntities(scene, entities, true);
 
     for (const Ento &ento : filtered_entities) {
-      if (!scene._registry.valid(ento.handle)) {
-        ImGui::End();
-        return;
-      }
+      if (!scene._registry.valid(ento.handle))
+        continue;
       if (ento.HasParent())
         continue;
       ShowTreeEnto(ento, 0, scene, filtered_entities);

@@ -6,7 +6,7 @@
 namespace axl {
 
   class Shader;
-  class Line;
+  class LinePrimitive;
 
   class Grid {
    public:
@@ -19,7 +19,7 @@ namespace axl {
     v2i _cell_size;
 
     std::unique_ptr<Shader> _shader;
-    std::unique_ptr<Line> _line;
+    std::unique_ptr<LinePrimitive> _line;
   };
 
 } // namespace axl

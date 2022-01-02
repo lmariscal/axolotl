@@ -11,19 +11,19 @@ namespace axl {
     v4 color;
   };
 
-  class Line {
+  class LinePrimitive {
    public:
-    Line(v3 pos0, v3 pos1, Color color = Color(), f32 thickness = 1.0f, bool loop = false);
-    Line(const std::vector<LineVertex> &vertices, f32 thickness = 1.0f, bool loop = false);
-    Line(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness = 1.0f);
+    LinePrimitive(v3 pos0, v3 pos1, Color color = Color(), f32 thickness = 1.0f, bool loop = false);
+    LinePrimitive(const std::vector<LineVertex> &vertices, f32 thickness = 1.0f, bool loop = false);
+    LinePrimitive(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness = 1.0f);
 
-    Line(Line &&other);
-    Line(const Line &other);
+    LinePrimitive(LinePrimitive &&other);
+    LinePrimitive(const LinePrimitive &other);
 
-    Line &operator=(Line &&other);
-    Line &operator=(const Line &other);
+    LinePrimitive &operator=(LinePrimitive &&other);
+    LinePrimitive &operator=(const LinePrimitive &other);
 
-    ~Line();
+    ~LinePrimitive();
 
     void Draw() const;
 

@@ -60,7 +60,7 @@ namespace axl {
 
     void Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform);
     void SetMeshWireframe(bool state);
-    void AddLine(const Line &line);
+    void AddLine(const LinePrimitive &line);
 
     const RendererPerformance &GetPerformance() const;
 
@@ -73,7 +73,7 @@ namespace axl {
     RendererPerformance _last_performance;
 
     std::unique_ptr<Shader> _line_shader;
-    std::queue<Line> _lines;
+    std::queue<LinePrimitive> _lines;
 
     std::unique_ptr<Grid> _grid;
 

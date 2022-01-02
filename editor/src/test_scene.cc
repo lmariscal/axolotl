@@ -3,6 +3,7 @@
 #include <axolotl/axolotl.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
+#include <axolotl/geometry.hh>
 #include <axolotl/material.hh>
 #include <axolotl/model.hh>
 #include <axolotl/renderer.hh>

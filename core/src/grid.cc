@@ -44,7 +44,7 @@ namespace axl {
       indices.push_back(v2(vertices.size() - 2, vertices.size() - 1));
     }
 
-    _line = std::make_unique<Line>(vertices, indices);
+    _line = std::make_unique<LinePrimitive>(vertices, indices);
   }
 
   void Grid::Draw(const m4 &view, const m4 &projection) {

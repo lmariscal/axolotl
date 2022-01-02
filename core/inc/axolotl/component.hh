@@ -38,7 +38,7 @@
 
 #define REGISTER_COMPONENT_FACTORY(Type, ...)                                                                      \
   entt::meta<Type>()                                                                                               \
-    .type(entt::hashed_string::value(#Type))                                                                       \
+    .type()                                                                                                        \
     .prop("name"_hs, std::string(#Type))                                                                           \
     .func<static_cast<Type &(entt::registry::*)(const entt::entity)>(&entt::registry::get<Type>), entt::as_ref_t>( \
       "get"_hs)                                                                                                    \
@@ -178,7 +178,8 @@ namespace nlohmann {
 
     static void from_json(const json &j, axl::uuid &u) {
       std::optional<axl::uuid> ou = axl::uuid::from_string(j.get<std::string>());
-      if (ou.has_value()) u = ou.value();
+      if (ou.has_value())
+        u = ou.value();
       else
         axl::log::error("Failed to parse uuid from json {}", j.dump());
     }

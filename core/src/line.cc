@@ -3,7 +3,10 @@
 
 namespace axl {
 
-  Line::Line(v3 pos0, v3 pos1, Color color, f32 thickness, bool loop): thickness(thickness), loop(loop), _vertices() {
+  LinePrimitive::LinePrimitive(v3 pos0, v3 pos1, Color color, f32 thickness, bool loop):
+    thickness(thickness),
+    loop(loop),
+    _vertices() {
     LoadBuffers();
 
     v4 &c = color.rgba;
@@ -14,7 +17,7 @@ namespace axl {
       glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, value_ptr(_line_thickness_range));
   }
 
-  Line::Line(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness):
+  LinePrimitive::LinePrimitive(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness):
     _vertices(vertices),
     _indices(indices),
     thickness(thickness),
@@ -25,7 +28,7 @@ namespace axl {
       glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, value_ptr(_line_thickness_range));
   }
 
-  Line::Line(const std::vector<LineVertex> &vertices, f32 thickness, bool loop):
+  LinePrimitive::LinePrimitive(const std::vector<LineVertex> &vertices, f32 thickness, bool loop):
     _vertices(vertices),
     thickness(thickness),
     loop(loop) {
@@ -36,7 +39,7 @@ namespace axl {
       glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, value_ptr(_line_thickness_range));
   }
 
-  Line::Line(Line &&other) {
+  LinePrimitive::LinePrimitive(LinePrimitive &&other) {
     _vertices = std::move(other._vertices);
     _indices = std::move(other._indices);
     thickness = other.thickness;
@@ -45,7 +48,7 @@ namespace axl {
     LoadBuffers();
   }
 
-  Line::Line(const Line &other) {
+  LinePrimitive::LinePrimitive(const LinePrimitive &other) {
     _vertices = other._vertices;
     _indices = other._indices;
     thickness = other.thickness;
@@ -54,7 +57,7 @@ namespace axl {
     LoadBuffers();
   }
 
-  Line &Line::operator=(Line &&other) {
+  LinePrimitive &LinePrimitive::operator=(LinePrimitive &&other) {
     _vertices = std::move(other._vertices);
     _indices = std::move(other._indices);
     thickness = other.thickness;
@@ -65,7 +68,7 @@ namespace axl {
     return *this;
   }
 
-  Line &Line::operator=(const Line &other) {
+  LinePrimitive &LinePrimitive::operator=(const LinePrimitive &other) {
     _vertices = other._vertices;
     _indices = other._indices;
     thickness = other.thickness;
@@ -76,12 +79,12 @@ namespace axl {
     return *this;
   }
 
-  Line::~Line() {
+  LinePrimitive::~LinePrimitive() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
   }
 
-  void Line::LoadBuffers() {
+  void LinePrimitive::LoadBuffers() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
     glGenBuffers(1, &_ebo);
@@ -104,7 +107,7 @@ namespace axl {
     glBindVertexArray(0);
   }
 
-  void Line::Draw() const {
+  void LinePrimitive::Draw() const {
     glLineWidth(thickness);
 
     glBindVertexArray(_vao);

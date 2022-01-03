@@ -101,7 +101,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   bool last_fullscreen = false;
 
-  constexpr f64 time_step = 1.0 / 100.0;
+  constexpr f64 time_step = 1.0 / 60.0;
   f64 time_accumulator = 0.0;
 
   f64 update_time_start;
@@ -111,6 +111,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   Scene &scene = *dock.data.scene;
   scene.Init(window);
+
+  ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
 
   while (window.Update() && !terminal_data.quit_requested) {
     UpdateEditorCamera(window, editor_camera, editor_camera_transform, dock.data, window.GetDeltaTime());

@@ -20,8 +20,6 @@ namespace axl {
 
     inline Interval(): min(0.0f), max(0.0f) { }
     inline Interval(f32 min, f32 max): min(min), max(max) { }
-
-    inline f32 GetLength() const { }
   };
 
   class Ray {
@@ -46,6 +44,9 @@ namespace axl {
     }
 
     bool PointInside(const v3 &point) const;
+    f32 SphereInside(const Sphere &sphere) const;
+    f32 AABBInside(const AABB &aabb) const;
+    f32 OBBInside(const OBB &obb) const;
     v3 ClosestPoint(const v3 &point) const;
 
    protected:
@@ -65,6 +66,7 @@ namespace axl {
     bool AABBInside(const AABB &aabb) const;
     bool OBBInside(const OBB &obb) const;
     bool PlaneInside(const Plane &plane) const;
+    f32 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
   };
 
@@ -116,8 +118,10 @@ namespace axl {
 
     bool PointInside(const v3 &point) const;
     bool AABBInside(const AABB &aabb) const;
+    bool OBBInside(const OBB &obb) const;
     bool SphereInside(const Sphere &sphere) const;
     bool PlaneInside(const Plane &plane) const;
+    f32 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
   };
 
@@ -179,6 +183,7 @@ namespace axl {
     bool AABBInside(const AABB &aabb) const;
     bool OBBInside(const OBB &obb) const;
     bool PlaneInside(const Plane &plane) const;
+    f32 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
 
    protected:
@@ -200,6 +205,7 @@ namespace axl {
     bool AABBInside(const AABB &aabb) const;
     bool OBBInside(const OBB &obb) const;
     bool PlaneInside(const Plane &plane) const;
+    f32 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
   };
 

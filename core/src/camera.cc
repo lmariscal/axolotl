@@ -33,10 +33,10 @@ namespace axl {
     Transform &transform = Ento::FromComponent(*this).Transform();
     switch (direction) {
       case CameraDirection::Down:
-        transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * (f32)delta);
+        transform.SetPosition(transform.GetPosition() - _world_up * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Up:
-        transform.SetPosition(transform.GetPosition() - _world_up * _movement_speed * (f32)delta);
+        transform.SetPosition(transform.GetPosition() + _world_up * _movement_speed * (f32)delta);
         break;
       case CameraDirection::Front:
         transform.SetPosition(transform.GetPosition() + _front * _movement_speed * (f32)delta);

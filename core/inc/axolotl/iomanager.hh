@@ -194,6 +194,12 @@ namespace axl {
     bool KeyTriggered(Key key);
     bool KeyReleased(Key key);
 
+    bool ButtonDown(Pad pad, PadButton button);
+    bool ButtonHeld(Pad pad, PadButton button);
+    bool ButtonTriggered(Pad pad, PadButton button);
+    bool ButtonReleased(Pad pad, PadButton button);
+    f32 GetAxis(Pad pad, JoyStick joy_stick);
+
     void SetDoubleClickLimit(f32 ms);
     void SetMouseSensitivity(f32 sensitivity);
     bool ButtonDown(MouseButton button);
@@ -232,7 +238,7 @@ namespace axl {
     v2d _mouse_pos;
     v2d _last_mouse_pos;
     v2d _relative_mouse_pos;
-    f32 _joy_sticks[(i32)JoyStick::Last];
+    f32 _joy_sticks[(i32)Pad::Last][(i32)JoyStick::Last];
     f32 _sensitivity;
   };
 

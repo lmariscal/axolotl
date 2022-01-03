@@ -19,9 +19,9 @@ namespace axl {
         _pad[i][j] = false;
         _hold_pad[i][j] = false;
       }
-    }
-    for (i32 i = 0; i < (i32)JoyStick::Last; ++i) {
-      _joy_sticks[i] = 0.0f;
+      for (i32 j = 0; j < (i32)JoyStick::Last; ++j) {
+        _joy_sticks[i][j] = 0.0f;
+      }
     }
   }
 
@@ -40,24 +40,24 @@ namespace axl {
   }
 
   void IOManager::UpdatePads(GLFWwindow *glfwWindow) {
-    for (i32 j = 0; j < (i32)Pad::Last; ++j) {
-      if (!PadPresent((Pad)j))
+    for (i32 i = 0; i < (i32)Pad::Last; ++i) {
+      if (!PadPresent((Pad)i))
         continue;
 
       GLFWgamepadstate state;
-      if (!glfwGetGamepadState(j, &state))
+      if (!glfwGetGamepadState(i, &state))
         return;
 
       int count;
-      const float *axes = glfwGetJoystickAxes(j, &count);
+      const float *axes = glfwGetJoystickAxes(i, &count);
       if (count > (i32)JoyStick::Last)
         count = (i32)JoyStick::Last;
       for (int n = 0; n < count; ++n)
-        _joy_sticks[n] = axes[n];
+        _joy_sticks[i][n] = axes[n];
 
-      for (i32 i = 0; i < (i32)PadButton::Last; ++i) {
-        bool pressed = state.buttons[i];
-        _pad[j][i] = pressed;
+      for (i32 j = 0; j < (i32)PadButton::Last; ++j) {
+        bool pressed = state.buttons[j];
+        _pad[i][j] = pressed;
       }
     }
   }
@@ -118,6 +118,26 @@ namespace axl {
 
   bool IOManager::ButtonReleased(MouseButton button) {
     return !_mouse[(i32)button] && _hold_mouse[(i32)button];
+  }
+
+  bool IOManager::ButtonDown(Pad pad, PadButton button) {
+    return _pad[(i32)pad][(i32)button];
+  }
+
+  bool IOManager::ButtonHeld(Pad pad, PadButton button) {
+    return _pad[(i32)pad][(i32)button] && _hold_pad[(i32)pad][(i32)button];
+  }
+
+  bool IOManager::ButtonTriggered(Pad pad, PadButton button) {
+    return _pad[(i32)pad][(i32)button] && !_hold_pad[(i32)pad][(i32)button];
+  }
+
+  bool IOManager::ButtonReleased(Pad pad, PadButton button) {
+    return _pad[(i32)pad][(i32)button] && !_hold_pad[(i32)pad][(i32)button];
+  }
+
+  f32 IOManager::GetAxis(Pad pad, JoyStick joy_stick) {
+    return _joy_sticks[(i32)pad][(i32)joy_stick];
   }
 
   bool IOManager::DoubleClicked(MouseButton button) {

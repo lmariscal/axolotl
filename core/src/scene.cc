@@ -3,6 +3,7 @@
 #include <axolotl/material.hh>
 #include <axolotl/mesh.hh>
 #include <axolotl/model.hh>
+#include <axolotl/physics.hh>
 #include <axolotl/renderer.hh>
 #include <axolotl/scene.hh>
 #include <axolotl/shader.hh>
@@ -63,6 +64,10 @@ namespace axl {
       return {};
 
     return Ento::_handle_ento_map[handle];
+  }
+
+  void Scene::PhysicsUpdate(f32 step) {
+    Physics::Step(*this, step);
   }
 
   void Scene::Draw(Renderer &renderer, bool show_data, Camera *camera, Transform *camera_transform) {

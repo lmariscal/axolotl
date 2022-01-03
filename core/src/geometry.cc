@@ -67,6 +67,80 @@ namespace axl {
     return fabsf(dist) <= p_len;
   }
 
+  f32 RaySphereInside(const Ray &ray, const Sphere &sphere) {
+    v3 e = sphere.position - ray.position;
+    f32 r_sqr = sphere.radius * sphere.radius;
+    f32 e_sqr = length2(e);
+
+    f32 a = dot(e, ray.GetDirection());
+    f32 b_sqr = e_sqr - a * a;
+    f32 f = sqrt(r_sqr - b_sqr);
+
+    if (r_sqr - (e_sqr - a * a) < 0.0f)
+      return -1.0f;
+    else if (e_sqr < r_sqr)
+      return a + f;
+
+    return a - f;
+  }
+
+  f32 RayAABBInside(const Ray &ray, const AABB &aabb) {
+    v3 min = aabb.GetMin();
+    v3 max = aabb.GetMax();
+
+    v3 dir = ray.GetDirection();
+    for (i32 i = 0; i < 3; ++i) {
+      if (dir[i] == 0.0f)
+        dir[i] = std::numeric_limits<f32>::epsilon();
+    }
+
+    std::array<f32, 6> t = {};
+    t[0] = (min.x - ray.position.x) / dir.x;
+    t[1] = (max.x - ray.position.x) / dir.x;
+    t[2] = (min.y - ray.position.y) / dir.y;
+    t[3] = (max.y - ray.position.y) / dir.y;
+    t[4] = (min.z - ray.position.z) / dir.z;
+    t[5] = (max.z - ray.position.z) / dir.z;
+
+    f32 t_min = fmaxf(fmaxf(fminf(t[0], t[1]), fminf(t[2], t[3])), fminf(t[4], t[5]));
+    f32 t_max = fminf(fminf(fmaxf(t[0], t[1]), fmaxf(t[2], t[3])), fmaxf(t[4], t[5]));
+
+    if (t_min > t_max || t_max < 0.0f)
+      return -1.0f;
+    if (t_min < 0.0f)
+      return t_max;
+    return t_min;
+  }
+
+  f32 RayOBBInside(const Ray &ray, const OBB &obb) {
+    v3 pointing = obb.position - ray.position;
+    const m3 &rotation = obb.GetRotationMatrix();
+    v3 f(dot(rotation[0], ray.GetDirection()),
+         dot(rotation[1], ray.GetDirection()),
+         dot(rotation[2], ray.GetDirection()));
+    v3 e(dot(rotation[0], pointing), dot(rotation[1], pointing), dot(rotation[2], pointing));
+
+    std::array<f32, 6> t = {};
+    for (i32 i = 0; i < 3; ++i) {
+      if (epsilonEqual(f[i], 0.0f, std::numeric_limits<f32>::epsilon())) {
+        if (-e[i] - obb.size[i] > 0.0f || -e[i] + obb.size[i] < 0.0f)
+          return -1.0f;
+        f[i] = std::numeric_limits<f32>::epsilon();
+      }
+      t[i * 2 + 0] = (e[i] + obb.size[i]) / f[i];
+      t[i * 2 + 1] = (e[i] - obb.size[i]) / f[i];
+    }
+
+    f32 t_min = fmaxf(fmaxf(fminf(t[0], t[1]), fminf(t[2], t[3])), fminf(t[4], t[5]));
+    f32 t_max = fminf(fminf(fmaxf(t[0], t[1]), fmaxf(t[2], t[3])), fmaxf(t[4], t[5]));
+
+    if (t_min > t_max || t_max < 0.0f)
+      return -1.0f;
+    if (t_min < 0.0f)
+      return t_max;
+    return t_min;
+  }
+
   // -----------------------------------------------------------------------
 
   f32 Plane::PlaneEquation(const v3 &point) const {
@@ -95,6 +169,10 @@ namespace axl {
 
   bool Sphere::PlaneInside(const Plane &plane) const {
     return PlaneSphereInside(plane, *this);
+  }
+
+  f32 Sphere::RayInside(const Ray &ray) const {
+    return RaySphereInside(ray, *this);
   }
 
   v3 Sphere::ClosestPoint(const v3 &point) const {
@@ -132,6 +210,14 @@ namespace axl {
 
   bool AABB::PlaneInside(const Plane &plane) const {
     return AABBPlaneInside(*this, plane);
+  }
+
+  bool AABB::OBBInside(const OBB &obb) const {
+    return AABBOBBInside(*this, obb);
+  }
+
+  f32 AABB::RayInside(const Ray &ray) const {
+    return RayAABBInside(ray, *this);
   }
 
   v3 AABB::ClosestPoint(const v3 &point) const {
@@ -219,6 +305,10 @@ namespace axl {
     return true;
   }
 
+  f32 OBB::RayInside(const Ray &ray) const {
+    return RayOBBInside(ray, *this);
+  }
+
   v3 OBB::ClosestPoint(const v3 &point) const {
     v3 result = position;
     v3 dir = point - position;
@@ -288,6 +378,18 @@ namespace axl {
     f32 t = dot(point - position, direction);
     t = max(t, 0.0f);
     return position + direction * t;
+  }
+
+  f32 Ray::SphereInside(const Sphere &sphere) const {
+    return RaySphereInside(*this, sphere);
+  }
+
+  f32 Ray::OBBInside(const OBB &obb) const {
+    return RayOBBInside(*this, obb);
+  }
+
+  f32 Ray::AABBInside(const AABB &aabb) const {
+    return RayAABBInside(*this, aabb);
   }
 
 } // namespace axl

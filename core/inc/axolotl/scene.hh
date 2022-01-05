@@ -25,7 +25,7 @@ namespace axl {
     Ento FromHandle(entt::entity handle);
     entt::registry &GetRegistry();
 
-    void PhysicsUpdate(f32 step);
+    void PhysicsUpdate(f64 step);
     void
     Draw(Renderer &renderer, bool show_data = false, Camera *camera = nullptr, Transform *camera_transform = nullptr);
     json Serialize();

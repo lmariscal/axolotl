@@ -112,8 +112,6 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   Scene &scene = *dock.data.scene;
   scene.Init(window);
 
-  ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
-
   while (window.Update() && !terminal_data.quit_requested) {
     UpdateEditorCamera(window, editor_camera, editor_camera_transform, dock.data, window.GetDeltaTime());
     if (terminal_data.watch_shaders) {
@@ -145,6 +143,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
       time_accumulator += window.GetDeltaTime();
       while (time_accumulator >= time_step) {
+        scene.PhysicsUpdate(time_step);
         scene.Update(window, time_step);
         time_accumulator -= time_step;
       }

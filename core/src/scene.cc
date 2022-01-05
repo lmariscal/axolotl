@@ -66,7 +66,7 @@ namespace axl {
     return Ento::_handle_ento_map[handle];
   }
 
-  void Scene::PhysicsUpdate(f32 step) {
+  void Scene::PhysicsUpdate(f64 step) {
     Physics::Step(*this, step);
   }
 
@@ -110,7 +110,7 @@ namespace axl {
 #ifdef AXOLOTL_DEBUG
           log::error("Could not resolve meta for type {}", id);
 #endif
-          return;
+          continue;
         }
         std::string component_name = meta.prop("name"_hs).value().cast<std::string>();
         auto handle = meta.func("get"_hs).invoke({}, entt::forward_as_meta(_registry), entity);

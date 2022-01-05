@@ -1,25 +1,27 @@
 #pragma once
 
+#include <axolotl/component.hh>
+#include <axolotl/ento.hh>
 #include <axolotl/types.hh>
 
 namespace axl {
 
   class Ray;
-  class Sphere;
-  class AABB;
-  class OBB;
-  class Triangle;
+  class SphereCollider;
+  class AABBCollider;
+  class OBBCollider;
   class Plane;
   class Line;
   class Interval;
+  class CollisionManifold;
 
   class Interval {
    public:
-    f32 min;
-    f32 max;
+    f64 min;
+    f64 max;
 
     inline Interval(): min(0.0f), max(0.0f) { }
-    inline Interval(f32 min, f32 max): min(min), max(max) { }
+    inline Interval(f64 min, f64 max): min(min), max(max) { }
   };
 
   class Ray {
@@ -44,39 +46,45 @@ namespace axl {
     }
 
     bool PointInside(const v3 &point) const;
-    f32 SphereInside(const Sphere &sphere) const;
-    f32 AABBInside(const AABB &aabb) const;
-    f32 OBBInside(const OBB &obb) const;
+    f64 SphereInside(const SphereCollider &sphere) const;
+    f64 AABBInside(const AABBCollider &aabb) const;
+    f64 OBBInside(const OBBCollider &obb) const;
     v3 ClosestPoint(const v3 &point) const;
 
    protected:
     v3 direction;
   };
 
-  class Sphere {
+  class SphereCollider {
    public:
     v3 position;
-    f32 radius;
+    f64 radius;
 
-    inline Sphere(): radius(1.0f) { }
-    inline Sphere(const v3 &position, f32 radius = 1.0f): position(position), radius(radius) { }
+    inline SphereCollider(): radius(1.0f) { }
+    inline SphereCollider(const v3 &position, f64 radius = 1.0f): position(position), radius(radius) { }
 
+    void Init() { }
     bool PointInside(const v3 &point) const;
-    bool SphereInside(const Sphere &sphere) const;
-    bool AABBInside(const AABB &aabb) const;
-    bool OBBInside(const OBB &obb) const;
+    bool SphereInside(const SphereCollider &sphere) const;
+    bool AABBInside(const AABBCollider &aabb) const;
+    bool OBBInside(const OBBCollider &obb) const;
     bool PlaneInside(const Plane &plane) const;
-    f32 RayInside(const Ray &ray) const;
+    f64 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
+
+    CollisionManifold SphereCollide(const SphereCollider &sphere) const;
+    CollisionManifold OBBCollide(const OBBCollider &obb) const;
+
+    REGISTER_COMPONENT(SphereCollider, position, radius)
   };
 
-  class AABB {
+  class AABBCollider {
    public:
     v3 position;
     v3 size; // half-size
 
-    inline AABB(): size(1.0f) { }
-    inline AABB(const v3 &position, const v3 &size = v3(1.0f)): position(position), size(size) { }
+    inline AABBCollider(): size(1.0f) { }
+    inline AABBCollider(const v3 &position, const v3 &size = v3(1.0f)): position(position), size(size) { }
 
     inline v3 GetMin() const {
       v3 p0 = position + size;
@@ -104,7 +112,7 @@ namespace axl {
       result.min = result.max = dot(axis, vertex[0]);
 
       for (i32 i = 1; i < 8; ++i) {
-        f32 projection = dot(axis, vertex[i]);
+        f64 projection = dot(axis, vertex[i]);
         result.min = (projection < result.min) ? projection : result.min;
         result.max = (projection > result.max) ? projection : result.max;
       }
@@ -112,20 +120,23 @@ namespace axl {
       return result;
     }
 
-    static inline AABB FromMinMax(const v3 &min, const v3 &max) {
-      return AABB((min + max) * 0.5f, (max - min) * 0.5f);
+    static inline AABBCollider FromMinMax(const v3 &min, const v3 &max) {
+      return AABBCollider((min + max) * 0.5f, (max - min) * 0.5f);
     }
 
+    void Init() { }
     bool PointInside(const v3 &point) const;
-    bool AABBInside(const AABB &aabb) const;
-    bool OBBInside(const OBB &obb) const;
-    bool SphereInside(const Sphere &sphere) const;
+    bool AABBInside(const AABBCollider &aabb) const;
+    bool OBBInside(const OBBCollider &obb) const;
+    bool SphereInside(const SphereCollider &sphere) const;
     bool PlaneInside(const Plane &plane) const;
-    f32 RayInside(const Ray &ray) const;
+    f64 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
+
+    REGISTER_COMPONENT(AABBCollider, position, size);
   };
 
-  class OBB {
+  class OBBCollider {
    public:
     v3 position;
     v3 size; // half-size
@@ -134,8 +145,8 @@ namespace axl {
     const quat &GetRotation() const;
     const m3 &GetRotationMatrix() const;
 
-    inline OBB(): size(1.0f), rotation(), rotation_matrix(1.0f) { }
-    inline OBB(const v3 &position, const v3 &size, const quat &rotation = quat()):
+    inline OBBCollider(): size(1.0f), rotation(), rotation_matrix(1.0f) { }
+    inline OBBCollider(const v3 &position, const v3 &size, const quat &rotation = quat()):
       position(position),
       size(size),
       rotation(rotation) {
@@ -168,7 +179,7 @@ namespace axl {
       result.min = result.max = dot(axis, vertex[0]);
 
       for (i32 i = 1; i < 8; ++i) {
-        f32 projection = dot(axis, vertex[i]);
+        f64 projection = dot(axis, vertex[i]);
         result.min = (projection < result.min) ? projection : result.min;
         result.max = (projection > result.max) ? projection : result.max;
       }
@@ -176,15 +187,28 @@ namespace axl {
       return result;
     }
 
-    bool OverlapOnAxis(const AABB &aabb, const v3 &axis) const;
-    bool OverlapOnAxis(const OBB &obb, const v3 &axis) const;
+    void Init() { }
+    bool OverlapOnAxis(const AABBCollider &aabb, const v3 &axis) const;
+    bool OverlapOnAxis(const OBBCollider &obb, const v3 &axis) const;
     bool PointInside(const v3 &point) const;
-    bool SphereInside(const Sphere &sphere) const;
-    bool AABBInside(const AABB &aabb) const;
-    bool OBBInside(const OBB &obb) const;
+    bool SphereInside(const SphereCollider &sphere) const;
+    bool AABBInside(const AABBCollider &aabb) const;
+    bool OBBInside(const OBBCollider &obb) const;
     bool PlaneInside(const Plane &plane) const;
-    f32 RayInside(const Ray &ray) const;
+    f64 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
+
+    CollisionManifold SphereCollide(const SphereCollider &sphere) const;
+    CollisionManifold OBBCollide(const OBBCollider &obb) const;
+
+    std::vector<v3> ClipEdgesToOBB(const std::vector<Line> &edges) const;
+    std::vector<v3> GetVertices() const;
+    std::vector<Line> GetEdges() const;
+    std::vector<Plane> GetPlanes() const;
+    bool ClipToPlane(const Plane &plane, const Line &line, v3 &out_point) const;
+    f64 PenetrationDepth(const OBBCollider &obb, const v3 &axis, bool &out_should_flip) const;
+
+    REGISTER_COMPONENT(OBBCollider, position, size, rotation)
 
    protected:
     quat rotation;
@@ -193,28 +217,40 @@ namespace axl {
 
   class Plane {
    public:
-    f32 distance;
+    f64 distance;
     v3 normal;
 
     inline Plane(): distance(0.0f), normal(0.0f, 0.0f, 1.0f) { }
-    inline Plane(f32 distance, const v3 &normal = v3(0.0f, 0.0f, 1.0f)): normal(normal), distance(distance) { }
+    inline Plane(f64 distance, const v3 &normal = v3(0.0f, 0.0f, 1.0f)): normal(normal), distance(distance) { }
 
-    f32 PlaneEquation(const v3 &point) const;
+    f64 PlaneEquation(const v3 &point) const;
     bool PointInside(const v3 &point) const;
-    bool SphereInside(const Sphere &sphere) const;
-    bool AABBInside(const AABB &aabb) const;
-    bool OBBInside(const OBB &obb) const;
+    bool SphereInside(const SphereCollider &sphere) const;
+    bool AABBInside(const AABBCollider &aabb) const;
+    bool OBBInside(const OBBCollider &obb) const;
     bool PlaneInside(const Plane &plane) const;
-    f32 RayInside(const Ray &ray) const;
+    f64 RayInside(const Ray &ray) const;
     v3 ClosestPoint(const v3 &point) const;
   };
 
-  class Triangle {
+  class CollisionManifold {
    public:
-    std::array<v3, 3> points;
+    bool colliding;
+    v3 normal;
+    f64 depth;
+    std::vector<v3> points;
 
-    inline Triangle(): points({ v3(0.0f), v3(0.0f), v3(0.0f) }) { }
-    inline Triangle(const v3 &p0, const v3 &p1, const v3 &p2): points({ p0, p1, p2 }) { }
+    inline CollisionManifold() {
+      Reset();
+    }
+
+    inline CollisionManifold(const v3 &normal, f32 depth, const std::vector<v3> &points):
+      colliding(false),
+      normal(normal),
+      depth(depth),
+      points(points) { }
+
+    void Reset();
   };
 
   class Line {
@@ -224,9 +260,6 @@ namespace axl {
 
     inline Line(): start(0.0f), end(0.0f) { }
     inline Line(const v3 &start, const v3 &end): start(start), end(end) { }
-
-    bool PointInside(const v3 &point) const;
-    v3 ClosestPoint(const v3 &point) const;
   };
 
 } // namespace axl

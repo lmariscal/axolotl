@@ -17,6 +17,7 @@ namespace axl {
 
     // Register component member data types
     REGISTER_COMPONENT_DATA_TYPE(f32);
+    REGISTER_COMPONENT_DATA_TYPE(f64);
     REGISTER_COMPONENT_DATA_TYPE(u32);
     REGISTER_COMPONENT_DATA_TYPE(bool);
     REGISTER_COMPONENT_DATA_TYPE(std::string);

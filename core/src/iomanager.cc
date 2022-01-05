@@ -48,11 +48,11 @@ namespace axl {
       if (!glfwGetGamepadState(i, &state))
         return;
 
-      int count;
+      i32 count;
       const float *axes = glfwGetJoystickAxes(i, &count);
       if (count > (i32)JoyStick::Last)
         count = (i32)JoyStick::Last;
-      for (int n = 0; n < count; ++n)
+      for (i32 n = 0; n < count; ++n)
         _joy_sticks[i][n] = axes[n];
 
       for (i32 j = 0; j < (i32)PadButton::Last; ++j) {

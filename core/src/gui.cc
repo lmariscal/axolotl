@@ -18,7 +18,9 @@ namespace axl {
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
     ImFont *font = io.Fonts->AddFontFromFileTTF(font_awesome_path.c_str(), size, &icons_config, icons_ranges);
-    if (!font) { log::error("Failed to load font \"{}\"", font_awesome_path); }
+    if (!font) {
+      log::error("Failed to load font \"{}\"", font_awesome_path);
+    }
   }
 
   void ImGuiFonts() {
@@ -269,12 +271,10 @@ namespace axl {
       io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
       io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
       io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-      io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     } else {
       io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
       io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
       io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
-      io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
     }
     // Remove if statement via binary operations and state
 
@@ -282,7 +282,6 @@ namespace axl {
     // io.ConfigFlags = (io.ConfigFlags & ~ImGuiConfigFlags_NoMouseCursorChange) | (state ?
     // ImGuiConfigFlags_NoMouseCursorChange : 0); io.ConfigFlags = (io.ConfigFlags &
     // ~ImGuiConfigFlags_NavEnableKeyboard) | (state ? ImGuiConfigFlags_NavEnableKeyboard : 0); io.ConfigFlags =
-    // (io.ConfigFlags & ~ImGuiConfigFlags_NavEnableGamepad) | (state ? ImGuiConfigFlags_NavEnableGamepad : 0);
 
     io.WantCaptureKeyboard = state;
     io.WantCaptureMouse = state;

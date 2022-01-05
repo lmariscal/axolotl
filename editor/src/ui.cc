@@ -281,7 +281,7 @@ namespace axl {
           ImGui::IsItemClicked() && !ImGuizmo::IsOver() && !dock.data.hover_action_buttons)
         focused = true;
 
-      if (!dock.data.terminal->scene_playing) {
+      if (!dock.data.terminal->scene_playing || dock.data.terminal->scene_paused) {
         DrawGuizmo(window, camera);
 
         dock.data.hover_action_buttons = false;

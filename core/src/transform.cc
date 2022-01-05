@@ -70,8 +70,13 @@ namespace axl {
   m4 Transform::GetModelMatrix() {
     Ento ento = Ento::FromComponent(*this);
 
-    if (!IsDirty())
-      return _model_matrix;
+    if (!IsDirty()) {
+      if (!ento.HasParent())
+        return _model_matrix;
+
+      if (!ento.Parent().Transform().IsDirty())
+        return _model_matrix;
+    }
 
     m4 model(1.0f);
     model = translate(model, _position);
@@ -86,7 +91,18 @@ namespace axl {
 
     _model_matrix = model;
     _is_dirty = false;
+    _was_dirty = true;
     return model;
+  }
+
+  m4 Transform::GetParentModelMatrix() {
+    return _parent_model_matrix;
+  }
+
+  bool Transform::WasDirty() {
+    bool was_dirty = _was_dirty;
+    _was_dirty = false;
+    return was_dirty;
   }
 
   bool Transform::ShowComponent() {

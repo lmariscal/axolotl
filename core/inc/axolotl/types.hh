@@ -39,6 +39,8 @@ namespace axl {
   using json = nlohmann::json;
   using uuid = uuids::uuid;
 
+  constexpr f64 GRAVITATIONAL_CONSTANT = 9.80665;
+
   namespace log {
     using namespace spdlog;
   }

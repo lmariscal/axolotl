@@ -30,19 +30,22 @@ namespace axl {
     void SetRotation(const quat &rotation);
     void SetRotationEuler(const v3 &rotation);
     bool IsDirty() const;
+    bool WasDirty();
 
     m4 GetModelMatrix();
+    m4 GetParentModelMatrix();
 
-    REGISTER_COMPONENT(Transform, _position, _scale, _rotation);
+    REGISTER_COMPONENT(Transform, _position, _scale, _rotation)
 
    protected:
-    v3 _position;
-    v3 _scale;
-    quat _rotation;
+    v3 _position = v3(0.0f);
+    v3 _scale = v3(0.0f);
+    quat _rotation = quat();
 
-    bool _is_dirty;
-    m4 _model_matrix;
-    m4 _parent_model_matrix;
+    bool _is_dirty = false;
+    bool _was_dirty = false;
+    m4 _model_matrix = m4(1.0f);
+    m4 _parent_model_matrix = m4(1.0f);
   };
 
 } // namespace axl

@@ -24,7 +24,8 @@ namespace axl {
   }
 
   Ento::~Ento() {
-    if (id.is_nil()) return;
+    if (id.is_nil())
+      return;
   }
 
   void Ento::AddChild(Ento child) {
@@ -58,7 +59,8 @@ namespace axl {
 
   Ento Ento::Parent() {
     HierarchyComponent &hierarchy = GetComponent<HierarchyComponent>();
-    if (hierarchy.parent.is_nil()) return {};
+    if (hierarchy.parent.is_nil())
+      return {};
     return scene->FromID(hierarchy.parent);
   }
 
@@ -99,7 +101,8 @@ namespace axl {
     j["components"] = json::array();
     j["components"].push_back(Transform().Serialize());
 
-    if (HasComponent<Model>()) j["components"].push_back(GetComponent<Model>().Serialize());
+    if (HasComponent<Model>())
+      j["components"].push_back(GetComponent<Model>().Serialize());
 
     return j;
   }

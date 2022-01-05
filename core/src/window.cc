@@ -11,6 +11,8 @@ namespace axl {
     _window_title(title),
     _window(nullptr),
     _renderer(nullptr),
+    _time_last(0.0),
+    _delta_time(0.0),
     _io_manager(new IOManager(*this)),
     _lock_mouse(false) {
     glfwInit();

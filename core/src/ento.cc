@@ -20,7 +20,7 @@ namespace axl {
     }
 
     id = _uuid_generator();
-    log::info("Created ento {}", uuids::to_string(id));
+    log::debug("Created ento {}", uuids::to_string(id));
   }
 
   Ento::~Ento() {

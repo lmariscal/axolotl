@@ -60,6 +60,7 @@ namespace axl {
 
     void Render(Scene &scene, bool show_data, bool focused, Camera &camera, Transform &camera_transform);
     void SetMeshWireframe(bool state);
+    void SetShowGrid(bool state);
     void AddLine(const LinePrimitive &line);
 
     const RendererPerformance &GetPerformance() const;
@@ -78,6 +79,7 @@ namespace axl {
     std::unique_ptr<Grid> _grid;
 
     bool _show_wireframe;
+    bool _show_grid;
     v2i _size;
 
     u32 _lights_uniform_buffer;

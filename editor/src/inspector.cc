@@ -3,6 +3,8 @@
 #include <IconsFontAwesome5Pro.h>
 #include <assimp/Importer.hpp>
 #include <axolotl/axolotl.hh>
+#include <axolotl/physics.hh>
+#include <axolotl/geometry.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/light.hh>
@@ -160,6 +162,18 @@ namespace axl {
         _want_model = true;
         ImGui::CloseCurrentPopup();
       }
+      if (ImGui::MenuItem("RigidBody")) {
+        selected_entity.TryAddComponent<RigidBody>();
+        ImGui::CloseCurrentPopup();
+      }
+      if (ImGui::MenuItem("OBB Collider")) {
+        selected_entity.TryAddComponent<OBBCollider>();
+        ImGui::CloseCurrentPopup();
+      }
+      if (ImGui::MenuItem("Sphere Collider")) {
+        selected_entity.TryAddComponent<SphereCollider>();
+        ImGui::CloseCurrentPopup();
+      }
       ImGui::EndPopup();
     }
   }
@@ -201,6 +215,30 @@ namespace axl {
       if (ImGui::CollapsingHeader("Light Source", ImGuiTreeNodeFlags_DefaultOpen)) {
         Light &light = ento.GetComponent<Light>();
         light.ShowComponent();
+      }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+    }
+
+    if (ento.HasComponent<RigidBody>()) {
+      if (ImGui::CollapsingHeader("Rigid Body", ImGuiTreeNodeFlags_DefaultOpen)) {
+        RigidBody &rigid_body = ento.GetComponent<RigidBody>();
+        rigid_body.ShowComponent();
+      }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+    }
+
+    if (ento.HasComponent<OBBCollider>()) {
+      if (ImGui::CollapsingHeader("OBB Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
+        OBBCollider &collider = ento.GetComponent<OBBCollider>();
+        collider.ShowComponent();
+      }
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+    }
+
+    if (ento.HasComponent<SphereCollider>()) {
+      if (ImGui::CollapsingHeader("Sphere Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
+        SphereCollider &collider = ento.GetComponent<SphereCollider>();
+        collider.ShowComponent();
       }
       ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
     }

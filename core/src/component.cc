@@ -48,7 +48,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, min, max, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, min, max, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -67,7 +68,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, min, max, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, min, max, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -86,7 +88,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, min, max, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, min, max, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -137,7 +140,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -156,7 +160,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -207,7 +212,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##X", &v.x, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -226,7 +232,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##Y", &v.y, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
 
     ImGui::SetCursorPosX(100.0f + 7.5f);
@@ -245,7 +252,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##Z", &v.z, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
@@ -264,7 +272,8 @@ namespace axl {
     ImGui::PopStyleColor(3);
 
     ImGui::SameLine();
-    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##W", &v.w, 0.1f, 0.0f, 0.0f, "%.3f"))
+      modified = true;
     ImGui::PopItemWidth();
 
     ImGui::PopStyleVar();
@@ -277,15 +286,55 @@ namespace axl {
 
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values) {
     v3 original = degrees(eulerAngles(v));
+
     v3 euler = original;
-    if (!ShowData(label, euler, reset_values)) return false;
+    if (euler.x <= 0.001f && euler.x >= -0.001f)
+      euler.x = 0.0f;
+    if (euler.y <= 0.001f && euler.y >= -0.001f)
+      euler.y = 0.0f;
+    if (euler.z <= 0.001f && euler.z >= -0.001f)
+      euler.z = 0.0f;
+    if (!ShowData(label, euler, reset_values))
+      return false;
+
     quat offset = quat(radians(euler - original));
-    v *= offset;
+    if (length2(v) == 0.0f) {
+      v = offset;
+    } else {
+      v = v * offset;
+    }
+
     return true;
   }
 
   // bool ShowData(const std::string &label, f32 &v, const f32 &reset_value = 0.0f);
   // bool ShowData(const std::string &label, bool &v);
+
+  bool ShowData(const std::string &label, f64 &v, const f64 &reset_value, f64 min, f64 max) {
+    bool modified = false;
+
+    ImGui::PushID(label.c_str());
+
+    f32 label_size = ImGui::CalcTextSize(label.c_str()).x + 15;
+    if (ImGui::GetWindowWidth() > column_width && label_size < column_width * 3) {
+      ImGui::Columns(2);
+      ImGui::SetColumnWidth(0, label_size > column_width ? label_size : column_width);
+    } else {
+      ImGui::Columns(1);
+    }
+
+    ImGui::Text("%s", label.c_str());
+    ImGui::NextColumn();
+
+    f32 vt = v;
+    if (ImGui::DragFloat("##v", &vt, 0.1f, min, max, "%.3f")) {
+      modified = true;
+      v = vt;
+    }
+    ImGui::Columns(1);
+    ImGui::PopID();
+    return modified;
+  }
 
   bool ShowData(const std::string &label, f32 &v, const f32 &reset_value, f32 min, f32 max) {
     bool modified = false;
@@ -303,7 +352,8 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragFloat("##v", &v, 0.1f, min, max, "%.3f")) modified = true;
+    if (ImGui::DragFloat("##v", &v, 0.1f, min, max, "%.3f"))
+      modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -326,7 +376,8 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::Checkbox("##v", &v)) modified = true;
+    if (ImGui::Checkbox("##v", &v))
+      modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -349,7 +400,8 @@ namespace axl {
     ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
 
-    if (ImGui::DragInt("##v", &v, 0.1f, min, max)) modified = true;
+    if (ImGui::DragInt("##v", &v, 0.1f, min, max))
+      modified = true;
 
     ImGui::Columns(1);
     ImGui::PopID();
@@ -422,7 +474,8 @@ namespace axl {
 
     ImGui::PushFont(bold_font);
     // imgui button position on the left
-    if (ImGui::ColorEdit4("##color", value_ptr(v.rgba))) modified = true;
+    if (ImGui::ColorEdit4("##color", value_ptr(v.rgba)))
+      modified = true;
     ImGui::PopFont();
 
     ImGui::PopItemWidth();

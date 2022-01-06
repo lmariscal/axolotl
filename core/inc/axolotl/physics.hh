@@ -22,20 +22,38 @@ namespace axl {
     f64 cor;
     v3 velocity;
     v3 forces;
+    v3 torques;
+    v3 orientation;
+    v3 angular_velocity;
 
-    inline RigidBody(): cor(0.5), mass(1.0), friction(0.6), velocity(0.0f), forces(0.0f) { }
+    inline RigidBody():
+      cor(0.5),
+      mass(1.0),
+      friction(0.6),
+      velocity(0.0f),
+      forces(0.0f),
+      torques(0.0f),
+      orientation(0.0f),
+      angular_velocity(0.0f) { }
     inline RigidBody(f64 mass, f64 friction = 0.6, f64 cor = 0.5):
       cor(cor),
       mass(mass),
       friction(friction),
       velocity(0.0f),
-      forces(0.0f) { }
+      forces(0.0f),
+      torques(0.0f),
+      orientation(0.0f),
+      angular_velocity(0.0f) { }
 
     f64 InvMass() const;
+    m4 InvTensor() const;
     void Init();
+    void Update(f64 step);
     void ApplyForces();
-    CollisionManifold FindCollisionFeatures(const RigidBody &other) const;
+    void AddRotationalImpulse(const v3 &point, const v3 &impulse);
     void ApplyImpulse(RigidBody &other, const CollisionManifold &manifold, i32 c);
+    bool ShowComponent();
+    CollisionManifold FindCollisionFeatures(const RigidBody &other) const;
 
     REGISTER_COMPONENT(RigidBody, mass, friction, cor)
   };

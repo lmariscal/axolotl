@@ -31,7 +31,8 @@ namespace axl {
     _ambient_light(LightType::Ambient, v3(0.6f), 0.4f),
     _directional_light(LightType::Directional, v3(1.0f), 0.4f),
     _directional_light_direction(v3(0.3f, 0.2f, 0.3f)),
-    _show_wireframe(false) {
+    _show_wireframe(false),
+    _show_grid(true) {
 
     if (gladLoadGL() != GL_TRUE) {
       log::error("Failed to load OpenGL");
@@ -240,7 +241,8 @@ namespace axl {
       entity.model->Draw();
     }
 
-    _grid->Draw(view, projection);
+    if (_show_grid)
+      _grid->Draw(view, projection);
 
     if (_skybox_texture) {
       glDisable(GL_CULL_FACE);
@@ -364,9 +366,6 @@ namespace axl {
   }
 
   void Renderer::ShowData() {
-    ImGui::Begin("Performance");
-    ImGui::End();
-
     ImGui::Begin("Renderer");
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
       axl::ShowData("Ambient Light", _ambient_light.color);
@@ -382,6 +381,10 @@ namespace axl {
 
   void Renderer::SetMeshWireframe(bool state) {
     _show_wireframe = state;
+  }
+
+  void Renderer::SetShowGrid(bool state) {
+    _show_grid = state;
   }
 
 } // namespace axl

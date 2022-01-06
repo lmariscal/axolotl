@@ -357,7 +357,8 @@ namespace axl {
 
   void TextureStore::DeregisterTexture(u32 id) {
     if (!_data.count(id)) {
-      log::error("Texture id {} not registered", id);
+      if (id != 0)
+        log::error("Texture id {} not registered", id);
       return;
     }
 

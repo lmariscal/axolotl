@@ -287,6 +287,9 @@ namespace axl {
         dock.data.hover_action_buttons = false;
         DrawActionButtons(window, dock.data);
       }
+
+      dock.data.terminal->frame_pos = ImGui::GetWindowPos();
+      dock.data.terminal->frame_size = ImGui::GetWindowSize();
       ImGui::EndChild();
     }
 

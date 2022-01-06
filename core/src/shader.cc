@@ -325,12 +325,12 @@ namespace axl {
 
     if (!data._file_watcher) {
       data._file_watcher = new efsw::FileWatcher();
-      log::info("File watcher created");
+      log::debug("File watcher created");
       data._file_watcher->watch();
     }
     if (!data._watcher) {
       data._watcher = new ShaderWatcher(shader.shader_id);
-      log::info("Creating file watcher");
+      log::debug("Creating file watcher");
     }
 
     if (data._watch_ids[(i32)type])

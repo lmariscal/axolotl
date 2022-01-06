@@ -15,6 +15,8 @@ namespace axl {
     bool scene_paused = false;
     bool display_terminal = false;
 
+    v2 frame_size = { 0, 0 };
+    v2 frame_pos = { 0, 0 };
     std::filesystem::path project_path = "";
   };
 

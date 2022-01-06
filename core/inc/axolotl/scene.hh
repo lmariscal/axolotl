@@ -17,6 +17,7 @@ namespace axl {
     virtual ~Scene() = default;
     virtual void Init(Window &window) = 0;
     virtual void Update(Window &window, f64 delta) = 0;
+    virtual void UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) { }
     virtual void Focused(Window &window, bool stat) = 0;
 
     Ento CreateEntity(const std::string &name = "");

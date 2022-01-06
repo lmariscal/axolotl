@@ -1,5 +1,5 @@
 #include "dockspace.hh"
-#include "test_scene.hh"
+#include "menu.hh"
 #include "ui.hh"
 
 #include <ImGuizmo.h>
@@ -22,6 +22,9 @@ v2 eye_position;
 f32 target_distance = 5.0f;
 v2 start_dragging_pos;
 v2 start_rotating_pos;
+
+f64 start_physics_time;
+f64 end_physics_time;
 
 void UpdateEditorCamera(Window &window,
                         Camera &camera,
@@ -92,7 +95,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   DockSpace dock;
 
-  dock.data.scene = new TestScene();
+  dock.data.scene = new MenuScene();
   Scene::SetActiveScene(dock.data.scene);
 
   FrameEditor frame_editor;
@@ -141,9 +144,15 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
+      if (!dock.data.fullscreen)
+        scene.UpdateGUI(window, terminal_data.frame_size, terminal_data.frame_pos);
+      else
+        scene.UpdateGUI(window, window.GetWindowFrameBufferSize(), v2(0));
       time_accumulator += window.GetDeltaTime();
       while (time_accumulator >= time_step) {
+        start_physics_time = window.GetTime();
         scene.PhysicsUpdate(time_step);
+        end_physics_time = window.GetTime();
         scene.Update(window, time_step);
         time_accumulator -= time_step;
       }
@@ -220,6 +229,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       ImGui::Text("FPS: %u", performance.fps);
       ImGui::Text("Delta: %.2fms", performance.delta_time * 1000.0);
       ImGui::Text("Meshes: %u", performance.mesh_count);
+      ImGui::Text("Physics: %.2fms", (end_physics_time - start_physics_time) * 1000.0);
       ImGui::Text("Vertices: %u", performance.vertex_count);
       ImGui::Text("Triangles: %u", performance.triangle_count);
       ImGui::Text("Draw Calls: %u", performance.draw_calls);

@@ -7,9 +7,9 @@
 
 namespace axl {
 
-  constexpr f64 LINEAR_PROJECTION_PERCENT = 0.3;
-  constexpr f64 PENETRATION_SLACK = 0.03;
-  constexpr i32 IMPULSE_ITERATIONS = 8;
+  constexpr f64 LINEAR_PROJECTION_PERCENT = 0.45;
+  constexpr f64 PENETRATION_SLACK = 0.01;
+  constexpr i32 IMPULSE_ITERATIONS = 5;
 
   void RigidBody::Init() { }
 
@@ -25,6 +25,52 @@ namespace axl {
 
   f64 RigidBody::InvMass() const {
     return mass == 0.0 ? 0.0 : 1.0 / mass;
+  }
+
+  m4 RigidBody::InvTensor() const {
+    if (mass == 0.0)
+      return m4(0.0);
+
+    Ento ento = Ento::FromComponent(*this);
+
+    f64 ix = 0.0;
+    f64 iy = 0.0;
+    f64 iz = 0.0;
+    f64 iw = 0.0;
+
+    if (ento.HasComponent<SphereCollider>()) {
+      SphereCollider sphere = ento.GetComponent<SphereCollider>();
+      f64 r2 = sphere.radius * sphere.radius;
+      constexpr f64 fraction = (2.0 / 5.0);
+
+      ix = r2 * mass * fraction;
+      iy = r2 * mass * fraction;
+      iz = r2 * mass * fraction;
+      iw = 1.0;
+    } else if (ento.HasComponent<OBBCollider>()) {
+      OBBCollider obb = ento.GetComponent<OBBCollider>();
+      v3 size = obb.size * 2.0f;
+      constexpr f64 fraction = (1.0 / 12.0);
+      f64 x2 = size.x * size.x;
+      f64 y2 = size.y * size.y;
+      f64 z2 = size.z * size.z;
+
+      ix = (y2 + z2) * mass * fraction;
+      iy = (x2 + z2) * mass * fraction;
+      iz = (x2 + y2) * mass * fraction;
+      iw = 1.0;
+    }
+
+    return inverse(m4((f32)ix, 0, 0, 0, 0, (f32)iy, 0, 0, 0, 0, (f32)iz, 0, 0, 0, 0, (f32)iw));
+  }
+
+  void RigidBody::AddRotationalImpulse(const v3 &point, const v3 &impulse) {
+    Ento ento = Ento::FromComponent(*this);
+
+    v3 center_of_mass = ento.Transform().GetPosition();
+    v3 torque = cross(point - center_of_mass, impulse);
+    v3 angular_acceleration = v4(torque, 1.0) * InvTensor();
+    angular_velocity = angular_velocity + angular_acceleration;
   }
 
   CollisionManifold RigidBody::FindCollisionFeatures(const RigidBody &other) const {
@@ -50,7 +96,6 @@ namespace axl {
       if (other_ento.HasComponent<SphereCollider>()) {
         SphereCollider &other_sphere = other_ento.GetComponent<SphereCollider>();
         result = obb.SphereCollide(other_sphere);
-        result.normal = -result.normal;
       } else if (other_ento.HasComponent<OBBCollider>()) {
         OBBCollider &other_obb = other_ento.GetComponent<OBBCollider>();
         result = obb.OBBCollide(other_obb);
@@ -68,7 +113,17 @@ namespace axl {
     if (inv_mass == 0.0)
       return;
 
-    v3 relative_velocity = other.velocity - velocity;
+    Ento ento = Ento::FromComponent(*this);
+    Ento other_ento = Ento::FromComponent(other);
+
+    v3 relative_point = manifold.points[c];
+    v3 r_a = relative_point - ento.Transform().GetPosition();
+    v3 r_b = relative_point - other_ento.Transform().GetPosition();
+    m4 i_a = InvTensor();
+    m4 i_b = other.InvTensor();
+
+    v3 relative_velocity =
+      (other.velocity + cross(other.angular_velocity, r_b)) - (velocity + cross(angular_velocity, r_a));
     v3 relative_normal = normalize(manifold.normal);
 
     if (dot(relative_velocity, relative_normal) > 0.0)
@@ -76,7 +131,11 @@ namespace axl {
 
     f64 e = min(cor, other.cor);
     f64 numerator = (-(1.0 + e) * dot(relative_velocity, relative_normal));
-    f64 j = numerator / inv_mass;
+    f64 d1 = inv_mass;
+    v3 d2 = cross(v3(v4(cross(r_a, relative_normal), 1.0) * i_a), r_a);
+    v3 d3 = cross(v3(v4(cross(r_b, relative_normal), 1.0) * i_b), r_b);
+    f64 denominator = d1 + dot(relative_normal, d2 + d3);
+    f64 j = (denominator == 0.0) ? 0.0 : numerator / denominator;
 
     if (manifold.points.size() > 0.0 && j != 0.0)
       j /= manifold.points.size();
@@ -84,6 +143,9 @@ namespace axl {
     v3 impulse = (f32)j * relative_normal;
     velocity = velocity - impulse * (f32)inv_mass_a;
     other.velocity = other.velocity + impulse * (f32)inv_mass_b;
+
+    angular_velocity = angular_velocity - v3(v4(cross(r_a, impulse), 1.0) * i_a);
+    other.angular_velocity = other.angular_velocity + v3(v4(cross(r_b, impulse), 1.0) * i_b);
 
     // friction
 
@@ -93,7 +155,12 @@ namespace axl {
     t = normalize(t);
 
     numerator = -dot(relative_velocity, t);
-    f64 jt = numerator / inv_mass;
+    d1 = inv_mass;
+    d2 = cross(v3(v4(cross(r_a, t), 1.0) * i_a), r_a);
+    d3 = cross(v3(v4(cross(r_b, t), 1.0) * i_b), r_b);
+    denominator = d1 + dot(t, d2 + d3);
+
+    f64 jt = denominator == 0.0 ? 0.0f : numerator / denominator;
 
     if (manifold.points.size() > 0.0 && jt != 0.0)
       jt /= manifold.points.size();
@@ -108,6 +175,38 @@ namespace axl {
 
     velocity = velocity - tangent_impulse * (f32)inv_mass_a;
     other.velocity = other.velocity + tangent_impulse * (f32)inv_mass_b;
+    angular_velocity = angular_velocity - v3(v4(cross(r_a, tangent_impulse), 1.0) * i_a);
+    other.angular_velocity = other.angular_velocity + v3(v4(cross(r_b, tangent_impulse), 1.0) * i_b);
+  }
+
+  void RigidBody::Update(f64 step) {
+    Ento ento = Ento::FromComponent(*this);
+    v3 acceleration = forces * (f32)InvMass();
+    velocity = velocity + acceleration * (f32)step;
+    velocity = velocity * (f32)damping;
+
+    if (abs(velocity.x) < 0.001)
+      velocity.x = 0.0f;
+    if (abs(velocity.y) < 0.001)
+      velocity.y = 0.0f;
+    if (abs(velocity.z) < 0.001)
+      velocity.z = 0.0f;
+
+    if (ento.HasComponent<OBBCollider>()) {
+      v3 angular_acceleration = v4(torques, 1.0f) * InvTensor();
+      angular_velocity = angular_velocity + angular_acceleration * (f32)step;
+      angular_velocity = angular_velocity * (f32)damping;
+
+      if (angular_velocity.x < 0.001)
+        angular_velocity.x = 0.0f;
+      if (angular_velocity.y < 0.001)
+        angular_velocity.y = 0.0f;
+      if (angular_velocity.z < 0.001)
+        angular_velocity.z = 0.0f;
+    }
+
+    // ento.Transform().SetPosition(ento.Transform().GetPosition() + velocity * (f32)step);
+    // ento.Transform().SetRotationEuler(ento.Transform().GetRotationEuler() + angular_velocity * (f32)step);
   }
 
   void Physics::Step(Scene &scene, f64 step) {
@@ -158,11 +257,8 @@ namespace axl {
 
     registry.group<Transform, RigidBody>().each([&](entt::entity entity, Transform &transform, RigidBody &body) {
       body.ApplyForces();
+      body.Update(step);
       Ento ento = scene.FromHandle(entity);
-
-      v3 acceleration = body.forces * (f32)body.InvMass();
-      body.velocity = body.velocity + acceleration * (f32)step;
-      body.velocity = body.velocity * (f32)body.damping;
 
       if (ento.HasAnyOf<SphereCollider, OBBCollider>()) {
         registry.view<Transform, RigidBody>().each(
@@ -197,8 +293,18 @@ namespace axl {
     }
 
     registry.group<Transform, RigidBody>().each([&](entt::entity entity, Transform &transform, RigidBody &body) {
-      if (epsilonNotEqual(length2(body.velocity), 0.0f, std::numeric_limits<f32>::epsilon()))
+      Ento ento = scene.FromHandle(entity);
+      if (epsilonNotEqual(length2(body.velocity), 0.0f, std::numeric_limits<f32>::epsilon())) {
         transform.SetPosition(transform.GetPosition() + body.velocity * (f32)step);
+      }
+      if (ento.HasComponent<OBBCollider>() &&
+          epsilonNotEqual(length2(body.angular_velocity), 0.0f, std::numeric_limits<f32>::epsilon())) {
+        transform.SetRotationEuler(transform.GetRotationEuler() + degrees(body.angular_velocity) * (f32)step);
+        // log::debug("Ento {} has angular velocity {}, step is {}",
+        //            ento.Tag().value,
+        //            to_string(body.angular_velocity),
+        //            step);
+      }
     });
 
     for (i32 i = 0; i < manifolds.size(); ++i) {
@@ -210,18 +316,28 @@ namespace axl {
       if (total_mass == 0.0)
         continue;
 
-      // if (a->IsTrigger() || b->IsTrigger())
-      //   continue;
-
       f64 depth = max(manifold.depth - PENETRATION_SLACK, 0.0);
       f64 scalar = depth / total_mass;
-      v3 correction = manifold.normal * (f32)scalar;
+      v3 correction = manifold.normal * (f32)scalar * (f32)LINEAR_PROJECTION_PERCENT;
 
       Ento ento_a = Ento::FromComponent(*a);
       ento_a.Transform().SetPosition(ento_a.Transform().GetPosition() - correction * (f32)a->InvMass());
       Ento ento_b = Ento::FromComponent(*b);
       ento_b.Transform().SetPosition(ento_b.Transform().GetPosition() + correction * (f32)b->InvMass());
     }
+  }
+
+  bool RigidBody::ShowComponent() {
+    bool modified = false;
+
+    if (!ShowData("Mass", mass))
+      modified = true;
+    if (!ShowData("Friction", friction))
+      modified = true;
+    if (!ShowData("Restitution", cor))
+      modified = true;
+
+    return modified;
   }
 
 } // namespace axl

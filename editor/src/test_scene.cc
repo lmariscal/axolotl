@@ -32,8 +32,8 @@ namespace axl {
     light_ento.Tag().value = "Light";
     Light &light_component = light_ento.AddComponent<Light>(LightType::Point, v3(1.0f), 0.6f);
 
-    Ento container = CreateEntity();
-    container.Tag().value = "Container";
+    // Ento container = CreateEntity();
+    // container.Tag().value = "Container";
 
     Ento cube_ento = CreateEntity();
     cube_id = cube_ento.id;
@@ -45,17 +45,25 @@ namespace axl {
     Model &cube_model = cube_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
     TextureStore::ProcessQueue();
 
-    container.AddChild(cube_ento);
+    // container.AddChild(cube_ento);
 
     Ento cube_other_ento = CreateEntity();
     cube_other_id = cube_other_ento.id;
     cube_other_ento.Tag().value = "CubeOther";
     cube_other_ento.Transform().SetPosition(v3(3.0f, 0.0f, 0.0f));
-
     cube_other_ento.AddComponent<OBBCollider>(cube_other_ento.Transform().GetPosition(), v3(1.0f));
-    cube_other_ento.AddComponent<RigidBody>(0.0);
+    cube_other_ento.AddComponent<RigidBody>(1.0);
     Model &cube_other_model =
       cube_other_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
+    TextureStore::ProcessQueue();
+
+    Ento cube_other2_ento = CreateEntity();
+    cube_other2_ento.Tag().value = "CubeOther2";
+    cube_other2_ento.Transform().SetPosition(v3(3.0f, 0.0f, 0.0f));
+    cube_other2_ento.AddComponent<OBBCollider>(cube_other2_ento.Transform().GetPosition(), v3(1.0f));
+    cube_other2_ento.AddComponent<RigidBody>(0.0);
+    Model &cube_other2_model =
+      cube_other2_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Cube.fbx", shader_paths);
     TextureStore::ProcessQueue();
 
     Ento sphere_ento = CreateEntity();
@@ -66,7 +74,7 @@ namespace axl {
     Model &sphere_model = sphere_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Sphere.fbx", shader_paths);
     sphere_ento.AddComponent<SphereCollider>(sphere_ento.Transform().GetPosition(),
                                              sphere_ento.Transform().GetScale().x);
-    sphere_ento.AddComponent<RigidBody>(0.0);
+    sphere_ento.AddComponent<RigidBody>(1.0);
 
     TextureStore::ProcessQueue();
 
@@ -108,7 +116,7 @@ namespace axl {
         if (io.ButtonDown(pad, PadButton::RightBumper))
           camera->MoveCamera(CameraDirection::Up, delta);
 
-        constexpr f32 AXIS_DEAD_ZONE = 0.01f;
+        constexpr f32 AXIS_DEAD_ZONE = 0.3f;
 
         f32 left_x = io.GetAxis(pad, JoyStick::LeftX);
         f32 left_y = io.GetAxis(pad, JoyStick::LeftY);

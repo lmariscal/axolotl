@@ -34,9 +34,9 @@ namespace axl {
     test[5] = v3(obb_rotation[2][0], obb_rotation[2][1], obb_rotation[2][2]);
 
     for (i32 i = 0; i < 3; ++i) {
-      test[6 + i * 3 + 0] = cross(test[i], test[0]);
-      test[6 + i * 3 + 1] = cross(test[i], test[1]);
-      test[6 + i * 3 + 2] = cross(test[i], test[2]);
+      test[6 + i * 3 + 0] = cross(test[i], test[3]);
+      test[6 + i * 3 + 1] = cross(test[i], test[4]);
+      test[6 + i * 3 + 2] = cross(test[i], test[5]);
     }
 
     for (i32 i = 0; i < 15; ++i) {
@@ -321,9 +321,9 @@ namespace axl {
     test[5] = v3(other.rotation_matrix[2][0], other.rotation_matrix[2][1], other.rotation_matrix[2][2]);
 
     for (i32 i = 0; i < 3; ++i) {
-      test[6 + i * 3 + 0] = cross(test[i], test[0]);
-      test[6 + i * 3 + 1] = cross(test[i], test[1]);
-      test[6 + i * 3 + 2] = cross(test[i], test[2]);
+      test[6 + i * 3 + 0] = cross(test[i], test[3]);
+      test[6 + i * 3 + 1] = cross(test[i], test[4]);
+      test[6 + i * 3 + 2] = cross(test[i], test[5]);
     }
 
     for (i32 i = 0; i < 15; ++i) {
@@ -610,4 +610,23 @@ namespace axl {
     return result;
   }
 
+  bool OBBCollider::ShowComponent() {
+    bool modified = false;
+
+    if (ShowData("Size", size))
+      modified = true;
+
+    return modified;
+  }
+
+  bool SphereCollider::ShowComponent() {
+    bool modified = false;
+
+    if (ShowData("Radius", radius))
+      modified = true;
+
+    return modified;
+  }
+
 } // namespace axl
+

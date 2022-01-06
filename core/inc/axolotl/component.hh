@@ -93,6 +93,7 @@ namespace axl {
   bool ShowData(const std::string &label, Color &v);
   bool ShowData(const std::string &label, quat &v, const v3 &reset_values = { 0.0f, 0.0f, 0.0f });
   bool ShowData(const std::string &label, f32 &v, const f32 &reset_value = 0.0f, f32 min = 0.0f, f32 max = 0.0f);
+  bool ShowData(const std::string &label, f64 &v, const f64 &reset_value = 0.0f, f64 min = 0.0f, f64 max = 0.0f);
   bool ShowData(const std::string &label, bool &v);
   bool ShowData(const std::string &label, i32 &v, const i32 &reset_value = 0, i32 min = 0, i32 max = 0);
   bool ShowData(const std::string &label, u32 &v, const u32 &reset_value = 0, u32 min = 0, u32 max = 0);

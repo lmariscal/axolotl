@@ -44,20 +44,55 @@ namespace axl {
       if (!PadPresent((Pad)i))
         continue;
 
-      GLFWgamepadstate state;
-      if (!glfwGetGamepadState(i, &state))
-        return;
-
       i32 count;
       const float *axes = glfwGetJoystickAxes(i, &count);
+      if (!axes)
+        continue;
+
       if (count > (i32)JoyStick::Last)
         count = (i32)JoyStick::Last;
       for (i32 n = 0; n < count; ++n)
         _joy_sticks[i][n] = axes[n];
 
-      for (i32 j = 0; j < (i32)PadButton::Last; ++j) {
-        bool pressed = state.buttons[j];
-        _pad[i][j] = pressed;
+      GLFWgamepadstate state;
+      if (glfwGetGamepadState(i, &state)) {
+        for (i32 j = 0; j < (i32)PadButton::Last; ++j) {
+          bool pressed = state.buttons[j];
+          _pad[i][j] = pressed;
+        }
+      } else if (glfwJoystickPresent(i)) {
+        const uchar *buttons = glfwGetJoystickButtons(i, &count);
+        if (!buttons)
+          continue;
+
+        for (i32 j = 0; j < count; ++j) {
+          if (count > 0)
+            _pad[i][(i32)PadButton::A] = buttons[0];
+          if (count > 1)
+            _pad[i][(i32)PadButton::B] = buttons[1];
+          if (count > 3)
+            _pad[i][(i32)PadButton::X] = buttons[3];
+          if (count > 4)
+            _pad[i][(i32)PadButton::Y] = buttons[4];
+          if (count > 7)
+            _pad[i][(i32)PadButton::RightBumper] = buttons[7];
+          if (count > 6)
+            _pad[i][(i32)PadButton::LeftBumper] = buttons[6];
+          if (count > 11)
+            _pad[i][(i32)PadButton::Start] = buttons[11];
+          if (count > 13)
+            _pad[i][(i32)PadButton::LeftThumb] = buttons[13];
+          if (count > 14)
+            _pad[i][(i32)PadButton::RightThumb] = buttons[13];
+          if (count > 15)
+            _pad[i][(i32)PadButton::DPadUp] = buttons[15];
+          if (count > 16)
+            _pad[i][(i32)PadButton::DPadRight] = buttons[16];
+          if (count > 17)
+            _pad[i][(i32)PadButton::DPadDown] = buttons[17];
+          if (count > 18)
+            _pad[i][(i32)PadButton::DPadLeft] = buttons[18];
+        }
       }
     }
   }

@@ -75,6 +75,8 @@ namespace axl {
     CollisionManifold SphereCollide(const SphereCollider &sphere) const;
     CollisionManifold OBBCollide(const OBBCollider &obb) const;
 
+    bool ShowComponent();
+
     REGISTER_COMPONENT(SphereCollider, position, radius)
   };
 
@@ -207,6 +209,8 @@ namespace axl {
     std::vector<Plane> GetPlanes() const;
     bool ClipToPlane(const Plane &plane, const Line &line, v3 &out_point) const;
     f64 PenetrationDepth(const OBBCollider &obb, const v3 &axis, bool &out_should_flip) const;
+
+    bool ShowComponent();
 
     REGISTER_COMPONENT(OBBCollider, position, size, rotation)
 

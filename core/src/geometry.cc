@@ -1,4 +1,7 @@
 #include <axolotl/geometry.hh>
+#include <axolotl/line.hh>
+#include <axolotl/renderer.hh>
+#include <axolotl/window.hh>
 
 namespace axl {
 
@@ -159,6 +162,9 @@ namespace axl {
       normal = normalize(sphere.position - closest);
     }
 
+    LinePrimitive line(sphere.position, closest);
+    Window::GetCurrentWindow()->GetRenderer().AddLine(line);
+
     v3 outside = sphere.position - normal * (f32)sphere.radius;
     f64 dist = length(closest - outside);
 
@@ -264,6 +270,8 @@ namespace axl {
   void OBBCollider::SetRotation(const quat &rotation) {
     this->rotation = rotation;
     rotation_matrix = toMat3(rotation);
+    for (i32 i = 0; i < 3; ++i)
+      rotation_matrix[i][1] = -rotation_matrix[i][1];
   }
 
   const quat &OBBCollider::GetRotation() const {
@@ -341,6 +349,7 @@ namespace axl {
   v3 OBBCollider::ClosestPoint(const v3 &point) const {
     v3 result = position;
     v3 dir = point - position;
+
     for (i32 i = 0; i < 3; ++i) {
       v3 axis(rotation_matrix[i][0], rotation_matrix[i][1], rotation_matrix[i][2]);
       f64 dist = dot(dir, axis);
@@ -629,4 +638,3 @@ namespace axl {
   }
 
 } // namespace axl
-

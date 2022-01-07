@@ -54,10 +54,11 @@ namespace axl {
   }
 
   bool Window::Update() {
-    _io_manager->UpdatePads(_window);
+    _active_window = this;
     _io_manager->UpdateHolds();
     _io_manager->UpdateRelativePositions();
 
+    _io_manager->UpdatePads(_window);
     glfwPollEvents();
 
     f64 time_now = glfwGetTime();

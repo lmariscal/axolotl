@@ -1,5 +1,7 @@
 #include "menu.hh"
 
+#include "level1.hh"
+
 #include <axolotl/axolotl.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
@@ -9,7 +11,7 @@
 
 namespace axl {
 
-  void MenuScene::Init(Window &window) {
+  void MenuLevel::Init(Window &window) {
     Ento camera_ento = CreateEntity();
     camera_ento.Tag().value = "Camera";
     Camera &camera_component = camera_ento.AddComponent<Camera>();
@@ -19,9 +21,9 @@ namespace axl {
     window.GetRenderer().SetShowGrid(false);
   }
 
-  void MenuScene::Update(Window &window, f64 delta) { }
+  void MenuLevel::Update(Window &window, f64 delta) { }
 
-  void MenuScene::UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) {
+  void MenuLevel::UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) {
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoResize;
@@ -47,7 +49,7 @@ namespace axl {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
 
     if (ImGui::Button("Physics Level")) {
-      // window.SetScene<PhysicsScene>();
+      Scene::SetActiveScene(new PhysicsLevel());
       log::debug("Physics Level");
     }
     if (ImGui::IsItemHovered())
@@ -66,6 +68,6 @@ namespace axl {
     ImGui::PopStyleVar();
   }
 
-  void MenuScene::Focused(Window &window, bool state) { }
+  void MenuLevel::Focused(Window &window, bool state) { }
 
 } // namespace axl

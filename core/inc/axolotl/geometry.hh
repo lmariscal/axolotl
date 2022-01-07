@@ -153,6 +153,8 @@ namespace axl {
       size(size),
       rotation(rotation) {
       rotation_matrix = toMat3(rotation);
+      for (i32 i = 0; i < 3; ++i)
+        rotation_matrix[i][1] = -rotation_matrix[i][1];
     }
 
     inline Interval GetInterval(const v3 &axis) const {

@@ -113,7 +113,7 @@ namespace axl {
 
       ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.5f, &dock_left_bottom, &dock_left);
       ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Right, 0.2f, &dock_top_right, &dock_top_left);
-      ImGui::DockBuilderSplitNode(dock_top_right, ImGuiDir_Up, 0.4f, &dock_top_right_top, &dock_top_right_bottom);
+      ImGui::DockBuilderSplitNode(dock_top_right, ImGuiDir_Up, 0.5f, &dock_top_right_top, &dock_top_right_bottom);
 
       ImGui::DockBuilderDockWindow("World Editor", dock_top_left);
       ImGui::DockBuilderDockWindow("Entities", dock_left);

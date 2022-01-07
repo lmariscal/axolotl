@@ -35,6 +35,10 @@ namespace axl {
     GUI &GetGUI() const;
     GLFWwindow *GetGLFWWindow() const;
 
+    static inline Window *GetCurrentWindow() {
+      return _active_window;
+    }
+
    protected:
     friend class Renderer;
 
@@ -59,6 +63,8 @@ namespace axl {
     IOManager *_io_manager;
     GLFWwindow *_window;
     bool _lock_mouse;
+
+    inline static Window *_active_window;
   };
 
 } // namespace axl

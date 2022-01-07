@@ -29,9 +29,13 @@ namespace axl {
     void SetFov(f32 fov);
     void UpdateVectors(Transform *transform);
     void SetCustomViewMatrix(m4 view);
+    v3 GetFront();
+    v3 GetUp();
+    v3 GetRight();
     m4 GetViewMatrix(Transform *transform);
     m4 GetProjectionMatrix(Window &window);
 
+    static void SetAsActive(Camera *camera);
     static Camera *GetActiveCamera();
     static Ento GetActiveCameraEnto();
 

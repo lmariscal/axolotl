@@ -3,12 +3,12 @@
 #include <IconsFontAwesome5Pro.h>
 #include <assimp/Importer.hpp>
 #include <axolotl/axolotl.hh>
-#include <axolotl/physics.hh>
-#include <axolotl/geometry.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
+#include <axolotl/geometry.hh>
 #include <axolotl/light.hh>
 #include <axolotl/model.hh>
+#include <axolotl/physics.hh>
 #include <axolotl/scene.hh>
 #include <axolotl/transform.hh>
 #include <imgui.h>
@@ -160,6 +160,10 @@ namespace axl {
       if (ImGui::MenuItem("Model")) {
         log::debug("clearing model path");
         _want_model = true;
+        ImGui::CloseCurrentPopup();
+      }
+      if (ImGui::MenuItem("Light")) {
+        selected_entity.TryAddComponent<Light>(LightType::Point, v3(1.0f), 0.6f);
         ImGui::CloseCurrentPopup();
       }
       if (ImGui::MenuItem("RigidBody")) {

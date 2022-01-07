@@ -13,6 +13,8 @@
 namespace axl {
 
   void Scene::SetActiveScene(Scene *scene) {
+    Ento::ClearMaps();
+    new_scene = true;
     _active_scene = scene;
   }
 
@@ -73,6 +75,9 @@ namespace axl {
   void Scene::Draw(Renderer &renderer, bool show_data, Camera *camera, Transform *camera_transform) {
     if (!camera)
       camera = Camera::GetActiveCamera();
+    if (!camera)
+      return;
+
     if (!camera_transform)
       camera_transform = &Ento::FromComponent(*camera).GetComponent<Transform>();
 

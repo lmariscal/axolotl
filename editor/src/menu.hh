@@ -5,9 +5,9 @@
 
 namespace axl {
 
-  class MenuScene: public Scene {
+  class MenuLevel: public Scene {
    public:
-    virtual ~MenuScene() = default;
+    virtual ~MenuLevel() = default;
     void Init(Window &window) override;
     void Update(Window &window, f64 delta) override;
     void UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) override;

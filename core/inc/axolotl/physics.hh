@@ -3,6 +3,7 @@
 #include <axolotl/component.hh>
 #include <axolotl/geometry.hh>
 #include <axolotl/types.hh>
+#include <vector>
 
 namespace axl {
 
@@ -20,6 +21,7 @@ namespace axl {
     f64 mass;
     f64 friction;
     f64 cor;
+    bool is_trigger;
     v3 velocity;
     v3 forces;
     v3 torques;
@@ -51,11 +53,14 @@ namespace axl {
     void Update(f64 step);
     void ApplyForces();
     void AddRotationalImpulse(const v3 &point, const v3 &impulse);
+    void AddLinearImpulse(const v3 &impulse);
     void ApplyImpulse(RigidBody &other, const CollisionManifold &manifold, i32 c);
     bool ShowComponent();
     CollisionManifold FindCollisionFeatures(const RigidBody &other) const;
 
-    REGISTER_COMPONENT(RigidBody, mass, friction, cor)
+    std::vector<Ento> colliding_with;
+
+    REGISTER_COMPONENT(RigidBody, mass, friction, cor, is_trigger)
   };
 
 } // namespace axl

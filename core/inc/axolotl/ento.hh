@@ -146,6 +146,7 @@ namespace axl {
    protected:
     friend class Scene;
 
+    static void ClearMaps();
     static uuids::uuid_random_generator _uuid_generator;
     inline static std::mt19937 _random_generator;
 

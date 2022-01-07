@@ -16,7 +16,9 @@ namespace axl {
   void RigidBody::ApplyForces() {
     Ento ento = Ento::FromComponent(*this);
 
-    m4 parent_model_matrix = ento.Transform().GetParentModelMatrix();
+    m4 parent_model_matrix(1.0f);
+    if (ento.HasParent())
+      parent_model_matrix = ento.Transform().GetParentModelMatrix();
     quat rotation = quat_cast(parent_model_matrix);
     rotation = conjugate(rotation);
 
@@ -73,6 +75,10 @@ namespace axl {
     angular_velocity = angular_velocity + angular_acceleration;
   }
 
+  void RigidBody::AddLinearImpulse(const v3 &impulse) {
+    velocity = velocity + impulse;
+  }
+
   CollisionManifold RigidBody::FindCollisionFeatures(const RigidBody &other) const {
     CollisionManifold result;
 
@@ -99,6 +105,7 @@ namespace axl {
       } else if (other_ento.HasComponent<OBBCollider>()) {
         OBBCollider &other_obb = other_ento.GetComponent<OBBCollider>();
         result = obb.OBBCollide(other_obb);
+        result.normal = -result.normal;
       }
     }
 
@@ -180,6 +187,7 @@ namespace axl {
   }
 
   void RigidBody::Update(f64 step) {
+    colliding_with.clear();
     Ento ento = Ento::FromComponent(*this);
     v3 acceleration = forces * (f32)InvMass();
     velocity = velocity + acceleration * (f32)step;
@@ -271,6 +279,11 @@ namespace axl {
             CollisionManifold manifold = body.FindCollisionFeatures(other_body);
 
             if (!manifold.colliding)
+              return;
+
+            body.colliding_with.push_back(other_ento);
+
+            if (body.is_trigger || other_body.is_trigger)
               return;
 
             manifolds.emplace_back(manifold);

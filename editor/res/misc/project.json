@@ -1,0 +1,910 @@
+{
+    "entities": [
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "39a38ea5-b976-46ac-9137-5ff4c223d1b3",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Cube",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": false,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                }
+            ],
+            "id": "a2f1370a-34cc-4386-a7fa-b14686cdffb6"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.9871475100517273,
+                                "x": 0.15981152653694153,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 4.060448169708252,
+                                "y": 0.9999998807907104,
+                                "z": 10.154524803161621
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 3.3295555114746094,
+                                "z": -14.886102676391602
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [
+                                "a2f1370a-34cc-4386-a7fa-b14686cdffb6"
+                            ],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Floor",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": true,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                },
+                {
+                    "data": [
+                        {
+                            "data": false,
+                            "name": "is_trigger"
+                        },
+                        {
+                            "data": 0.5,
+                            "name": "cor"
+                        },
+                        {
+                            "data": 0.6,
+                            "name": "friction"
+                        },
+                        {
+                            "data": 0.0,
+                            "name": "mass"
+                        }
+                    ],
+                    "id": 16510198815990732735,
+                    "type": "RigidBody"
+                },
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "size"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "position"
+                        }
+                    ],
+                    "id": 9199434328752695177,
+                    "type": "OBBCollider"
+                }
+            ],
+            "id": "39a38ea5-b976-46ac-9137-5ff4c223d1b3"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.6830126047134399,
+                                "x": 0.18301275372505188,
+                                "y": -0.1830126792192459,
+                                "z": 0.6830127239227295
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": -25.819305419921875,
+                                "y": 11.97999382019043,
+                                "z": -0.8806475400924683
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Camera",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": true,
+                            "name": "_is_active_camera"
+                        },
+                        {
+                            "data": false,
+                            "name": "_is_orthographic"
+                        },
+                        {
+                            "data": 60.0,
+                            "name": "_fov"
+                        },
+                        {
+                            "data": 2.0,
+                            "name": "_mouse_sensitivity"
+                        },
+                        {
+                            "data": 6.0,
+                            "name": "_movement_speed"
+                        }
+                    ],
+                    "id": 10750615132922303963,
+                    "type": "Camera"
+                }
+            ],
+            "id": "9c61694a-5e3a-4afa-b9e9-c55aed94f325"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 6.0,
+                                "y": 1.0,
+                                "z": 6.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [
+                                "3d198a25-17b9-4a36-802f-07d8953cb915"
+                            ],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Floor",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": true,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                },
+                {
+                    "data": [
+                        {
+                            "data": false,
+                            "name": "is_trigger"
+                        },
+                        {
+                            "data": 0.5,
+                            "name": "cor"
+                        },
+                        {
+                            "data": 0.6,
+                            "name": "friction"
+                        },
+                        {
+                            "data": 0.0,
+                            "name": "mass"
+                        }
+                    ],
+                    "id": 16510198815990732735,
+                    "type": "RigidBody"
+                },
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
+                            },
+                            "name": "rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 30.0,
+                                "y": 1.0,
+                                "z": 30.0
+                            },
+                            "name": "size"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "position"
+                        }
+                    ],
+                    "id": 9199434328752695177,
+                    "type": "OBBCollider"
+                }
+            ],
+            "id": "b2e840fa-b63f-41f8-980d-4c035826a9fa"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "b2e840fa-b63f-41f8-980d-4c035826a9fa",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Cube",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": false,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                }
+            ],
+            "id": "3d198a25-17b9-4a36-802f-07d8953cb915"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 2.0,
+                                "z": 0.0
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [
+                                "227d1707-1405-4db0-a900-9ab41634c83c"
+                            ],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Player",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": true,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Sphere.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                },
+                {
+                    "data": [
+                        {
+                            "data": false,
+                            "name": "is_trigger"
+                        },
+                        {
+                            "data": 0.5,
+                            "name": "cor"
+                        },
+                        {
+                            "data": 0.6,
+                            "name": "friction"
+                        },
+                        {
+                            "data": 1.0,
+                            "name": "mass"
+                        }
+                    ],
+                    "id": 16510198815990732735,
+                    "type": "RigidBody"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 1.0,
+                            "name": "radius"
+                        },
+                        {
+                            "data": {
+                                "x": -5.821630477905273,
+                                "y": 1.9799940586090088,
+                                "z": -0.8815701007843018
+                            },
+                            "name": "position"
+                        }
+                    ],
+                    "id": 6504587200702265729,
+                    "type": "SphereCollider"
+                }
+            ],
+            "id": "c63d2009-5657-4304-a9b7-8110d9f8b4c2"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "c63d2009-5657-4304-a9b7-8110d9f8b4c2",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Sphere",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0,
+                            "name": "_mesh_id"
+                        },
+                        {
+                            "data": [
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
+                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                            ],
+                            "name": "_shader_paths"
+                        },
+                        {
+                            "data": false,
+                            "name": "_root"
+                        },
+                        {
+                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Sphere.fbx",
+                            "name": "_path"
+                        }
+                    ],
+                    "id": 9812713005920102553,
+                    "type": "Model"
+                }
+            ],
+            "id": "227d1707-1405-4db0-a900-9ab41634c83c"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": -23.0,
+                                "y": 17.700000762939453,
+                                "z": -10.100000381469727
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Light",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0.30000001192092896,
+                            "name": "intensity"
+                        },
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "color"
+                        }
+                    ],
+                    "id": 2700491181630078672,
+                    "type": "Light"
+                }
+            ],
+            "id": "95bf8a7f-d7d1-4ab1-9db6-e5218c591dec"
+        },
+        {
+            "components": [
+                {
+                    "data": [
+                        {
+                            "data": {
+                                "w": 0.0,
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "name": "_rotation"
+                        },
+                        {
+                            "data": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "_scale"
+                        },
+                        {
+                            "data": {
+                                "x": 13.399999618530273,
+                                "y": 5.5,
+                                "z": 11.199999809265137
+                            },
+                            "name": "_position"
+                        }
+                    ],
+                    "id": 9235761694408261176,
+                    "type": "Transform"
+                },
+                {
+                    "data": [
+                        {
+                            "data": [],
+                            "name": "children"
+                        },
+                        {
+                            "data": "00000000-0000-0000-0000-000000000000",
+                            "name": "parent"
+                        }
+                    ],
+                    "id": 9905469220423225578,
+                    "type": "HierarchyComponent"
+                },
+                {
+                    "data": [
+                        {
+                            "data": "Light",
+                            "name": "value"
+                        }
+                    ],
+                    "id": 10282220108266289860,
+                    "type": "Tag"
+                },
+                {
+                    "data": [
+                        {
+                            "data": 0.30000001192092896,
+                            "name": "intensity"
+                        },
+                        {
+                            "data": {
+                                "w": 1.0,
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "name": "color"
+                        }
+                    ],
+                    "id": 2700491181630078672,
+                    "type": "Light"
+                }
+            ],
+            "id": "d54002eb-2f88-4800-892d-59bb464d3ae7"
+        }
+    ]
+}

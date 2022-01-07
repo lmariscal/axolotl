@@ -34,6 +34,7 @@ namespace axl {
 
     static void SetActiveScene(Scene *scene);
     static Scene *GetActiveScene();
+    inline static bool new_scene = false;
 
    protected:
     friend class Ento;

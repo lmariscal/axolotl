@@ -95,8 +95,8 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   DockSpace dock;
 
-  dock.data.scene = new MenuScene();
-  Scene::SetActiveScene(dock.data.scene);
+  Scene::SetActiveScene(new MenuLevel());
+  Scene::new_scene = false;
 
   FrameEditor frame_editor;
 
@@ -112,10 +112,12 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   f64 imgui_starttime;
   f64 imgui_endtime;
 
-  Scene &scene = *dock.data.scene;
-  scene.Init(window);
+  Scene::GetActiveScene()->Init(window);
 
   while (window.Update() && !terminal_data.quit_requested) {
+    dock.data.scene = Scene::GetActiveScene();
+    Scene *scene = dock.data.scene;
+
     UpdateEditorCamera(window, editor_camera, editor_camera_transform, dock.data, window.GetDeltaTime());
     if (terminal_data.watch_shaders) {
       ShaderStore::ProcessQueue();
@@ -144,22 +146,32 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
     update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
-      if (!dock.data.fullscreen)
-        scene.UpdateGUI(window, terminal_data.frame_size, terminal_data.frame_pos);
-      else
-        scene.UpdateGUI(window, window.GetWindowFrameBufferSize(), v2(0));
       time_accumulator += window.GetDeltaTime();
+      start_physics_time = window.GetTime();
       while (time_accumulator >= time_step) {
-        start_physics_time = window.GetTime();
-        scene.PhysicsUpdate(time_step);
-        end_physics_time = window.GetTime();
-        scene.Update(window, time_step);
+        scene->PhysicsUpdate(time_step);
         time_accumulator -= time_step;
       }
+      end_physics_time = window.GetTime();
+
+      scene->Update(window, time_step);
+
+      if (!dock.data.fullscreen)
+        scene->UpdateGUI(window, terminal_data.frame_size, terminal_data.frame_pos);
+      else
+        scene->UpdateGUI(window, window.GetWindowFrameBufferSize(), v2(0));
     }
     update_time_end = window.GetTime();
+    if (Scene::new_scene) {
+      delete scene;
+      Scene::new_scene = false;
+      window.Draw();
+      log::debug("changing scene...");
+      Scene::GetActiveScene()->Init(window);
+      continue;
+    }
 
-    scene.Focused(window, frame_editor.focused);
+    scene->Focused(window, frame_editor.focused);
 
     // Actual Scene Rendering START
 
@@ -176,9 +188,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
         terminal.show();
 
       if (dock.data.terminal->scene_playing && !dock.data.terminal->scene_paused) {
-        scene.Draw(renderer, dock.data.show_renderer && show_frame);
+        scene->Draw(renderer, dock.data.show_renderer && show_frame);
       } else {
-        scene.Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
+        scene->Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
       }
 
     } else {
@@ -195,9 +207,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
       if (dock.data.show_world_editor) {
         if (dock.data.terminal->scene_playing && !dock.data.terminal->scene_paused) {
-          scene.Draw(renderer, dock.data.show_renderer && show_frame);
+          scene->Draw(renderer, dock.data.show_renderer && show_frame);
         } else {
-          scene.Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
+          scene->Draw(renderer, dock.data.show_renderer && show_frame, &editor_camera, &editor_camera_transform);
         }
       }
 
@@ -211,9 +223,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       if (dock.data.show_world_editor)
         frame_editor.Draw(window, dock, &editor_camera);
       if (dock.data.show_hierarchy)
-        frame_editor.DrawEntityList(scene, dock);
+        frame_editor.DrawEntityList(*scene, dock);
       if (dock.data.show_inspector)
-        frame_editor.DrawInspector(scene, dock);
+        frame_editor.DrawInspector(*scene, dock);
 
       imgui_endtime = window.GetTime();
     }
@@ -275,7 +287,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
   }
 
-  delete dock.data.scene;
+  delete Scene::GetActiveScene();
   terminal.get_terminal_helper()->Terminate();
 }
 

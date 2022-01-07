@@ -107,4 +107,9 @@ namespace axl {
     return j;
   }
 
+  void Ento::ClearMaps() {
+    _uuid_ento_map.clear();
+    _handle_ento_map.clear();
+  }
+
 } // namespace axl

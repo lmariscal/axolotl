@@ -124,6 +124,14 @@ namespace axl {
     _is_active_camera = true;
   }
 
+  void Camera::SetAsActive(Camera *camera) {
+    if (!camera) {
+      _active_camera_ento = {};
+      return;
+    }
+    camera->SetAsActive();
+  }
+
   Camera *Camera::GetActiveCamera() {
     if (!_active_camera_ento)
       return nullptr;
@@ -170,6 +178,18 @@ namespace axl {
       modified = true;
 
     return modified;
+  }
+
+  v3 Camera::GetFront() {
+    return _front;
+  }
+
+  v3 Camera::GetUp() {
+    return _up;
+  }
+
+  v3 Camera::GetRight() {
+    return _right;
   }
 
 } // namespace axl

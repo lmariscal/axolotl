@@ -23,8 +23,14 @@ f32 target_distance = 5.0f;
 v2 start_dragging_pos;
 v2 start_rotating_pos;
 
-f64 start_physics_time;
-f64 end_physics_time;
+i32 frame_count = 0;
+f64 physics_time = 0.0;
+f64 imgui_time = 0.0;
+f64 update_time = 0.0;
+f64 physics_time_sum = 0.0;
+f64 imgui_time_sum = 0.0;
+f64 update_time_sum = 0.0;
+f64 last_time_sum = 0.0;
 
 void UpdateEditorCamera(Window &window,
                         Camera &camera,
@@ -109,10 +115,14 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
   f64 update_time_start;
   f64 update_time_end;
-  f64 imgui_starttime;
-  f64 imgui_endtime;
+  f64 imgui_time_start;
+  f64 imgui_time_end;
+  f64 physics_time_start;
+  f64 phyisics_time_end;
 
   Scene::GetActiveScene()->Init(window);
+
+  last_time_sum = window.GetTime();
 
   while (window.Update() && !terminal_data.quit_requested) {
     dock.data.scene = Scene::GetActiveScene();
@@ -147,12 +157,12 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
       time_accumulator += window.GetDeltaTime();
-      start_physics_time = window.GetTime();
+      physics_time_start = window.GetTime();
       while (time_accumulator >= time_step) {
         scene->PhysicsUpdate(time_step);
         time_accumulator -= time_step;
       }
-      end_physics_time = window.GetTime();
+      phyisics_time_end = window.GetTime();
 
       scene->Update(window, time_step);
 
@@ -215,7 +225,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
 
       frame_editor.Unbind(window);
 
-      imgui_starttime = window.GetTime();
+      imgui_time_start = window.GetTime();
 
       renderer.ClearScreen(v4(color / 255.0f, 1.0f));
       if (dock.data.show_terminal)
@@ -227,21 +237,41 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       if (dock.data.show_inspector)
         frame_editor.DrawInspector(*scene, dock);
 
-      imgui_endtime = window.GetTime();
+      imgui_time_end = window.GetTime();
     }
 
     // Actual Scene Rendering END
 
+    f64 now = window.GetTime();
+    if (now - last_time_sum >= 0.25) {
+      last_time_sum = now;
+
+      update_time = update_time_sum / (f32)frame_count;
+      update_time_sum = 0.0;
+
+      imgui_time = imgui_time_sum / (f32)frame_count;
+      imgui_time_sum = 0.0;
+
+      physics_time = physics_time_sum / (f32)frame_count;
+      physics_time_sum = 0.0;
+
+      frame_count = 0;
+    }
+
+    update_time_sum += update_time_end - update_time_start;
+    imgui_time_sum += imgui_time_end - imgui_time_start;
+    physics_time_sum += phyisics_time_end - physics_time_start;
+
     if (dock.data.show_performance) {
       ImGui::Begin("Performance", &dock.data.show_performance);
       const RendererPerformance &performance = renderer.GetPerformance();
-      f64 imgui_time = imgui_endtime - imgui_starttime;
+      f64 imgui_time = imgui_time_end - imgui_time_start;
       f64 update_time = update_time_end - update_time_start;
 
       ImGui::Text("FPS: %u", performance.fps);
       ImGui::Text("Delta: %.2fms", performance.delta_time * 1000.0);
       ImGui::Text("Meshes: %u", performance.mesh_count);
-      ImGui::Text("Physics: %.2fms", (end_physics_time - start_physics_time) * 1000.0);
+      ImGui::Text("Physics: %.2fms", (physics_time)*1000.0);
       ImGui::Text("Vertices: %u", performance.vertex_count);
       ImGui::Text("Triangles: %u", performance.triangle_count);
       ImGui::Text("Draw Calls: %u", performance.draw_calls);
@@ -257,6 +287,7 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
 
     window.Draw();
+    frame_count++;
 
     if (dock.data.fullscreen && terminal_data.scene_playing && io.KeyTriggered(Key::GraveAccent)) {
       // terminal_data.scene_paused = !terminal_data.scene_paused;

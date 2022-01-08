@@ -175,11 +175,15 @@ namespace axl {
 
     auto lights = registry.view<Light>();
     for (auto entity : lights) {
-      Transform &transform = registry.get<Transform>(entity);
-      Light &light = registry.get<Light>(entity);
+      Ento light_ento = scene.FromHandle(entity);
+      Transform &transform = light_ento.Transform();
+      Light &light = light_ento.GetComponent<Light>();
 
       LightData light_data;
-      light_data.position = vec4(transform.GetPosition(), 1.0f);
+      v4 position = v4(transform.GetPosition(), 1.0f);
+      if (light_ento.HasParent())
+        position = transform.GetModelMatrix() * v4(0.0f, 0.0f, 0.0f, 1.0f);
+      light_data.position = position;
       light_data.color = light.color;
       light_data.intensity = light.intensity;
 

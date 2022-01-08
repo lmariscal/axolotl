@@ -12,6 +12,8 @@ namespace axl {
     void Update(Window &window, f64 delta) override;
     void UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) override;
     void Focused(Window &window, bool state) override;
+
+    static void ShowBackMenu(Window &window, const v2 &frame_size, const v2 &frame_pos, bool &show_menu);
   };
 
 } // namespace axl

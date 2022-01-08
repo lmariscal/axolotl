@@ -7,9 +7,9 @@
 
 namespace axl {
 
-  constexpr f64 LINEAR_PROJECTION_PERCENT = 0.45;
+  constexpr f64 LINEAR_PROJECTION_PERCENT = 0.6;
   constexpr f64 PENETRATION_SLACK = 0.01;
-  constexpr i32 IMPULSE_ITERATIONS = 5;
+  constexpr i32 IMPULSE_ITERATIONS = 9;
 
   void RigidBody::Init() { }
 
@@ -348,6 +348,8 @@ namespace axl {
     if (!ShowData("Friction", friction))
       modified = true;
     if (!ShowData("Restitution", cor))
+      modified = true;
+    if (!ShowData("Is Trigger", is_trigger))
       modified = true;
 
     return modified;

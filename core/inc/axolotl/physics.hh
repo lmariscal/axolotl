@@ -36,7 +36,8 @@ namespace axl {
       forces(0.0f),
       torques(0.0f),
       orientation(0.0f),
-      angular_velocity(0.0f) { }
+      angular_velocity(0.0f),
+      is_trigger(false) { }
     inline RigidBody(f64 mass, f64 friction = 0.6, f64 cor = 0.5):
       cor(cor),
       mass(mass),
@@ -45,7 +46,8 @@ namespace axl {
       forces(0.0f),
       torques(0.0f),
       orientation(0.0f),
-      angular_velocity(0.0f) { }
+      angular_velocity(0.0f),
+      is_trigger(false) { }
 
     f64 InvMass() const;
     m4 InvTensor() const;

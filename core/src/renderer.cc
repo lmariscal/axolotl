@@ -28,8 +28,8 @@ namespace axl {
     _skybox_mesh(nullptr),
     _skybox_shader(nullptr),
     _size(1920, 1080),
-    _ambient_light(LightType::Ambient, v3(0.6f), 0.4f),
-    _directional_light(LightType::Directional, v3(1.0f), 0.4f),
+    _ambient_light(LightType::Ambient, v3(0.6f), 0.6f),
+    _directional_light(LightType::Directional, v3(1.0f), 0.6f),
     _directional_light_direction(v3(0.3f, 0.2f, 0.3f)),
     _show_wireframe(false),
     _show_grid(true) {

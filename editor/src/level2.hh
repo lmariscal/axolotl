@@ -12,6 +12,9 @@ namespace axl {
     void UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) override;
     void Focused(Window &window, bool state) override;
 
+    void GenerateMazeFromFile();
+    void AddWall(const v2i &pos, const std::vector<std::string> &shader_paths);
+
    protected:
     bool _show_menu = false;
   };

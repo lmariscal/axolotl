@@ -391,4 +391,12 @@ namespace axl {
     _show_grid = state;
   }
 
+  void Renderer::SetAmbientLight(const Light &color) {
+    _ambient_light = color;
+  }
+
+  void Renderer::SetDirectionalLight(const Light &light) {
+    _directional_light = light;
+  }
+
 } // namespace axl

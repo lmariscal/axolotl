@@ -195,6 +195,7 @@ namespace axl {
     (void)io;
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigDockingWithShift = true;
 

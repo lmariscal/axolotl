@@ -3,6 +3,7 @@
 #include <axolotl/physics.hh>
 #include <axolotl/scene.hh>
 #include <axolotl/transform.hh>
+#include <axolotl/window.hh>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace axl {
@@ -96,17 +97,19 @@ namespace axl {
         result = sphere.OBBCollide(other_obb);
         result.normal = -result.normal;
       }
-    } else if (ento.HasComponent<OBBCollider>()) {
-      OBBCollider &obb = ento.GetComponent<OBBCollider>();
+      // INFO: This works, just that performance is terrible, and it is not used in the game.
+      //
+      // } else if (ento.HasComponent<OBBCollider>()) {
+      //   OBBCollider &obb = ento.GetComponent<OBBCollider>();
 
-      if (other_ento.HasComponent<SphereCollider>()) {
-        SphereCollider &other_sphere = other_ento.GetComponent<SphereCollider>();
-        result = obb.SphereCollide(other_sphere);
-      } else if (other_ento.HasComponent<OBBCollider>()) {
-        OBBCollider &other_obb = other_ento.GetComponent<OBBCollider>();
-        result = obb.OBBCollide(other_obb);
-        result.normal = -result.normal;
-      }
+      //   if (other_ento.HasComponent<SphereCollider>()) {
+      //     SphereCollider &other_sphere = other_ento.GetComponent<SphereCollider>();
+      //     result = obb.SphereCollide(other_sphere);
+      //   } else if (other_ento.HasComponent<OBBCollider>()) {
+      //     OBBCollider &other_obb = other_ento.GetComponent<OBBCollider>();
+      //     result = obb.OBBCollide(other_obb);
+      //     result.normal = -result.normal;
+      //   }
     }
 
     return result;
@@ -255,6 +258,7 @@ namespace axl {
           collider.radius = scale.x;
         }
       });
+    i32 rb_times = 0;
 
     std::vector<CollisionManifold> manifolds;
     manifolds.reserve(registry.size());
@@ -276,7 +280,10 @@ namespace axl {
             if (other_ento.id == ento.id)
               return;
 
+            f64 start = Window::GetCurrentWindow()->GetTime();
             CollisionManifold manifold = body.FindCollisionFeatures(other_body);
+            f64 end = Window::GetCurrentWindow()->GetTime();
+            total_physics_time += end - start;
 
             if (!manifold.colliding)
               return;
@@ -292,6 +299,8 @@ namespace axl {
           });
       }
     });
+    // log::info("Physics Step: {}", rb_times);
+    // total_physics_time /= (f32)rb_times;
 
     for (i32 i = 0; i < IMPULSE_ITERATIONS; ++i) {
       for (CollisionManifold &manifold : manifolds) {

@@ -63,6 +63,9 @@ namespace axl {
     void SetShowGrid(bool state);
     void AddLine(const LinePrimitive &line);
 
+    void SetAmbientLight(const Light &color);
+    void SetDirectionalLight(const Light &light);
+
     const RendererPerformance &GetPerformance() const;
 
    protected:

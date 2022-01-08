@@ -12,6 +12,8 @@ namespace axl {
   class Physics {
    public:
     static void Step(Scene &scene, f64 step);
+
+    inline static f64 total_physics_time = 0.0;
   };
 
   class RigidBody {
@@ -62,7 +64,7 @@ namespace axl {
 
     std::vector<Ento> colliding_with;
 
-    REGISTER_COMPONENT(RigidBody, mass, friction, cor, is_trigger)
+    REGISTER_COMPONENT(RigidBody, mass, friction, cor, is_trigger);
   };
 
 } // namespace axl

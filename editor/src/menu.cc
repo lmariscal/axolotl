@@ -69,13 +69,28 @@ namespace axl {
     ImGui::PopStyleVar();
   }
 
-  void MenuLevel::Focused(Window &window, bool state) { }
+  void MenuLevel::Focused(Window &window, bool state) {
+    focused = state;
+  }
 
   void MenuLevel::ShowBackMenu(Window &window, const v2 &frame_size, const v2 &frame_pos, bool &show_menu) {
     IOManager &ioman = window.GetIOManager();
 
     if (ioman.KeyTriggered(Key::Escape))
       show_menu = !show_menu;
+
+    Pad pad = Pad::Last;
+    for (i32 p = 0; p < (i32)Pad::Last; ++p) {
+      if (ioman.PadPresent((Pad)p)) {
+        pad = (Pad)p;
+        break;
+      }
+    }
+
+    if (pad != Pad::Last) {
+      if (ioman.ButtonTriggered(pad, PadButton::Start))
+        show_menu = !show_menu;
+    }
 
     if (!show_menu)
       return;

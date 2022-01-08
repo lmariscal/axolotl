@@ -162,9 +162,6 @@ namespace axl {
       normal = normalize(sphere.position - closest);
     }
 
-    LinePrimitive line(sphere.position, closest);
-    Window::GetCurrentWindow()->GetRenderer().AddLine(line);
-
     v3 outside = sphere.position - normal * (f32)sphere.radius;
     f64 dist = length(closest - outside);
 

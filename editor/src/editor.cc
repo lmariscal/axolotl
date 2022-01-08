@@ -7,6 +7,7 @@
 #include <axolotl/camera.hh>
 #include <axolotl/gui.hh>
 #include <axolotl/line.hh>
+#include <axolotl/physics.hh>
 #include <axolotl/renderer.hh>
 #include <axolotl/shader.hh>
 #include <axolotl/transform.hh>
@@ -25,12 +26,18 @@ v2 start_rotating_pos;
 
 i32 frame_count = 0;
 f64 physics_time = 0.0;
+f64 physics_time_total = 0.0;
+f64 physics_time_debug = 0.0;
 f64 imgui_time = 0.0;
 f64 update_time = 0.0;
-f64 physics_time_sum = 0.0;
+f64 physics_time_update_sum = 0.0;
+f64 physics_time_total_sum = 0.0;
 f64 imgui_time_sum = 0.0;
 f64 update_time_sum = 0.0;
 f64 last_time_sum = 0.0;
+
+i32 physics_update_count_sum = 0;
+f32 physics_update_count = 0;
 
 void UpdateEditorCamera(Window &window,
                         Camera &camera,
@@ -117,8 +124,10 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
   f64 update_time_end;
   f64 imgui_time_start;
   f64 imgui_time_end;
-  f64 physics_time_start;
-  f64 phyisics_time_end;
+  f64 physics_time_update_start;
+  f64 phyisics_time_update_end;
+  f64 physics_time_total_start;
+  f64 phyisics_time_total_end;
 
   Scene::GetActiveScene()->Init(window);
 
@@ -157,12 +166,18 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {
       time_accumulator += window.GetDeltaTime();
-      physics_time_start = window.GetTime();
+      physics_time_total_start = window.GetTime();
       while (time_accumulator >= time_step) {
+        physics_time_update_start = window.GetTime();
+
+        physics_update_count_sum++;
         scene->PhysicsUpdate(time_step);
         time_accumulator -= time_step;
+
+        phyisics_time_update_end = window.GetTime();
+        physics_time_update_sum += phyisics_time_update_end - physics_time_update_start;
       }
-      phyisics_time_end = window.GetTime();
+      phyisics_time_total_end = window.GetTime();
 
       scene->Update(window, time_step);
 
@@ -252,15 +267,24 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       imgui_time = imgui_time_sum / (f32)frame_count;
       imgui_time_sum = 0.0;
 
-      physics_time = physics_time_sum / (f32)frame_count;
-      physics_time_sum = 0.0;
+      physics_time_total = physics_time_total_sum / (f32)frame_count;
+      physics_time_total_sum = 0.0;
+
+      physics_time = physics_time_update_sum / (f32)physics_update_count_sum;
+      physics_time_update_sum = 0.0;
+
+      physics_time_debug = Physics::total_physics_time / (f32)physics_update_count_sum;
+      Physics::total_physics_time = 0.0;
+
+      physics_update_count = physics_update_count_sum / (f32)frame_count;
+      physics_update_count_sum = 0;
 
       frame_count = 0;
     }
 
     update_time_sum += update_time_end - update_time_start;
     imgui_time_sum += imgui_time_end - imgui_time_start;
-    physics_time_sum += phyisics_time_end - physics_time_start;
+    physics_time_total_sum += phyisics_time_total_end - physics_time_total_start;
 
     if (dock.data.show_performance) {
       ImGui::Begin("Performance", &dock.data.show_performance);
@@ -271,7 +295,10 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
       ImGui::Text("FPS: %u", performance.fps);
       ImGui::Text("Delta: %.2fms", performance.delta_time * 1000.0);
       ImGui::Text("Meshes: %u", performance.mesh_count);
-      ImGui::Text("Physics: %.2fms", (physics_time)*1000.0);
+      ImGui::Text("Physics Total: %.2fms", physics_time_total * 1000.0);
+      ImGui::Text("Physics Update: %.2fms", physics_time * 1000.0);
+      ImGui::Text("Physics Debug: %.2fms", physics_time_debug * 1000.0);
+      ImGui::Text("Physics Update Count: %.2f per frame", physics_update_count);
       ImGui::Text("Vertices: %u", performance.vertex_count);
       ImGui::Text("Triangles: %u", performance.triangle_count);
       ImGui::Text("Draw Calls: %u", performance.draw_calls);

@@ -67,9 +67,15 @@ namespace axl {
     _player_id = *uuid::from_string("c63d2009-5657-4304-a9b7-8110d9f8b4c2");
     _platform_id = *uuid::from_string("ed2f5ded-2c14-456f-b426-43c5a45121cd");
     _elevator_id = *uuid::from_string("e5095876-2cb9-4ecd-abda-33d0ebd87143");
+
+    window.GetRenderer().SetAmbientLight(Light(LightType::Ambient, v3(0.6f), 0.4f));
+    window.GetRenderer().SetDirectionalLight(Light(LightType::Directional, v3(1.0f), 0.4f));
   }
 
   void PhysicsLevel::Update(Window &window, f64 delta) {
+    if (_show_instructions || _show_menu)
+      return;
+
     IOManager &io = window.GetIOManager();
 
     Ento player_ento = FromID(_player_id);
@@ -109,8 +115,6 @@ namespace axl {
         if (length2(closest - sc.position) <= sc.radius) {
           grounded = true;
         } else {
-          LinePrimitive lp(start_ray, closest, Color(0.0f, 1.0f, 0));
-          window.GetRenderer().AddLine(lp);
         }
         return;
       }
@@ -127,18 +131,25 @@ namespace axl {
     constexpr f32 MOVEMENT_SPEED = 6.0f;
     constexpr f32 ROTATION_SPEED = 2.0f;
 
-    if (grounded) {
-      if (io.KeyDown(Key::W))
-        rb.AddLinearImpulse(front * (f32)delta * MOVEMENT_SPEED);
-      if (io.KeyDown(Key::S))
-        rb.AddLinearImpulse(-front * (f32)delta * MOVEMENT_SPEED);
-      if (io.KeyDown(Key::A))
-        rb.AddLinearImpulse(right * (f32)delta * MOVEMENT_SPEED);
-      if (io.KeyDown(Key::D))
-        rb.AddLinearImpulse(-right * (f32)delta * MOVEMENT_SPEED);
+    // More realistic to move this way, but funny to see the player move in the air
+    // if (grounded) {
+    if (io.KeyDown(Key::W))
+      rb.AddLinearImpulse(front * (f32)delta * MOVEMENT_SPEED);
+    if (io.KeyDown(Key::S))
+      rb.AddLinearImpulse(-front * (f32)delta * MOVEMENT_SPEED);
+    if (io.KeyDown(Key::A))
+      rb.AddLinearImpulse(right * (f32)delta * MOVEMENT_SPEED);
+    if (io.KeyDown(Key::D))
+      rb.AddLinearImpulse(-right * (f32)delta * MOVEMENT_SPEED);
 
+    if (grounded) {
       _double_jump = false;
     }
+
+    if (io.KeyDown(Key::N9) || io.KeyDown(Key::KPSubtract))
+      _target_distance += 3.0f * delta;
+    if (io.KeyDown(Key::N0) || io.KeyDown(Key::KPAdd))
+      _target_distance -= 3.0f * delta;
 
     if (io.KeyDown(Key::Left))
       _camera_position.x -= ROTATION_SPEED * delta;
@@ -167,25 +178,25 @@ namespace axl {
 
     if (pad != Pad::Last) {
       if (io.ButtonDown(pad, PadButton::LeftBumper))
-        _target_distance += 0.1f;
+        _target_distance += 3.0f * delta;
       if (io.ButtonDown(pad, PadButton::RightBumper))
-        _target_distance -= 0.1f;
+        _target_distance -= 3.0f * delta;
 
       constexpr f32 AXIS_DEAD_ZONE = 0.3f;
 
-      if (grounded) {
-        v2 left = { io.GetAxis(pad, JoyStick::LeftX), io.GetAxis(pad, JoyStick::LeftY) };
+      // if (grounded) {
+      v2 left = { io.GetAxis(pad, JoyStick::LeftX), io.GetAxis(pad, JoyStick::LeftY) };
 
-        if (left.x < AXIS_DEAD_ZONE && left.x > -AXIS_DEAD_ZONE)
-          left.x = 0.0f;
-        if (left.y < AXIS_DEAD_ZONE && left.y > -AXIS_DEAD_ZONE)
-          left.y = 0.0f;
+      if (left.x < AXIS_DEAD_ZONE && left.x > -AXIS_DEAD_ZONE)
+        left.x = 0.0f;
+      if (left.y < AXIS_DEAD_ZONE && left.y > -AXIS_DEAD_ZONE)
+        left.y = 0.0f;
 
-        v3 front_impulse = front * -left.y;
-        v3 right_impulse = right * -left.x;
-        rb.AddLinearImpulse(front_impulse * MOVEMENT_SPEED * (f32)delta);
-        rb.AddLinearImpulse(right_impulse * MOVEMENT_SPEED * (f32)delta);
-      }
+      v3 front_impulse = front * -left.y;
+      v3 right_impulse = right * -left.x;
+      rb.AddLinearImpulse(front_impulse * MOVEMENT_SPEED * (f32)delta);
+      rb.AddLinearImpulse(right_impulse * MOVEMENT_SPEED * (f32)delta);
+      // }
       if (io.ButtonTriggered(pad, PadButton::A) && (grounded || !_double_jump)) {
         if (!_double_jump && !grounded)
           _double_jump = true;
@@ -232,11 +243,11 @@ namespace axl {
     v3 platform_dir = platform_pos[_platform_n] - platform_ento.Transform().GetPosition();
     platform_dir = normalize(platform_dir);
 
-    v3 platform_movement = platform_dir * MOVEMENT_SPEED * 0.5f;
+    v3 platform_movement = platform_dir * MOVEMENT_SPEED * 0.15f;
     platform_ento.Transform().SetPosition(platform_ento.Transform().GetPosition() + platform_movement * (f32)delta);
 
     f32 dist = length2(platform_pos[_platform_n] - platform_ento.Transform().GetPosition());
-    if (epsilonEqual(dist, 0.0f, std::numeric_limits<f32>::epsilon()))
+    if (dist <= 0.1f)
       _platform_n = (_platform_n + 1) % platform_pos.size();
 
     OBBCollider &platform_collider = platform_ento.GetComponent<OBBCollider>();
@@ -264,15 +275,77 @@ namespace axl {
         elevator_transform.SetPosition(elevator_pos);
       }
     }
+
+    // Coin Rotate
+
+    _registry.each([&](entt::entity e) {
+      Ento ento = FromHandle(e);
+      if (ento.Tag().value == "Coin") {
+        quat rot = quat(radians(v3(0.0f, 60.0f, 0.0f) * (f32)delta));
+        ento.Transform().SetRotation(ento.Transform().GetRotation() * rot);
+      }
+    });
+  }
+
+  void PhysicsLevel::ShowInstructions(Window &window, const v2 &frame_size, const v2 &frame_pos) {
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoTitleBar;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoScrollbar;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoDecoration;
+    window_flags |= ImGuiWindowFlags_NoSavedSettings;
+
+    ImGui::SetNextWindowPos(ImVec2(frame_pos.x + (frame_size.x * 0.1f), frame_pos.y + (frame_size.y * 0.1f)),
+                            ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(frame_size.x * 0.6f, frame_size.y * 0.8f), ImGuiCond_Always);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 30));
+
+    ImGui::Begin("Menu", nullptr, window_flags);
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::Text("Physics Level");
+    ImGui::PopFont();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+    ImGui::Text(
+      "The goal is to finish the course and collect all the coins.\n\n"
+      "To move around you can use the keyboard or a controller.\n"
+      "WASD or the left stick to move.\n\n"
+      "To move the camera you can use the right stick or the arrow keys.\n\n"
+      "You can also jump by pressing SPACE or the A button on the controller.\n"
+      "Double jump is available, but it only recharges when you land.\n\n"
+      "Zoom in and out with 0 and 9 numbers or bumpers in your controller\n\n");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+    ImGui::Text("You can exit the level by opening the menu with ESC or the START button.");
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
+
+    if (ImGui::Button("Close Instructions")) {
+      _show_instructions = false;
+      _first_time = false;
+    }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    ImGui::End();
+    ImGui::PopStyleVar();
   }
 
   void PhysicsLevel::UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) {
-    if (!_game_over)
+    if (!_game_over && !_show_instructions) {
       MenuLevel::ShowBackMenu(window, frame_size, frame_pos, _show_menu);
-    else
+    } else if (_game_over) {
       ShowScoreMenu(window, frame_size, frame_pos);
+    } else if (_show_instructions) {
+      ShowInstructions(window, frame_size, frame_pos);
+    }
   }
 
-  void PhysicsLevel::Focused(Window &window, bool state) { }
+  void PhysicsLevel::Focused(Window &window, bool state) {
+    focused = state;
+  }
 
 } // namespace axl

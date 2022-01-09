@@ -3,13 +3,14 @@
 
 namespace axl {
 
-  LinePrimitive::LinePrimitive(v3 pos0, v3 pos1, Color color, f32 thickness, bool loop):
+  LinePrimitive::LinePrimitive(const v3 &pos0, const v3 &pos1, const Color &color, f32 thickness, bool loop):
     thickness(thickness),
     loop(loop),
     _vertices() {
+    CreateBuffers();
     LoadBuffers();
 
-    v4 &c = color.rgba;
+    const v4 &c = color.rgba;
     _vertices.push_back({ pos0, c });
     _vertices.push_back({ pos1, c });
 
@@ -22,6 +23,7 @@ namespace axl {
     _indices(indices),
     thickness(thickness),
     loop(false) {
+    CreateBuffers();
     LoadBuffers();
 
     if (_line_thickness_range == v2(0.0f))
@@ -33,6 +35,7 @@ namespace axl {
     thickness(thickness),
     loop(loop) {
 
+    CreateBuffers();
     LoadBuffers();
 
     if (_line_thickness_range == v2(0.0f))
@@ -45,6 +48,7 @@ namespace axl {
     thickness = other.thickness;
     loop = other.loop;
 
+    CreateBuffers();
     LoadBuffers();
   }
 
@@ -54,6 +58,7 @@ namespace axl {
     thickness = other.thickness;
     loop = other.loop;
 
+    CreateBuffers();
     LoadBuffers();
   }
 
@@ -63,6 +68,7 @@ namespace axl {
     thickness = other.thickness;
     loop = other.loop;
 
+    CreateBuffers();
     LoadBuffers();
 
     return *this;
@@ -74,6 +80,7 @@ namespace axl {
     thickness = other.thickness;
     loop = other.loop;
 
+    CreateBuffers();
     LoadBuffers();
 
     return *this;
@@ -84,11 +91,13 @@ namespace axl {
     glDeleteBuffers(1, &_vbo);
   }
 
-  void LinePrimitive::LoadBuffers() {
+  void LinePrimitive::CreateBuffers() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
     glGenBuffers(1, &_ebo);
+  }
 
+  void LinePrimitive::LoadBuffers() {
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
@@ -118,6 +127,23 @@ namespace axl {
       glDrawArrays(loop ? GL_LINE_LOOP : GL_LINE_STRIP, 0, _vertices.size());
 
     glBindVertexArray(0);
+  }
+
+  void LinePrimitive::SetColor(const Color &color) {
+    for (auto &v : _vertices)
+      v.color = color.rgba;
+
+    LoadBuffers();
+  }
+
+  void LinePrimitive::SetPos(const v3 &pos0, const v3 &pos1, const Color &color) {
+    if (length2(color.rgba) != 0.0f)
+      _color = color;
+
+    _vertices.clear();
+    _vertices.push_back({ pos0, _color });
+    _vertices.push_back({ pos1, _color });
+    LoadBuffers();
   }
 
 } // namespace axl

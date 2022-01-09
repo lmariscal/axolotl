@@ -13,7 +13,11 @@ namespace axl {
 
   class LinePrimitive {
    public:
-    LinePrimitive(v3 pos0, v3 pos1, Color color = Color(), f32 thickness = 1.0f, bool loop = false);
+    LinePrimitive(const v3 &pos0,
+                  const v3 &pos1,
+                  const Color &color = Color(),
+                  f32 thickness = 1.0f,
+                  bool loop = false);
     LinePrimitive(const std::vector<LineVertex> &vertices, f32 thickness = 1.0f, bool loop = false);
     LinePrimitive(const std::vector<LineVertex> &vertices, const std::vector<v2u> &indices, f32 thickness = 1.0f);
 
@@ -25,7 +29,10 @@ namespace axl {
 
     ~LinePrimitive();
 
+    void CreateBuffers();
     void Draw() const;
+    void SetColor(const Color &color);
+    void SetPos(const v3 &pos0, const v3 &pos1, const Color &color = Color());
 
     f32 thickness;
     bool loop;
@@ -35,6 +42,7 @@ namespace axl {
 
     std::vector<LineVertex> _vertices;
     std::vector<v2u> _indices;
+    v4 _color;
 
     u32 _vao;
     u32 _vbo;

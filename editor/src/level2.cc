@@ -11,8 +11,37 @@
 #include <axolotl/texture.hh>
 #include <axolotl/window.hh>
 #include <fstream>
+#include <functional>
 
 namespace axl {
+
+  // Basic Logic of AI
+  // 1. Are we being attacked? (Raycast detects player)
+  //   a. If so, run away
+  //   b. If not, find coins
+  // 2. Do we know where a coin is?
+  //  a. If so, go there
+  //  b. If not, explore the map (Randomly, Raycast detects coin)
+  //
+  // Selector:
+  //    Check if we are being attacked -> Returns Failure on no detection, and Success on detection of a player
+  //        This in itself is a sequence:
+  //          Check if we are being attacked -> Returns Failure on no detection, and Success on detection of a player
+  //          Run away -> Returns Failure on no possible path, and Success on path found
+  //            // Haha, so if we have no path and we are being attacked, we just go searching for coin
+  //    Explore for coin -> Returns Failure on no detection, and Success on detection of a coin
+  //        Inverter: // Need it since a state that stops a selector child will stop a selector parent
+  //        This in itself is a selector:
+  //            Know Where coin Is? -> Returns Failure on coin not memorized, and Success on coin memorized
+  //            Explore for Coin -> Returns Failure on no possible path, and Success on path found
+  //    Go towards coin -> Returns Failure on no path, and Success on path found
+  //        Go towards coin -> Returns Failure on no path, and Success on path found
+  //
+  // If the root Selector fails, either we have explored the entire map and found no coin, or we are stuck
+
+  constexpr v3 light_colour_exploring = v3(0, 172, 193) / 255.0f;
+  constexpr v3 light_colour_coin_found = v3(255, 179, 0) / 255.0f;
+  constexpr v3 light_colour_run_away = v3(236, 64, 122) / 255.0f;
 
   void AILevel::AddCoin(const v2i &pos, const std::vector<std::string> &shader_paths) {
     Ento coin_ento = CreateEntity();
@@ -161,10 +190,57 @@ namespace axl {
     enemy_transform.SetPosition(v3(last_empty_pos.x * 2, 2, last_empty_pos.y * 2));
     enemy_transform.SetScale(v3(1.0f, 1.0f, 1.0f));
     Model &enemy_model = _enemy_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Sphere.fbx", shader_paths);
-    _enemy_ento.AddComponent<Light>(LightType::Point, v3(1.0f, 0.0f, 0.0f), 0.2f);
+    _enemy_ento.AddComponent<Light>(LightType::Point, light_colour_exploring, 0.2f);
 
     TextureStore::ProcessQueue();
     file.close();
+  }
+
+  void AILevel::SetupBehaviour() {
+    _behaviour_root = std::unique_ptr<BehaviourNodeWithChildren>(new BehaviourSelector("Behaviour Root"));
+
+    BehaviourNodeWithChildren *being_attacked_sequence = static_cast<BehaviourNodeWithChildren *>(
+      _behaviour_root->AddChild(new BehaviourSequence("Being Attacked Sequence")));
+
+    BehaviourInverter *explore_map_selector_inv = static_cast<BehaviourInverter *>(
+      _behaviour_root->AddChild(new BehaviourInverter("Explore Map Selector Inverter")));
+    BehaviourNodeWithChildren *explore_map_selector = static_cast<BehaviourNodeWithChildren *>(
+      explore_map_selector_inv->SetChild(new BehaviourSelector("Explore Map Selector")));
+
+    _behaviour_root->AddChild(
+      new BehaviourAction("Go Towards Coin", [this](f32 step, BehaviourState state) -> BehaviourState {
+        // TODO
+        log::info("Go Towards Coin");
+        return BehaviourState::Succeeded;
+      }));
+
+#pragma region Are we being attacked ?
+    being_attacked_sequence->AddChild(
+      new BehaviourAction("Check For Player", [this](f32 step, BehaviourState state) -> BehaviourState {
+        return this->_player_in_range ? BehaviourState::Succeeded : BehaviourState::Failed;
+      }));
+    being_attacked_sequence->AddChild(
+      new BehaviourAction("Run Away", [this](f32 step, BehaviourState state) -> BehaviourState {
+        // TODO
+        log::info("Running away");
+        return BehaviourState::Succeeded;
+      }));
+#pragma endregion
+#pragma region Explore Map
+    explore_map_selector->AddChild(
+      new BehaviourAction("Know Where Coin Is?", [this](f32 step, BehaviourState state) -> BehaviourState {
+        // TODO
+        log::info("We know where the coin is");
+        return BehaviourState::Succeeded;
+      }));
+
+    explore_map_selector->AddChild(
+      new BehaviourAction("Explore For Coin", [this](f32 step, BehaviourState state) -> BehaviourState {
+        // TODO
+        log::info("Exploring for coin");
+        return BehaviourState::Succeeded;
+      }));
+#pragma endregion
   }
 
   void AILevel::Init(Window &window) {
@@ -180,6 +256,11 @@ namespace axl {
     window.GetRenderer().SetShowGrid(false);
 
     GenerateMazeFromFile();
+    SetupBehaviour();
+
+    for (i32 i = 0; i < _ai_look_lines.size(); ++i)
+      _ai_look_lines[i] = std::unique_ptr<LinePrimitive>(
+        new LinePrimitive(_enemy_ento.Transform().GetPosition(), _enemy_ento.Transform().GetPosition()));
 
     window.GetRenderer().SetAmbientLight(Light(LightType::Ambient, v3(0.6f), 0.6f));
     window.GetRenderer().SetDirectionalLight(Light(LightType::Directional, v3(1.0f), 0.6f));
@@ -209,6 +290,11 @@ namespace axl {
     m4 view = lookAt(pos, player_transform.GetPosition(), { 0.0f, 1.0f, 0.0f });
 
     camera.SetCustomViewMatrix(view);
+
+    front.y = 0.0f;
+    front = normalize(front);
+    right.y = 0.0f;
+    right = normalize(right);
 
     RigidBody &rb = _player_ento.GetComponent<RigidBody>();
 
@@ -341,7 +427,10 @@ namespace axl {
       if (!other_rb.is_trigger)
         continue;
 
-      RemoveEntity(Ento::FromComponent(other_rb));
+      if (c.Tag().value != "Enemy")
+        continue;
+
+      // RemoveEntity(Ento::FromComponent(other_rb));
     }
 
     // Coin Rotate
@@ -353,6 +442,64 @@ namespace axl {
         ento.Transform().SetRotation(ento.Transform().GetRotation() * rot);
       }
     });
+
+    // Enemy Behaviour
+
+    constexpr std::array<v3, 16> check_axis = {
+      v3(1.0f, 0.0f, 0.0f),   v3(-1.0f, 0.0f, 0.0f),   v3(0.0f, 0.0f, 1.0f),    v3(0.0f, 0.0f, -1.0f),
+      v3(0.5f, 0.0f, 0.5f),   v3(-0.5f, 0.0f, 0.5f),   v3(0.5f, 0.0f, -0.5f),   v3(-0.5f, 0.0f, -0.5f),
+      v3(0.25f, 0.0f, 0.25f), v3(-0.25f, 0.0f, 0.25f), v3(0.25f, 0.0f, -0.25f), v3(-0.25f, 0.0f, -0.25f),
+      v3(0.15f, 0.0f, 0.15f), v3(-0.15f, 0.0f, 0.15f), v3(0.15f, 0.0f, -0.15f), v3(-0.15f, 0.0f, -0.15f),
+    };
+
+    _player_in_range = false;
+    for (i32 i = 0; i < (i32)check_axis.size(); ++i) {
+      const v3 &axis = check_axis[i];
+      Ray ray(_enemy_ento.Transform().GetPosition(), axis);
+      Ento min_dist_ento;
+      f32 min_dist = std::numeric_limits<f32>::max();
+
+      _registry.each([&](entt::entity e) {
+        Ento other_ento = FromHandle(e);
+        if (other_ento.HasComponent<RigidBody>()) {
+          RigidBody &other_rb = other_ento.GetComponent<RigidBody>();
+          if (other_rb.is_trigger)
+            return;
+        }
+
+        if (other_ento.HasComponent<SphereCollider>()) {
+          SphereCollider &other_collider = other_ento.GetComponent<SphereCollider>();
+          f32 dist = ray.SphereInside(other_collider);
+          if (dist > 0.0f && dist < min_dist) {
+            min_dist = dist;
+            min_dist_ento = other_ento;
+          }
+        } else if (other_ento.HasComponent<OBBCollider>()) {
+          OBBCollider &other_collider = other_ento.GetComponent<OBBCollider>();
+          f32 dist = ray.OBBInside(other_collider);
+          if (dist > 0.0f && dist < min_dist) {
+            min_dist = dist;
+            min_dist_ento = other_ento;
+          }
+        }
+      });
+
+      if (!min_dist_ento)
+        continue;
+
+      if (min_dist_ento.Tag().value == "Player") {
+        _last_known_player_position = min_dist_ento.Transform().GetPosition();
+        _player_in_range = true;
+        // log::info("Player position: {}", to_string(_last_known_player_position));
+      }
+
+      _ai_look_lines[i]->SetPos(_enemy_ento.Transform().GetPosition(),
+                                _enemy_ento.Transform().GetPosition() + axis * min_dist,
+                                _player_in_range ? Color(light_colour_exploring) : Color());
+      window.GetRenderer().AddLine(_ai_look_lines[i].get());
+    }
+
+    _behaviour_root->Execute(delta);
   }
 
   void AILevel::ShowInstructions(Window &window, const v2 &frame_size, const v2 &frame_pos) {
@@ -379,19 +526,18 @@ namespace axl {
     ImGui::PopFont();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
     ImGui::Text(
-      "The goal is to find the Enemy and destroy them by bumping with them.\n"
-      "Will you be able to find them? They will try to be hiding inside the maze\n\n"
+      "While the enemy tries to find the coins scaterred around the map, you have to hunt them down!\n\n"
       "To move around you can use the keyboard or a controller.\n"
       "WASD or the left stick to move.\n\n"
       "To move the camera you can use the right stick or the arrow keys.\n\n"
       "You can also jump by pressing SPACE or the A button on the controller.\n"
       "Double jump is available, but it only recharges when you land.\n\n"
-      "Zoom in and out with 0 and 9 numbers or bumpers in your controller\n\n");
+      "Zoom in and out with 0 and 9 numbers or bumpers in your controller.");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
     ImGui::Text("You can exit the level by opening the menu with ESC or the START button.");
     ImGui::Text(
       "Debug: In the real game the enemy would be destroyed and you would win.\n"
-      "But in this debug mode it will keep respawning.");
+      "But in this debug mode it will keep respawning. And you will eventually lose, haha!");
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
 

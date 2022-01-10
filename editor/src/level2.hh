@@ -58,10 +58,12 @@ namespace axl {
     void Focused(Window &window, bool state) override;
 
     void GenerateMazeFromFile();
+    void ShowScoreMenu(Window &window, const v2 &frame_size, const v2 &frame_pos);
     void AddWall(const v2i &pos, const std::vector<std::string> &shader_paths);
     void AddCoin(const v2i &pos, const std::vector<std::string> &shader_paths);
     void SetupBehaviour();
     void ShowInstructions(Window &window, const v2 &frame_size, const v2 &frame_pos);
+    v2i ToMazeCoord(const v2 &pos);
     v2 FindFurthestPos(const v2 &pos, const std::vector<std::vector<bool>> &map);
     std::vector<PathNode> FindPath(const PathNode &pos, const PathNode &target);
     std::vector<PathNode> GetNeighbours(const PathNode &pos);
@@ -87,6 +89,8 @@ namespace axl {
     std::vector<std::vector<bool>> _explored_maze;
     std::vector<v2> _known_coins;
     v2 _next_enemy_position;
+    v2 _to_explore;
+    f32 _time_since_saw_player = 0.0f;
     bool _show_instructions = true;
 
     inline static bool _first_time = true;

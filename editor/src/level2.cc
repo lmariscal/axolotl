@@ -39,16 +39,93 @@ namespace axl {
   //
   // If the root Selector fails, either we have explored the entire map and found no coin, or we are stuck
 
-  constexpr v3 light_colour_exploring = v3(0, 172, 193) / 255.0f;
-  constexpr v3 light_colour_coin_found = v3(255, 179, 0) / 255.0f;
-  constexpr v3 light_colour_run_away = v3(236, 64, 122) / 255.0f;
+  constexpr v3 light_color_exploring = v3(0, 172, 193) / 255.0f;
+  constexpr v3 light_color_coin_found = v3(255, 179, 0) / 255.0f;
+  constexpr v3 light_color_run_away = v3(236, 64, 122) / 255.0f;
+
+  v2i AILevel::ToMazeCoord(const v2 &pos) {
+    v2i maze_pos;
+    maze_pos.x = (i32)std::ceil(pos.x * 0.5f);
+    maze_pos.y = (i32)std::ceil(pos.y * 0.5f);
+
+    if (maze_pos.x >= _maze.size())
+      maze_pos.x = _maze.size() - 1;
+    if (maze_pos.y >= _maze[0].size())
+      maze_pos.y = _maze[0].size() - 1;
+
+    if (maze_pos.x < 0)
+      maze_pos.x = 0;
+    if (maze_pos.y < 0)
+      maze_pos.y = 0;
+
+    if (_maze[maze_pos.x][maze_pos.y]) {
+      maze_pos.x = (i32)std::floor(pos.x * 0.5f);
+      maze_pos.y = (i32)std::floor(pos.y * 0.5f);
+    }
+
+    if (maze_pos.x >= _maze.size())
+      maze_pos.x = _maze.size() - 1;
+    if (maze_pos.y >= _maze[0].size())
+      maze_pos.y = _maze[0].size() - 1;
+
+    if (maze_pos.x < 0)
+      maze_pos.x = 0;
+    if (maze_pos.y < 0)
+      maze_pos.y = 0;
+
+    return maze_pos;
+  }
+
+  void AILevel::ShowScoreMenu(Window &window, const v2 &frame_size, const v2 &frame_pos) {
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoTitleBar;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoScrollbar;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoDecoration;
+    window_flags |= ImGuiWindowFlags_NoSavedSettings;
+
+    ImGui::SetNextWindowPos(ImVec2(frame_pos.x + (frame_size.x * 0.1f), frame_pos.y + (frame_size.y * 0.1f)),
+                            ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(frame_size.x * 0.6f, frame_size.y * 0.8f), ImGuiCond_Always);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 30));
+
+    ImGui::Begin("Menu", nullptr, window_flags);
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    if (_coins_available <= 0)
+      ImGui::Text("You Lost!");
+    else
+      ImGui::Text("You Won!");
+    ImGui::PopFont();
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.0f);
+
+    if (ImGui::Button("Restart Level")) {
+      Scene::SetActiveScene(new AILevel());
+    }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    if (ImGui::Button("Back to Main Menu")) {
+      Scene::SetActiveScene(new MenuLevel());
+    }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+  }
 
   v2 AILevel::FindFurthestPos(const v2 &pos, const std::vector<std::vector<bool>> &map) {
     v2 furthest_pos = pos;
     f32 furthest_dist = 0.0f;
     for (i32 i = 0; i < map.size(); ++i) {
       for (i32 j = 0; j < map[i].size(); ++j) {
-        if (_maze[i][j])
+        if (map[i][j])
           continue;
 
         f32 dist = length(v2(i, j) - pos);
@@ -80,6 +157,7 @@ namespace axl {
       processed.push_back(current);
 
       if (current == target) {
+        log::debug("Found path in {} iterations", i);
         std::vector<PathNode> path;
         path.push_back(current);
         while (current.connection) {
@@ -143,8 +221,7 @@ namespace axl {
       pn.G = length(pos.position - n);
       pn.walkable = !_maze[n.x][n.y];
 
-      v2 last_known_player_position(_last_known_player_position.x, _last_known_player_position.z);
-      last_known_player_position *= 0.5f;
+      v2i last_known_player_position = ToMazeCoord({ _last_known_player_position.x, _last_known_player_position.z });
 
       if (n.x == last_known_player_position.x && n.y == last_known_player_position.y)
         pn.walkable = false;
@@ -162,7 +239,7 @@ namespace axl {
     RigidBody &coin_rb = coin_ento.AddComponent<RigidBody>(0.0);
     coin_rb.is_trigger = true;
     Transform &wall_transform = coin_ento.Transform();
-    wall_transform.SetPosition(v3(pos.x, 2.5f, pos.y));
+    wall_transform.SetPosition(v3(pos.x, 2.0f, pos.y));
     wall_transform.SetScale(v3(0.6f, 0.6f, 0.6f));
     wall_transform.SetRotationEuler(v3(90.0f, 0.0f, 0.0f));
 
@@ -313,7 +390,7 @@ namespace axl {
     enemy_transform.SetPosition(v3(last_empty_pos.x * 2, 2, last_empty_pos.y * 2));
     enemy_transform.SetScale(v3(1.0f, 1.0f, 1.0f));
     Model &enemy_model = _enemy_ento.AddComponent<Model>(Axolotl::GetDistDir() + "res/misc/Sphere.fbx", shader_paths);
-    _enemy_ento.AddComponent<Light>(LightType::Point, light_colour_exploring, 0.2f);
+    _enemy_ento.AddComponent<Light>(LightType::Point, light_color_exploring, 0.2f);
 
     TextureStore::ProcessQueue();
     file.close();
@@ -332,18 +409,41 @@ namespace axl {
 
     _behaviour_root->AddChild(
       new BehaviourAction("Go Towards Coin", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::info("Go Towards Coin");
         if (_known_coins.empty())
           return BehaviourState::Failed;
 
-        v2 enemy_pos(_enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z);
-        enemy_pos *= 0.5f;
+        log::debug("Go Towards Coin");
+        Light &light = _enemy_ento.GetComponent<Light>();
+        light.SetColor(light_color_coin_found);
+
+        v2 enemy_pos =
+          ToMazeCoord({ _enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z });
 
         std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(_known_coins.back()));
-        if (path.empty())
-          return BehaviourState::Failed;
+        if (path.empty()) {
+          f32 dist = length(enemy_pos - _known_coins.back());
+          log::debug("Distance to coin: {}", dist);
+          if (dist < 2) {
+            _next_enemy_position = _known_coins.back();
+            return BehaviourState::Succeeded;
+          }
 
-        _next_enemy_position = path[0].position;
+          log::debug("No path found for coin");
+          return BehaviourState::Failed;
+        }
+
+        PathNode *next_node = &path.rbegin()[0];
+        if (path.size() > 1) {
+          next_node = &path.rbegin()[1];
+        }
+        if (path.size() > 1) {
+          v3 next_pos(next_node->position.x * 2.0f,
+                      _enemy_ento.Transform().GetPosition().y,
+                      next_node->position.y * 2.0f);
+          if (length(next_pos - _enemy_ento.Transform().GetPosition()) <= 1.0f)
+            next_node = &path.rbegin()[2];
+        }
+        _next_enemy_position = next_node->position;
 
         return BehaviourState::Succeeded;
       }));
@@ -351,60 +451,106 @@ namespace axl {
 #pragma region Are we being attacked ?
     being_attacked_sequence->AddChild(
       new BehaviourAction("Check For Player", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::info("Checking for player");
+        log::debug("Checking for player, player in range: {}", _player_in_range);
+        if (this->_player_in_range)
+          this->_time_since_saw_player = 10.0f;
+
+        if (_time_since_saw_player > 0.0f) {
+          this->_player_in_range = true;
+          this->_time_since_saw_player -= Window::GetCurrentWindow()->GetDeltaTime();
+        }
         return this->_player_in_range ? BehaviourState::Succeeded : BehaviourState::Failed;
       }));
+
     being_attacked_sequence->AddChild(
       new BehaviourAction("Run Away", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::info("Running away from player");
-        v2 player_pos(_last_known_player_position.x, _last_known_player_position.z);
-        player_pos *= 0.5f;
+        Light &light = _enemy_ento.GetComponent<Light>();
+        light.SetColor(light_color_run_away);
 
-        v2 enemy_pos(_enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z);
-        enemy_pos *= 0.5f;
+        log::debug("Running away from player");
+        v2i player_pos = ToMazeCoord({ _last_known_player_position.x, _last_known_player_position.z });
+        v2i enemy_pos =
+          ToMazeCoord({ _enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z });
 
         v2 furthest_pos = FindFurthestPos(player_pos, _maze);
 
-        std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(furthest_pos));
-        if (path.empty())
-          return BehaviourState::Failed;
+        log::debug("Furthest pos is {}", to_string(furthest_pos));
+        log::debug("Enemy pos: {}", to_string(enemy_pos));
+        bool furthest_is_wall = _maze[furthest_pos.x][furthest_pos.y];
+        log::debug("Furthest is wall: {}", furthest_is_wall);
 
-        _next_enemy_position = path[0].position;
+        std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(furthest_pos));
+        if (path.empty()) {
+          log::debug("No path found to run away");
+          return BehaviourState::Failed;
+        }
+
+        PathNode *next_node = &path.rbegin()[0];
+        if (path.size() > 1) {
+          next_node = &path.rbegin()[1];
+        }
+        if (path.size() > 1) {
+          v3 next_pos(next_node->position.x * 2.0f,
+                      _enemy_ento.Transform().GetPosition().y,
+                      next_node->position.y * 2.0f);
+          if (length(next_pos - _enemy_ento.Transform().GetPosition()) <= 1.0f)
+            next_node = &path.rbegin()[2];
+        }
+        _next_enemy_position = next_node->position;
 
         return BehaviourState::Succeeded;
       }));
 #pragma endregion
 #pragma region Explore Map
+
     explore_map_selector->AddChild(
       new BehaviourAction("Know Where Coin Is?", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::info("Know Where Coin Is?");
+        log::debug("Know Where Coin Is?");
         if (_known_coins.empty())
           return BehaviourState::Failed;
 
-        log::info("Coin is at {}", to_string(_known_coins.back()));
+        log::debug("Coin is at {}", to_string(_known_coins.back()));
         return BehaviourState::Succeeded;
       }));
 
     explore_map_selector->AddChild(
       new BehaviourAction("Explore For Coin", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::info("Explore For Coin");
-        v2 enemy_pos(_enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z);
-        enemy_pos *= 0.5f;
+        Light &light = _enemy_ento.GetComponent<Light>();
+        light.SetColor(light_color_exploring);
 
-        v2 furthest_pos = FindFurthestPos(enemy_pos, _maze);
-        if (furthest_pos == enemy_pos) {
-          log::info("Explored the entire map");
-          return BehaviourState::Failed;
+        v2 enemy_pos =
+          ToMazeCoord({ _enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z });
+        f32 dist = length(enemy_pos - _to_explore);
+
+        if (_to_explore == v2(0) || _explored_maze[_to_explore.x][_to_explore.y] || dist < 2.0f) {
+          _explored_maze[_to_explore.x][_to_explore.y] = true;
+          v2 furthest_pos = FindFurthestPos(enemy_pos, _explored_maze);
+          if (furthest_pos == enemy_pos) {
+            return BehaviourState::Failed;
+          }
+
+          _to_explore = furthest_pos;
         }
 
-        std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(furthest_pos));
+        std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(_to_explore));
         if (path.empty()) {
-          _explored_maze[furthest_pos.x][furthest_pos.y] = true;
+          _explored_maze[_to_explore.x][_to_explore.y] = true;
           return BehaviourState::Failed;
         }
 
-        _next_enemy_position = path[0].position;
-        log::info("Found path to furthest point and explore");
+        PathNode *next_node = &path.rbegin()[0];
+        if (path.size() > 1) {
+          next_node = &path.rbegin()[1];
+        }
+        if (path.size() > 2) {
+          v3 next_pos(next_node->position.x * 2.0f,
+                      _enemy_ento.Transform().GetPosition().y,
+                      next_node->position.y * 2.0f);
+          if (length(next_pos - _enemy_ento.Transform().GetPosition()) <= 1.0f)
+            next_node = &path.rbegin()[2];
+        }
+
+        _next_enemy_position = next_node->position;
 
         return BehaviourState::Succeeded;
       }));
@@ -421,6 +567,7 @@ namespace axl {
 
     _show_instructions = _first_time;
     _next_enemy_position = v2(0, 0);
+    _to_explore = v2(0, 0);
 
     window.GetRenderer().SetShowGrid(false);
 
@@ -432,8 +579,8 @@ namespace axl {
     // v2i enemy_pos = ceil(v2(_enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z)
     // / 2.0f);
 
-    // log::info("Player pos: {}", to_string(player_pos));
-    // log::info("Enemy pos: {}", to_string(enemy_pos));
+    // log::debug("Player pos: {}", to_string(player_pos));
+    // log::debug("Enemy pos: {}", to_string(enemy_pos));
 
     // for (i32 i = 0; i < _maze.size(); ++i) {
     //   std::stringstream ss;
@@ -452,16 +599,16 @@ namespace axl {
     //       ss << _maze[i][j];
     //     }
     //   }
-    //   log::info("{}", ss.str());
+    //   log::debug("{}", ss.str());
     // }
 
     // std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(v2(player_pos)));
-    // log::info("Path found: {}", path.size());
+    // log::debug("Path found: {}", path.size());
     // std::vector<std::string> shader_paths = { Axolotl::GetDistDir() + "res/shaders/testy.vert",
     //                                           Axolotl::GetDistDir() + "res/shaders/testy.frag" };
     // for (PathNode &node : path) {
     //   AddCoin(node.position * 2.0f, shader_paths);
-    //   log::info("{}", to_string(node.position));
+    //   log::debug("{}", to_string(node.position));
     // }
 
     for (i32 i = 0; i < _ai_look_lines.size(); ++i)
@@ -579,9 +726,9 @@ namespace axl {
 
     if (pad != Pad::Last) {
       if (io.ButtonDown(pad, PadButton::LeftBumper))
-        _target_distance += 3.0f;
+        _target_distance += 20.0f * delta;
       if (io.ButtonDown(pad, PadButton::RightBumper))
-        _target_distance -= 3.0f;
+        _target_distance -= 20.0f * delta;
 
       constexpr f32 AXIS_DEAD_ZONE = 0.3f;
 
@@ -631,7 +778,14 @@ namespace axl {
       if (c.Tag().value != "Enemy")
         continue;
 
+      // This would make you win, but let's keep respawning the enemy
       // RemoveEntity(Ento::FromComponent(other_rb));
+
+      v2i player_pos = ToMazeCoord({ player_transform.GetPosition().x, player_transform.GetPosition().z });
+
+      v2 furthest = FindFurthestPos(player_pos, _maze);
+      _enemy_ento.Transform().SetPosition(
+        v3(furthest.x * 2.0f, _enemy_ento.Transform().GetPosition().y, furthest.y * 2.0f));
     }
 
     // Coin Rotate
@@ -664,11 +818,8 @@ namespace axl {
         Ento other_ento = FromHandle(e);
         if (_enemy_ento == other_ento)
           return;
-        if (other_ento.HasComponent<RigidBody>()) {
+        if (other_ento.HasComponent<RigidBody>())
           RigidBody &other_rb = other_ento.GetComponent<RigidBody>();
-          if (other_rb.is_trigger)
-            return;
-        }
 
         if (other_ento.HasComponent<SphereCollider>()) {
           SphereCollider &other_collider = other_ento.GetComponent<SphereCollider>();
@@ -683,11 +834,13 @@ namespace axl {
           if (dist > 0.0f && dist < min_dist) {
             min_dist = dist;
             min_dist_ento = other_ento;
-          }
 
-          if (other_ento.Tag().value == "Coin") {
-            _known_coins.push_back(
-              v2(other_ento.Transform().GetPosition().x * 0.5f, other_ento.Transform().GetPosition().z * 0.5f));
+            if (other_ento.Tag().value == "Coin") {
+              v2 coin_pos =
+                ToMazeCoord({ other_ento.Transform().GetPosition().x, other_ento.Transform().GetPosition().z });
+              if (std::find(_known_coins.begin(), _known_coins.end(), coin_pos) == _known_coins.end())
+                _known_coins.push_back(coin_pos);
+            }
           }
         }
       });
@@ -698,12 +851,12 @@ namespace axl {
       if (min_dist_ento.Tag().value == "Player") {
         _last_known_player_position = min_dist_ento.Transform().GetPosition();
         _player_in_range = true;
-        // log::info("Player position: {}", to_string(_last_known_player_position));
+        // log::debug("Player position: {}", to_string(_last_known_player_position));
       }
 
       _ai_look_lines[i]->SetPos(_enemy_ento.Transform().GetPosition(),
                                 _enemy_ento.Transform().GetPosition() + axis * min_dist,
-                                _player_in_range ? Color(light_colour_exploring) : Color());
+                                _player_in_range ? Color(light_color_exploring) : Color());
       window.GetRenderer().AddLine(_ai_look_lines[i].get());
     }
 
@@ -713,11 +866,14 @@ namespace axl {
     if (_next_enemy_position != v2(0.0f)) {
       v3 next_pos(
         v3(_next_enemy_position.x * 2.0f, _enemy_ento.Transform().GetPosition().y, _next_enemy_position.y * 2.0f));
-      // TODO: Movement should be smooth
-      _enemy_ento.Transform().SetPosition(next_pos);
 
-      v2 enemy_pos(_enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z);
-      enemy_pos *= 0.5f;
+      // TODO: Movement should be smooth
+      log::debug("Enemy moving to {}", to_string(next_pos));
+      f32 enemy_speed = 1.0f * delta;
+      _enemy_ento.Transform().SetPosition((_enemy_ento.Transform().GetPosition() * (1.0f - enemy_speed)) +
+                                          (next_pos * enemy_speed));
+
+      v2i enemy_pos = ToMazeCoord({ _enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z });
 
       _explored_maze[(i32)enemy_pos.x][(i32)enemy_pos.y] = true;
 
@@ -736,8 +892,9 @@ namespace axl {
       if (c.Tag().value == "Coin") {
         _coins_available--;
 
-        v2 coin_pos = v2(c.Transform().GetPosition().x * 0.5f, c.Transform().GetPosition().z * 0.5f);
+        v2 coin_pos = ToMazeCoord({ c.Transform().GetPosition().x, c.Transform().GetPosition().z });
         // Coins are static, so we can just "guess" the correct position
+        log::debug("Coin collected at {}", to_string(coin_pos));
         _known_coins.erase(std::remove(_known_coins.begin(), _known_coins.end(), coin_pos), _known_coins.end());
 
         RemoveEntity(c);
@@ -800,10 +957,12 @@ namespace axl {
   }
 
   void AILevel::UpdateGUI(Window &window, const v2 &frame_size, const v2 &frame_pos) {
-    if (!_show_instructions)
-      MenuLevel::ShowBackMenu(window, frame_size, frame_pos, _show_menu);
-    else
+    if (_show_instructions)
       ShowInstructions(window, frame_size, frame_pos);
+    else if (_game_over)
+      ShowScoreMenu(window, frame_size, frame_pos);
+    else
+      MenuLevel::ShowBackMenu(window, frame_size, frame_pos, _show_menu);
   }
 
   void AILevel::Focused(Window &window, bool state) {

@@ -10,7 +10,7 @@ namespace axl {
   class DockSpaceData {
    public:
     TerminalData *terminal;
-    bool fullscreen = false;
+    bool fullscreen = true;
     bool ratio_locked = false;
 
     bool show_wireframe = false;

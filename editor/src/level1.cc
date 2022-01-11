@@ -64,6 +64,8 @@ namespace axl {
     Deserialize(_world_data);
     file.close();
 
+    _show_instructions = _first_time;
+
     _player_id = *uuid::from_string("c63d2009-5657-4304-a9b7-8110d9f8b4c2");
     _platform_id = *uuid::from_string("ed2f5ded-2c14-456f-b426-43c5a45121cd");
     _elevator_id = *uuid::from_string("e5095876-2cb9-4ecd-abda-33d0ebd87143");
@@ -152,9 +154,9 @@ namespace axl {
       _target_distance -= 3.0f * delta;
 
     if (io.KeyDown(Key::Left))
-      _camera_position.x -= ROTATION_SPEED * delta;
-    if (io.KeyDown(Key::Right))
       _camera_position.x += ROTATION_SPEED * delta;
+    if (io.KeyDown(Key::Right))
+      _camera_position.x -= ROTATION_SPEED * delta;
     if (io.KeyDown(Key::Up))
       _camera_position.y += ROTATION_SPEED * delta;
     if (io.KeyDown(Key::Down))
@@ -219,6 +221,8 @@ namespace axl {
     }
 
     for (Ento &c : rb.colliding_with) {
+      if (!_registry.valid(c))
+        return;
       if (!c.HasComponent<RigidBody>())
         continue;
 

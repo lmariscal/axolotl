@@ -158,10 +158,9 @@ void MainLoop(Window &window, TerminalData &terminal_data) {
     }
     last_fullscreen = !show_frame;
 
-    if (show_frame) {
-      dock.data.terminal = &terminal_data;
+    dock.data.terminal = &terminal_data;
+    if (show_frame)
       dock.Draw(window);
-    }
 
     update_time_start = window.GetTime();
     if (terminal_data.scene_playing && !terminal_data.scene_paused) {

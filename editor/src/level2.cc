@@ -157,7 +157,7 @@ namespace axl {
       processed.push_back(current);
 
       if (current == target) {
-        log::debug("Found path in {} iterations", i);
+        // log::debug("Found path in {} iterations", i);
         std::vector<PathNode> path;
         path.push_back(current);
         while (current.connection) {
@@ -412,7 +412,7 @@ namespace axl {
         if (_known_coins.empty())
           return BehaviourState::Failed;
 
-        log::debug("Go Towards Coin");
+        // log::debug("Go Towards Coin");
         Light &light = _enemy_ento.GetComponent<Light>();
         light.SetColor(light_color_coin_found);
 
@@ -422,13 +422,13 @@ namespace axl {
         std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(_known_coins.back()));
         if (path.empty()) {
           f32 dist = length(enemy_pos - _known_coins.back());
-          log::debug("Distance to coin: {}", dist);
+          // log::debug("Distance to coin: {}", dist);
           if (dist < 2) {
             _next_enemy_position = _known_coins.back();
             return BehaviourState::Succeeded;
           }
 
-          log::debug("No path found for coin");
+          // log::debug("No path found for coin");
           return BehaviourState::Failed;
         }
 
@@ -451,7 +451,7 @@ namespace axl {
 #pragma region Are we being attacked ?
     being_attacked_sequence->AddChild(
       new BehaviourAction("Check For Player", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::debug("Checking for player, player in range: {}", _player_in_range);
+        // log::debug("Checking for player, player in range: {}", _player_in_range);
         if (this->_player_in_range)
           this->_time_since_saw_player = 10.0f;
 
@@ -467,21 +467,21 @@ namespace axl {
         Light &light = _enemy_ento.GetComponent<Light>();
         light.SetColor(light_color_run_away);
 
-        log::debug("Running away from player");
+        // log::debug("Running away from player");
         v2i player_pos = ToMazeCoord({ _last_known_player_position.x, _last_known_player_position.z });
         v2i enemy_pos =
           ToMazeCoord({ _enemy_ento.Transform().GetPosition().x, _enemy_ento.Transform().GetPosition().z });
 
         v2 furthest_pos = FindFurthestPos(player_pos, _maze);
 
-        log::debug("Furthest pos is {}", to_string(furthest_pos));
-        log::debug("Enemy pos: {}", to_string(enemy_pos));
+        // log::debug("Furthest pos is {}", to_string(furthest_pos));
+        // log::debug("Enemy pos: {}", to_string(enemy_pos));
         bool furthest_is_wall = _maze[furthest_pos.x][furthest_pos.y];
-        log::debug("Furthest is wall: {}", furthest_is_wall);
+        // log::debug("Furthest is wall: {}", furthest_is_wall);
 
         std::vector<PathNode> path = FindPath(PathNode(enemy_pos), PathNode(furthest_pos));
         if (path.empty()) {
-          log::debug("No path found to run away");
+          // log::debug("No path found to run away");
           return BehaviourState::Failed;
         }
 
@@ -505,11 +505,11 @@ namespace axl {
 
     explore_map_selector->AddChild(
       new BehaviourAction("Know Where Coin Is?", [this](f32 step, BehaviourState state) -> BehaviourState {
-        log::debug("Know Where Coin Is?");
+        // log::debug("Know Where Coin Is?");
         if (_known_coins.empty())
           return BehaviourState::Failed;
 
-        log::debug("Coin is at {}", to_string(_known_coins.back()));
+        // log::debug("Coin is at {}", to_string(_known_coins.back()));
         return BehaviourState::Succeeded;
       }));
 
@@ -772,9 +772,6 @@ namespace axl {
 
       RigidBody &other_rb = c.GetComponent<RigidBody>();
 
-      if (!other_rb.is_trigger)
-        continue;
-
       if (c.Tag().value != "Enemy")
         continue;
 
@@ -786,6 +783,11 @@ namespace axl {
       v2 furthest = FindFurthestPos(player_pos, _maze);
       _enemy_ento.Transform().SetPosition(
         v3(furthest.x * 2.0f, _enemy_ento.Transform().GetPosition().y, furthest.y * 2.0f));
+      _time_since_saw_player = 0.0f;
+
+      log::info("Enemy respawned at {}, current enemy pos {}",
+                to_string(furthest),
+                to_string(_enemy_ento.Transform().GetPosition()));
     }
 
     // Coin Rotate
@@ -868,7 +870,7 @@ namespace axl {
         v3(_next_enemy_position.x * 2.0f, _enemy_ento.Transform().GetPosition().y, _next_enemy_position.y * 2.0f));
 
       // TODO: Movement should be smooth
-      log::debug("Enemy moving to {}", to_string(next_pos));
+      // log::debug("Enemy moving to {}", to_string(next_pos));
       f32 enemy_speed = 1.0f * delta;
       _enemy_ento.Transform().SetPosition((_enemy_ento.Transform().GetPosition() * (1.0f - enemy_speed)) +
                                           (next_pos * enemy_speed));
@@ -881,6 +883,8 @@ namespace axl {
     }
 
     for (Ento &c : enemy_rb.colliding_with) {
+      if (!_registry.valid(c))
+        continue;
       if (!c.HasComponent<RigidBody>())
         continue;
 
@@ -894,7 +898,7 @@ namespace axl {
 
         v2 coin_pos = ToMazeCoord({ c.Transform().GetPosition().x, c.Transform().GetPosition().z });
         // Coins are static, so we can just "guess" the correct position
-        log::debug("Coin collected at {}", to_string(coin_pos));
+        // log::debug("Coin collected at {}", to_string(coin_pos));
         _known_coins.erase(std::remove(_known_coins.begin(), _known_coins.end(), coin_pos), _known_coins.end());
 
         RemoveEntity(c);

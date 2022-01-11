@@ -1,5 +1,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <axolotl/axolotl.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/material.hh>
 #include <axolotl/mesh.hh>
@@ -25,11 +26,27 @@ namespace axl {
       delete mesh;
   }
 
+  std::filesystem::path Model::SolvePath(const std::filesystem::path &path) const {
+    std::string dist_dir = Axolotl::GetDistDir();
+    std::string dist_dir_str = "${DistDir}";
+    std::string path_str = path.string();
+    std::string::size_type pos = path_str.find(dist_dir_str);
+
+    if (pos != std::string::npos) {
+      path_str.replace(pos, dist_dir_str.length(), dist_dir);
+      return std::filesystem::path(path_str);
+    }
+
+    return path;
+  }
+
   void Model::Init() {
     Ento ento = Ento::FromComponent(*this);
 
     if (!_root)
       return;
+
+    _path = SolvePath(_path);
 
     log::debug("Loading model from {}", _path.string());
     Assimp::Importer importer;

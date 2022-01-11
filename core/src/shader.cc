@@ -288,7 +288,7 @@ namespace axl {
       if (_shader_data[shader_id].paths[i].empty())
         continue;
       if (_shader_data[shader_id]._file_watcher)
-        _shader_data[shader_id]._file_watcher->removeWatch(_shader_data[shader_id].paths[i]);
+        _shader_data[shader_id]._file_watcher->removeWatch(_shader_data[shader_id].paths[i].string());
     }
 
     if (_shader_data[shader_id]._watcher)

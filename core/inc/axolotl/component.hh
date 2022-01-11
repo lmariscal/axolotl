@@ -8,30 +8,81 @@
 #include <uuid.h>
 #include <vector>
 
-#define COMPONENT_STRINGIZE(arg)  COMPONENT_STRINGIZE1(arg)
-#define COMPONENT_STRINGIZE1(arg) COMPONENT_STRINGIZE2(arg)
-#define COMPONENT_STRINGIZE2(arg) #arg
+// Cry, I'm so sorry for this. If anyone ever has to fix this.
+// It's quite simple, but getting your head around, it is a pain.
 
-#define COMPONENT_CONCATENATE(arg1, arg2)  COMPONENT_CONCATENATE1(arg1, arg2)
-#define COMPONENT_CONCATENATE1(arg1, arg2) COMPONENT_CONCATENATE2(arg1, arg2)
-#define COMPONENT_CONCATENATE2(arg1, arg2) arg1##arg2
-
-#define COMPONENT_FOR_EACH_1(what, x, y, ...) what(x, y)
-#define COMPONENT_FOR_EACH_2(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_1(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_3(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_2(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_4(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_3(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_5(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_4(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_6(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_5(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_7(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_6(what, x, __VA_ARGS__)
-#define COMPONENT_FOR_EACH_8(what, x, y, ...) what(x, y) COMPONENT_FOR_EACH_7(what, x, __VA_ARGS__)
-
-#define COMPONENT_FOR_EACH_NARG(...)                                     COMPONENT_FOR_EACH_NARG_(__VA_ARGS__, COMPONENT_FOR_EACH_RSEQ_N())
-#define COMPONENT_FOR_EACH_NARG_(...)                                    COMPONENT_FOR_EACH_ARG_N(__VA_ARGS__)
-#define COMPONENT_FOR_EACH_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
-#define COMPONENT_FOR_EACH_RSEQ_N()                                      8, 7, 6, 5, 4, 3, 2, 1, 0
-
-#define COMPONENT_FOR_EACH_(N, what, x, y, ...) COMPONENT_CONCATENATE(COMPONENT_FOR_EACH_, N)(what, x, y, __VA_ARGS__)
-#define COMPONENT_FOR_EACH(what, x, ...)        COMPONENT_FOR_EACH_(COMPONENT_FOR_EACH_NARG(__VA_ARGS__), what, x, __VA_ARGS__)
+#define INTERNAL_COMPONENT_EXPAND(x)                   x
+#define INTERNAL_COMPONENT_FOR_EACH_1(what, y, x, ...) what(y, x)
+#define INTERNAL_COMPONENT_FOR_EACH_2(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_1(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_3(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_2(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_4(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_3(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_5(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_4(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_6(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_5(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_7(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_6(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_8(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_7(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_9(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_8(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_10(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_9(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_11(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_10(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_12(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_11(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_13(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_12(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_14(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_13(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_15(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_14(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_16(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_15(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_17(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_16(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_18(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_17(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_19(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_18(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_20(what, y, x, ...) \
+  what(y, x) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_19(what, y, __VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_NARG(...) \
+  INTERNAL_COMPONENT_FOR_EACH_NARG_(__VA_ARGS__, INTERNAL_COMPONENT_FOR_EACH_RSEQ_N())
+#define INTERNAL_COMPONENT_FOR_EACH_NARG_(...) INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_FOR_EACH_ARG_N(__VA_ARGS__))
+#define INTERNAL_COMPONENT_FOR_EACH_ARG_N(_1,  \
+                                          _2,  \
+                                          _3,  \
+                                          _4,  \
+                                          _5,  \
+                                          _6,  \
+                                          _7,  \
+                                          _8,  \
+                                          _9,  \
+                                          _10, \
+                                          _11, \
+                                          _12, \
+                                          _13, \
+                                          _14, \
+                                          _15, \
+                                          _16, \
+                                          _17, \
+                                          _18, \
+                                          _19, \
+                                          _20, \
+                                          N,   \
+                                          ...) \
+  N
+#define INTERNAL_COMPONENT_FOR_EACH_RSEQ_N() 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+#define INTERNAL_COMPONENT_CONCATENATE(a, b) a##b
+#define INTERNAL_COMPONENT_FOR_EACH_(N, what, y, ...) \
+  INTERNAL_COMPONENT_EXPAND(INTERNAL_COMPONENT_CONCATENATE(INTERNAL_COMPONENT_FOR_EACH_, N)(what, y, __VA_ARGS__))
+#define COMPONENT_FOR_EACH(what, y, ...) \
+  INTERNAL_COMPONENT_FOR_EACH_(INTERNAL_COMPONENT_FOR_EACH_NARG(__VA_ARGS__), what, y, __VA_ARGS__)
 
 #define REGISTER_COMPONENT_MEMBER(Type, Member) \
   .data<&Type::Member>(entt::hashed_string::value(#Member)).prop("name"_hs, std::string(#Member))

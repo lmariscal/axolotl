@@ -22,6 +22,8 @@ namespace axl {
     bool ShowComponent();
     void Init();
 
+    std::filesystem::path SolvePath(const std::filesystem::path &path) const;
+
     bool two_sided;
 
     REGISTER_COMPONENT(Model, _path, _root, _shader_paths, _mesh_id)

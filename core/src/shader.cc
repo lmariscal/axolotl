@@ -692,6 +692,20 @@ namespace axl {
     return success;
   }
 
+  std::filesystem::path ShaderStore::SolvePath(const std::filesystem::path &path) {
+    std::string dist_dir = Axolotl::GetDistDir();
+    std::string dist_dir_str = "${DistDir}";
+    std::string path_str = path.string();
+    std::string::size_type pos = path_str.find(dist_dir_str);
+
+    if (pos != std::string::npos) {
+      path_str.replace(pos, dist_dir_str.length(), dist_dir);
+      return std::filesystem::path(path_str);
+    }
+
+    return path;
+  }
+
 #pragma region Uniforms
   UniformDataType Shader::GLToUniformDataType(u32 type) {
     switch (type) {

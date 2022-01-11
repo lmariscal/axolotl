@@ -1,3 +1,4 @@
+#include <axolotl/axolotl.hh>
 #include <axolotl/camera.hh>
 #include <axolotl/ento.hh>
 #include <axolotl/material.hh>
@@ -140,7 +141,19 @@ namespace axl {
 
           json mj = {};
           mj["name"] = name;
-          mj["data"] = *member_values;
+
+          if (component_name == "Model" && name == "_path") {
+            std::string dist_dir = Axolotl::GetDistDir();
+            std::string model_path = member_values->get<std::string>();
+
+            // if model_path starts with dist_dir replace with ${DistDir}
+            if (model_path.find(dist_dir) == 0)
+              model_path.replace(0, dist_dir.size(), "${DistDir}");
+
+            mj["data"] = model_path;
+          } else {
+            mj["data"] = *member_values;
+          }
 
           c["data"].push_back(mj);
         }

@@ -12,6 +12,7 @@ namespace axl {
     std::array<std::string, (i32)ShaderType::Last> shader_paths;
     for (i32 i = 0; i < (i32)ShaderType::Last; ++i) {
       shader_paths[i] = paths.size() > i ? paths[i] : "";
+      shader_paths[i] = ShaderStore::SolvePath(shader_paths[i]);
     }
     _shader = std::make_shared<Shader>(ShaderData(shader_paths[(i32)ShaderType::Vertex],
                                                   shader_paths[(i32)ShaderType::Fragment],

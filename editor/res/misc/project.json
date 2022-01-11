@@ -65,8 +65,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -75,7 +75,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -152,8 +152,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -162,7 +162,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -195,26 +195,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 1.0
+                                "z": 6.0
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
+                                "x": 34.68385696411133,
                                 "y": 0.0,
-                                "z": 0.0
+                                "z": 1.1294384002685547
                             },
                             "name": "position"
                         }
@@ -290,8 +290,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -300,7 +300,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -377,8 +377,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -387,7 +387,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -420,26 +420,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 1.0
+                                "z": 6.0
                             },
                             "name": "size"
                         },
                         {
                             "data": {
                                 "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "y": 6.449999809265137,
+                                "z": -60.0
                             },
                             "name": "position"
                         }
@@ -515,8 +515,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -525,7 +525,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -603,8 +603,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -613,7 +613,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -646,26 +646,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 1.0
+                                "z": 5.0
                             },
                             "name": "size"
                         },
                         {
                             "data": {
                                 "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "y": 6.449999809265137,
+                                "z": -50.0
                             },
                             "name": "position"
                         }
@@ -899,8 +899,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -909,7 +909,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Sphere.fbx",
+                            "data": "${DistDir}res/misc/Sphere.fbx",
                             "name": "_path"
                         }
                     ],
@@ -942,9 +942,9 @@
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 2.0,
-                                "z": 0.0
+                                "x": 0.04797641932964325,
+                                "y": 2.000899314880371,
+                                "z": 0.007268101908266544
                             },
                             "name": "_position"
                         }
@@ -986,8 +986,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -996,7 +996,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Sphere.fbx",
+                            "data": "${DistDir}res/misc/Sphere.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1033,9 +1033,9 @@
                         },
                         {
                             "data": {
-                                "x": -5.821630477905273,
-                                "y": 1.9799940586090088,
-                                "z": -0.8815701007843018
+                                "x": 0.04740210622549057,
+                                "y": 1.9981615543365479,
+                                "z": 0.007181145716458559
                             },
                             "name": "position"
                         }
@@ -1111,8 +1111,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1121,7 +1121,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1198,8 +1198,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1208,7 +1208,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1250,9 +1250,9 @@
                         },
                         {
                             "data": {
-                                "x": 30.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 30.0
+                                "z": 6.0
                             },
                             "name": "size"
                         },
@@ -1424,8 +1424,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1434,7 +1434,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1467,26 +1467,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 0.9871475100517273,
+                                "x": -0.15981152653694153,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 4.060448169708252,
+                                "y": 0.9999998807907104,
+                                "z": 10.154524803161621
                             },
                             "name": "size"
                         },
                         {
                             "data": {
                                 "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "y": 3.3295555114746094,
+                                "z": -14.886102676391602
                             },
                             "name": "position"
                         }
@@ -1562,8 +1562,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1572,7 +1572,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1728,8 +1728,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1738,7 +1738,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1771,26 +1771,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 1.0
+                                "z": 6.0
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": 17.0,
+                                "y": 6.5,
+                                "z": -60.0
                             },
                             "name": "position"
                         }
@@ -1866,8 +1866,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1876,7 +1876,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1954,8 +1954,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -1964,7 +1964,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -1997,26 +1997,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
+                                "x": 6.0,
                                 "y": 1.0,
-                                "z": 1.0
+                                "z": 6.0
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": 34.5,
+                                "y": 6.5,
+                                "z": -60.0
                             },
                             "name": "position"
                         }
@@ -2092,8 +2092,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2102,7 +2102,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2258,8 +2258,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2268,7 +2268,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2301,26 +2301,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 0.9510563015937805,
+                                "x": -0.3090176284313202,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 6.000000476837158,
+                                "y": 0.9999989867210388,
+                                "z": 26.768999099731445
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": 34.5,
+                                "y": 15.86299991607666,
+                                "z": -27.0
                             },
                             "name": "position"
                         }
@@ -2396,8 +2396,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2406,7 +2406,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/bld/dist/res/misc/Cube.fbx",
+                            "data": "${DistDir}res/misc/Cube.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2562,8 +2562,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2572,7 +2572,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2605,26 +2605,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": 2.559892034628576e-40,
+                                "y": -1.470270079519105e-20,
+                                "z": -1.7199026870712384e-20
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 0.6000000238418579,
+                                "y": 0.6000000238418579,
+                                "z": 0.6000000238418579
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": -1.0708310563775262e-19,
+                                "y": 8.439324378967285,
+                                "z": -21.000015258789063
                             },
                             "name": "position"
                         }
@@ -2700,8 +2700,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2710,7 +2710,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2787,8 +2787,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2797,7 +2797,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -2830,26 +2830,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 0.6000000238418579,
+                                "y": 0.6000000238418579,
+                                "z": 0.6000000238418579
                             },
                             "name": "size"
                         },
                         {
                             "data": {
                                 "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "y": 13.500021934509277,
+                                "z": -61.0
                             },
                             "name": "position"
                         }
@@ -2925,8 +2925,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -2935,7 +2935,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -3012,8 +3012,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -3022,7 +3022,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -3055,26 +3055,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": -0.0,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 0.6000000238418579,
+                                "y": 0.6000000238418579,
+                                "z": 0.6000000238418579
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": 34.65185546875,
+                                "y": 34.983707427978516,
+                                "z": -59.66259002685547
                             },
                             "name": "position"
                         }
@@ -3150,8 +3150,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -3160,7 +3160,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -3237,8 +3237,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -3247,7 +3247,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],
@@ -3280,26 +3280,26 @@
                     "data": [
                         {
                             "data": {
-                                "w": 0.0,
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "w": 1.0,
+                                "x": 2.9802318834981634e-08,
+                                "y": -0.0,
+                                "z": -0.0
                             },
                             "name": "rotation"
                         },
                         {
                             "data": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
+                                "x": 0.6000000238418579,
+                                "y": 0.6000000238418579,
+                                "z": 0.6000000238418579
                             },
                             "name": "size"
                         },
                         {
                             "data": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
+                                "x": 35.0,
+                                "y": 3.0,
+                                "z": 1.5
                             },
                             "name": "position"
                         }
@@ -3375,8 +3375,8 @@
                         },
                         {
                             "data": [
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.vert",
-                                "/home/coffee/dev/axolotl/bld/dist/res/shaders/testy.frag"
+                                "${DistDir}res/shaders/testy.vert",
+                                "${DistDir}res/shaders/testy.frag"
                             ],
                             "name": "_shader_paths"
                         },
@@ -3385,7 +3385,7 @@
                             "name": "_root"
                         },
                         {
-                            "data": "/home/coffee/dev/axolotl/editor/res/misc/Torus.fbx",
+                            "data": "${DistDir}res/misc/Torus.fbx",
                             "name": "_path"
                         }
                     ],

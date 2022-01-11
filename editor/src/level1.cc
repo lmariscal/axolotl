@@ -78,6 +78,9 @@ namespace axl {
     if (_show_instructions || _show_menu)
       return;
 
+    if (_game_over)
+      return;
+
     IOManager &io = window.GetIOManager();
 
     Ento player_ento = FromID(_player_id);

@@ -177,6 +177,7 @@ namespace axl {
     static void ProcessQueue();
     static void DeregisterShader(u32 id);
     static std::unordered_map<u32, ShaderData> &GetAllShadersData();
+    static std::filesystem::path SolvePath(const std::filesystem::path &path);
 
    protected:
     friend class Shader;
